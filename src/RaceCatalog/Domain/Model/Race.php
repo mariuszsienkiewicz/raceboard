@@ -1,0 +1,127 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\RaceCatalog\Domain\Model;
+
+use App\RaceCatalog\Domain\Event\RaceCreated;
+use App\RaceCatalog\Domain\Exception\EditionInThePastException;
+use App\RaceCatalog\Domain\Exception\DuplicateEditionException;
+
+class Race
+{
+    /** @var list<Edition> */
+    private array $editions = [];
+
+    /** @var list<object> */
+    private array $domainEvents = [];
+
+    public function __construct(
+        private readonly RaceId $id,
+        private string $name,
+        private string $slug,
+        private string $city,
+        private string $voivodeship,
+        private string $country = 'PL',
+    ) {
+        $this->recordEvent(new RaceCreated($this->id));
+    }
+
+    public static function create(
+        RaceId $id,
+        string $name,
+        string $city,
+        string $voivodeship,
+    ): self {
+        $slug = self::slugify($name);
+
+        return new self($id, $name, $slug, $city, $voivodeship);
+    }
+
+    public function addEdition(Edition $edition): void
+    {
+        if ($edition->getDate() < new \DateTimeImmutable('today')) {
+            throw EditionInThePastException::forRace($this->name, $edition->getDate());
+        }
+
+        foreach ($this->editions as $existing) {
+            if ($existing->getDate()->format('Y') === $edition->getDate()->format('Y')) {
+                throw DuplicateEditionException::forYear($this->name, (int) $edition->getDate()->format('Y'));
+            }
+        }
+
+        $this->editions[] = $edition;
+    }
+
+    /** @return list<Edition> */
+    public function getUpcomingEditions(): array
+    {
+        $now = new \DateTimeImmutable('today');
+
+        return array_values(
+            array_filter(
+                $this->editions,
+                static fn (Edition $e): bool => $e->getDate() >= $now,
+            )
+        );
+    }
+
+    public function getId(): RaceId
+    {
+        return $this->id;
+    }
+
+    public function getName(): string
+    {
+        return $this->name;
+    }
+
+    public function getSlug(): string
+    {
+        return $this->slug;
+    }
+
+    public function getCity(): string
+    {
+        return $this->city;
+    }
+
+    public function getVoivodeship(): string
+    {
+        return $this->voivodeship;
+    }
+
+    public function getCountry(): string
+    {
+        return $this->country;
+    }
+
+    /** @return list<Edition> */
+    public function getEditions(): array
+    {
+        return $this->editions;
+    }
+
+    /** @return list<object> */
+    public function pullDomainEvents(): array
+    {
+        $events = $this->domainEvents;
+        $this->domainEvents = [];
+
+        return $events;
+    }
+
+    private function recordEvent(object $event): void
+    {
+        $this->domainEvents[] = $event;
+    }
+
+    private static function slugify(string $text): string
+    {
+        $text = transliterator_transliterate('Any-Latin; Latin-ASCII', $text) ?: $text;
+        $text = strtolower($text);
+        $text = (string) preg_replace('/[^a-z0-9]+/', '-', $text);
+
+        return trim($text, '-');
+    }
+}
