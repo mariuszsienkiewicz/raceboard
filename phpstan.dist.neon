@@ -6,3 +6,9 @@ parameters:
     ignoreErrors:
         - identifier: function.alreadyNarrowedType
           path: tests/bootstrap.php
+
+services:
+    - 
+        class: App\Infrastructure\PHPStan\DomainModelPropertiesExtension
+        tags:
+            - phpstan.properties.readWriteExtension
