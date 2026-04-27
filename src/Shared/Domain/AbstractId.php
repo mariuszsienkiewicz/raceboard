@@ -4,7 +4,7 @@ namespace App\Shared\Domain;
 
 abstract class AbstractId
 {
-    private function __construct(private readonly string $value) {}
+    final private function __construct(private readonly string $value) {}
 
     public static function generate(): static
     {
