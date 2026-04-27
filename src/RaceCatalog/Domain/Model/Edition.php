@@ -1,5 +1,4 @@
 <?php
-// src/RaceCatalog/Domain/Model/Edition.php
 
 declare(strict_types=1);
 
@@ -7,6 +6,9 @@ namespace App\RaceCatalog\Domain\Model;
 
 class Edition
 {
+    private ?EditionId $id = null;
+    private ?Race $race = null;
+
     /** @var list<Distance> */
     private array $distances;
 
@@ -18,12 +20,23 @@ class Edition
         private readonly ?string $registrationUrl = null,
         array $distances = [],
     ) {
-        $this->distances = $distances;
+        $this->id = EditionId::generate();
+        $this->distances = [];
+
+        foreach ($distances as $distance) {
+            $this->addDistance($distance);
+        }
     }
 
     public function addDistance(Distance $distance): void
     {
+        $distance->assignEdition($this);
         $this->distances[] = $distance;
+    }
+
+    public function assignRace(Race $race): void
+    {
+        $this->race = $race;
     }
 
     public function getDate(): \DateTimeImmutable

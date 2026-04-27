@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<doctrine-mapping xmlns="http://doctrine-project.org/schemas/orm/doctrine-mapping"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://doctrine-project.org/schemas/orm/doctrine-mapping https://www.doctrine-project.org/schemas/orm/doctrine-mapping.xsd">
+
+    <entity name="App\RaceCatalog\Domain\Model\Edition" table="race_catalog_editions">
+
+        <id name="id" column="id" type="edition_id">
+            <generator strategy="NONE" />
+        </id>
+
+        <field name="date" type="date_immutable" />
+        <field name="registrationUrl" type="string" length="2048" nullable="true" />
+
+        <many-to-one field="race"
+            target-entity="App\RaceCatalog\Domain\Model\Race"
+            inversed-by="editions">
+            <join-column name="race_id" referenced-column-name="id" nullable="false" on-delete="CASCADE" />
+        </many-to-one>
+
+        <one-to-many field="distances"
+            target-entity="App\RaceCatalog\Domain\Model\Distance"
+            mapped-by="edition"
+            orphan-removal="true">
+            <cascade>
+                <cascade-all />
+            </cascade>
+        </one-to-many>
+
+    </entity>
+
+</doctrine-mapping>

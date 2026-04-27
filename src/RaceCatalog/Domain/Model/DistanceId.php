@@ -4,6 +4,6 @@ namespace App\RaceCatalog\Domain\Model;
 
 use App\Shared\Domain\AbstractId;
 
-class RaceId extends AbstractId
+class DistanceId extends AbstractId
 {
 } 

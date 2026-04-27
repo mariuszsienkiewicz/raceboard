@@ -1,7 +1,5 @@
 <?php
 
-declare(strict_types=1);
-
 namespace App\RaceCatalog\Domain\Model;
 
 use App\RaceCatalog\Domain\Event\RaceCreated;
@@ -50,6 +48,7 @@ class Race
             }
         }
 
+        $edition->assignRace($this);
         $this->editions[] = $edition;
     }
 

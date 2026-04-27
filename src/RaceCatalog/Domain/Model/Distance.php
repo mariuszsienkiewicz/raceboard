@@ -6,11 +6,20 @@ namespace App\RaceCatalog\Domain\Model;
 
 class Distance
 {
+    private ?DistanceId $id = null;
+    private ?Edition $edition = null;
+
     public function __construct(
         private readonly string $name,
         private readonly float $lengthInKm,
         private readonly ?float $priceInPln = null,
     ) {
+        $this->id = DistanceId::generate();
+    }
+
+    public function assignEdition(Edition $edition): void
+    {
+        $this->edition = $edition;
     }
 
     public function getName(): string
