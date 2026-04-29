@@ -1,0 +1,7 @@
+services:
+  _defaults:
+    public: true
+
+  App\RaceCatalog\Domain\Repository\RaceRepositoryInterface:
+    alias: App\RaceCatalog\Infrastructure\Persistence\Doctrine\Repository\DoctrineRaceRepository
+    public: true
