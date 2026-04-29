@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\RaceCatalog\Domain\Model;
 
+use App\RaceCatalog\Domain\Exception\DuplicateDistanceException;
+
 class Edition
 {
     private ?EditionId $id = null;
@@ -30,6 +32,14 @@ class Edition
 
     public function addDistance(Distance $distance): void
     {
+        foreach ($this->distances as $existingDistance) {
+            $sameName = $existingDistance->getName() === $distance->getName();
+            $sameLength = abs($existingDistance->getLengthInKm() - $distance->getLengthInKm()) < 0.00001;
+            if ($sameName && $sameLength) {
+                throw DuplicateDistanceException::forEdition($distance->getName());
+            }
+        }
+
         $distance->assignEdition($this);
         $this->distances[] = $distance;
     }
