@@ -5,14 +5,16 @@ declare(strict_types=1);
 namespace App\RaceCatalog\Domain\Model;
 
 use App\RaceCatalog\Domain\Exception\DuplicateDistanceException;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 class Edition
 {
     private ?EditionId $id = null;
     private ?Race $race = null;
 
-    /** @var list<Distance> */
-    private array $distances;
+    /** @var Collection<int, Distance> */
+    private  Collection $distances;
 
     /**
      * @param list<Distance> $distances
@@ -23,7 +25,7 @@ class Edition
         array $distances = [],
     ) {
         $this->id = EditionId::generate();
-        $this->distances = [];
+        $this->distances = new ArrayCollection();
 
         foreach ($distances as $distance) {
             $this->addDistance($distance);
@@ -41,7 +43,7 @@ class Edition
         }
 
         $distance->assignEdition($this);
-        $this->distances[] = $distance;
+        $this->distances->add($distance);
     }
 
     public function assignRace(Race $race): void
@@ -62,6 +64,6 @@ class Edition
     /** @return list<Distance> */
     public function getDistances(): array
     {
-        return $this->distances;
+        return $this->distances->getValues();
     }
 }

@@ -5,11 +5,13 @@ namespace App\RaceCatalog\Domain\Model;
 use App\RaceCatalog\Domain\Event\RaceCreated;
 use App\RaceCatalog\Domain\Exception\EditionInThePastException;
 use App\RaceCatalog\Domain\Exception\DuplicateEditionException;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 
 class Race
 {
-    /** @var list<Edition> */
-    private array $editions = [];
+    /** @var Collection<int, Edition> */
+    private Collection $editions;
 
     /** @var list<object> */
     private array $domainEvents = [];
@@ -22,6 +24,7 @@ class Race
         private string $voivodeship,
         private string $country = 'PL',
     ) {
+        $this->editions = new ArrayCollection();
         $this->recordEvent(new RaceCreated($this->id));
     }
 
@@ -49,7 +52,7 @@ class Race
         }
 
         $edition->assignRace($this);
-        $this->editions[] = $edition;
+        $this->editions->add($edition);
     }
 
     /** @return list<Edition> */
@@ -57,12 +60,9 @@ class Race
     {
         $now = new \DateTimeImmutable('today');
 
-        return array_values(
-            array_filter(
-                $this->editions,
-                static fn (Edition $e): bool => $e->getDate() >= $now,
-            )
-        );
+        return $this->editions->filter(
+            static fn (Edition $e): bool => $e->getDate() >= $now
+        )->getValues();
     }
 
     public function getId(): RaceId
@@ -98,7 +98,7 @@ class Race
     /** @return list<Edition> */
     public function getEditions(): array
     {
-        return $this->editions;
+        return $this->editions->getValues();
     }
 
     /** @return list<object> */
