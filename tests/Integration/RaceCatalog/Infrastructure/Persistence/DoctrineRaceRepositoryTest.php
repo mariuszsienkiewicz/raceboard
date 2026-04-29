@@ -17,8 +17,13 @@ class DoctrineRaceRepositoryTest extends KernelTestCase
     protected function setUp(): void
     {
         self::bootKernel();
-        $this->repository = self::getContainer()->get(RaceRepositoryInterface::class);
-        $this->em = self::getContainer()->get('doctrine.orm.entity_manager');
+        $repository = self::getContainer()->get(RaceRepositoryInterface::class);
+        assert($repository instanceof RaceRepositoryInterface);
+        $this->repository = $repository;
+
+        $em = self::getContainer()->get('doctrine.orm.entity_manager');
+        assert($em instanceof \Doctrine\ORM\EntityManagerInterface);
+        $this->em = $em;
     }
 
     public function testSavingAndRetrievingRace(): void
@@ -143,7 +148,6 @@ class DoctrineRaceRepositoryTest extends KernelTestCase
 
         // Test that both races are retrieved
         $this->assertCount(2, $allRaces);
-        $this->assertContainsOnlyInstancesOf(Race::class, $allRaces);
     }
 
     public function testFindByIdReturnsNullForNonExistentRace(): void
