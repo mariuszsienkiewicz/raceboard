@@ -56,7 +56,7 @@ jobs:
         run: composer install --prefer-dist --no-progress
 
       - name: Create .env.test.local
-        run: echo "DATABASE_URL=postgresql://raceboard:raceboard@localhost:5432/raceboard_test" > .env.test.local
+        run: echo "DATABASE_URL=postgresql://raceboard:raceboard@localhost:5432/raceboard_test?serverVersion=16&charset=utf8" > .env.test.local
 
       - name: Create test database
         run: php bin/console doctrine:database:create --env=test --if-not-exists
