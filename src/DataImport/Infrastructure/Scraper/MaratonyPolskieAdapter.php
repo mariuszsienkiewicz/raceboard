@@ -18,6 +18,11 @@ class MaratonyPolskieAdapter implements ImportAdapterInterface
     {
     }
 
+    public function getName(): string
+    {
+        return 'maratony-polskie';
+    }
+
     /** @return list<RawRaceData> */
     public function fetch(): array
     {
