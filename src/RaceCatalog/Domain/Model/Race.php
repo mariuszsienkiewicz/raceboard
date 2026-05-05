@@ -5,6 +5,7 @@ namespace App\RaceCatalog\Domain\Model;
 use App\RaceCatalog\Domain\Event\RaceCreated;
 use App\RaceCatalog\Domain\Exception\EditionInThePastException;
 use App\RaceCatalog\Domain\Exception\DuplicateEditionException;
+use App\Shared\Domain\Slugifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 
@@ -34,7 +35,7 @@ class Race
         string $city,
         string $voivodeship,
     ): self {
-        $slug = self::slugify($name);
+        $slug = Slugifier::slugify($name);
 
         return new self($id, $name, $slug, $city, $voivodeship);
     }
@@ -113,14 +114,5 @@ class Race
     private function recordEvent(object $event): void
     {
         $this->domainEvents[] = $event;
-    }
-
-    private static function slugify(string $text): string
-    {
-        $text = transliterator_transliterate('Any-Latin; Latin-ASCII', $text) ?: $text;
-        $text = strtolower($text);
-        $text = (string) preg_replace('/[^a-z0-9]+/', '-', $text);
-
-        return trim($text, '-');
     }
 }
