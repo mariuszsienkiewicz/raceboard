@@ -7,5 +7,5 @@ namespace App\DataImport\Domain;
 interface ImportAdapterInterface
 {
     /** @return list<RawRaceData> */
-    public function import(): array;
+    public function fetch(): array;
 }
