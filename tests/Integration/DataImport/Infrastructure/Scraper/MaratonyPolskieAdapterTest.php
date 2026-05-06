@@ -42,8 +42,6 @@ class MaratonyPolskieAdapterTest extends TestCase
     {
         $results = $this->adapter->fetch();
 
-        dump($results[0]);
-
         $this->assertSame('Kępno', $results[0]->city);
     }
 
