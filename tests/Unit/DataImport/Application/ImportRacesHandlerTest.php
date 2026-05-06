@@ -9,18 +9,20 @@ use App\DataImport\Domain\RawRaceData;
 use App\RaceCatalog\Domain\Model\Race;
 use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
+use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
 class ImportRacesHandlerTest extends TestCase
 {
-    private $repository;
+    /** @var RaceRepositoryInterface&MockObject */
+    private RaceRepositoryInterface&MockObject $repository;
 
     protected function setUp(): void
     {
         $this->repository = $this->createMock(RaceRepositoryInterface::class);
     }
 
-    public function testImportsNewRaceWhenSlugDoesNotExist()
+    public function testImportsNewRaceWhenSlugDoesNotExist(): void
     {
         $this->repository->method('findBySlug')->willReturn(null);
         $this->repository->expects($this->once())->method('save');
@@ -43,7 +45,7 @@ class ImportRacesHandlerTest extends TestCase
         $this->assertSame(0, $result->skippedCount);
     }
 
-    public function testSkipsRaceWhenSlugAlreadyExists()
+    public function testSkipsRaceWhenSlugAlreadyExists(): void
     {
         $raceToBeFound = Race::create(
             RaceId::generate(),
@@ -73,7 +75,7 @@ class ImportRacesHandlerTest extends TestCase
         $this->assertSame(1, $result->skippedCount);
     }
 
-    public function testImportsMixOfNewAndExistingRaces()
+    public function testImportsMixOfNewAndExistingRaces(): void
     {
         $this->repository->method('findBySlug')->willReturnMap([
             ['maraton-warszawski', $this->createStub(Race::class)],
@@ -121,7 +123,7 @@ class ImportRacesHandlerTest extends TestCase
         $this->assertSame(2, $result->skippedCount);
     }
 
-    public function testCreatesEditionWithCorrectDate()
+    public function testCreatesEditionWithCorrectDate(): void
     {
         $this->repository->method('findBySlug')->willReturn(null);
         $this->repository->expects($this->once())->method('save')->with($this->callback(function (Race $race) {
@@ -143,7 +145,7 @@ class ImportRacesHandlerTest extends TestCase
         ]);
     }
 
-    public function testSkipsEditionWhenDateIsInvalid()
+    public function testSkipsEditionWhenDateIsInvalid(): void
     {
         $this->repository->method('findBySlug')->willReturn(null);
         $this->repository->expects($this->never())->method('save');
@@ -165,7 +167,7 @@ class ImportRacesHandlerTest extends TestCase
         $this->assertSame(1, $result->skippedCount);
     }
 
-    public function testReturnsCorrectImportResultCounts()
+    public function testReturnsCorrectImportResultCounts(): void
     {
         $this->repository->method('findBySlug')->willReturnMap([
             ['maraton-warszawski', $this->createStub(Race::class)],
@@ -230,7 +232,7 @@ class ImportRacesHandlerTest extends TestCase
         $this->assertSame(3, $result->skippedCount);
     }
 
-    public function testDoesNotSaveWhenAllRacesAlreadyExist()
+    public function testDoesNotSaveWhenAllRacesAlreadyExist(): void
     {
         $this->repository->method('findBySlug')->willReturn($this->createStub(Race::class));
         $this->repository->expects($this->never())->method('save');
@@ -270,7 +272,7 @@ class ImportRacesHandlerTest extends TestCase
         $this->assertSame(3, $result->skippedCount);
     }
 
-    public function testHandlesEmptyInputList()
+    public function testHandlesEmptyInputList(): void
     {
         $this->repository->expects($this->never())->method('save');
 
