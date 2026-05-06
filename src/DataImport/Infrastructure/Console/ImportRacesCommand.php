@@ -23,7 +23,7 @@ class ImportRacesCommand extends Command
     /** @var array<string, ImportAdapterInterface> */
     private array $adaptersByName;
 
-     /**
+    /**
      * @param iterable<ImportAdapterInterface> $adapters
      */
     public function __construct(
@@ -55,6 +55,7 @@ class ImportRacesCommand extends Command
                 $source,
                 implode(', ', array_keys($this->adaptersByName)),
             ));
+
             return Command::FAILURE;
         }
 

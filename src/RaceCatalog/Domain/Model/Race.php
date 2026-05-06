@@ -1,10 +1,12 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\RaceCatalog\Domain\Model;
 
 use App\RaceCatalog\Domain\Event\RaceCreated;
-use App\RaceCatalog\Domain\Exception\EditionInThePastException;
 use App\RaceCatalog\Domain\Exception\DuplicateEditionException;
+use App\RaceCatalog\Domain\Exception\EditionInThePastException;
 use App\Shared\Domain\Slugifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -62,7 +64,7 @@ class Race
         $now = new \DateTimeImmutable('today');
 
         return $this->editions->filter(
-            static fn (Edition $e): bool => $e->getDate() >= $now
+            static fn (Edition $e): bool => $e->getDate() >= $now,
         )->getValues();
     }
 

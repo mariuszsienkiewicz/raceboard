@@ -29,7 +29,7 @@ class RawRaceDataTest extends TestCase
             $voivodeship,
             $distances,
             $sourceUrl,
-            $registrationUrl
+            $registrationUrl,
         );
 
         $this->assertSame($name, $rawRaceData->name);

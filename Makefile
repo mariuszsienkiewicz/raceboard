@@ -6,7 +6,13 @@ lint:
 test:
 	vendor/bin/phpunit
 
-check: lint test
+cs:
+	vendor/bin/php-cs-fixer fix --dry-run --diff
+
+cs-fix:
+	vendor/bin/php-cs-fixer fix
+
+check: lint cs test
 
 setup:
 	composer install

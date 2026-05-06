@@ -14,7 +14,6 @@ use PHPUnit\Framework\TestCase;
 
 class ImportRacesHandlerTest extends TestCase
 {
-    /** @var RaceRepositoryInterface&MockObject */
     private RaceRepositoryInterface&MockObject $repository;
 
     protected function setUp(): void
@@ -51,7 +50,7 @@ class ImportRacesHandlerTest extends TestCase
             RaceId::generate(),
             'Maraton Warszawski',
             'Warszawa',
-            'mazowieckie'
+            'mazowieckie',
         );
 
         $this->repository->method('findBySlug')->willReturn($raceToBeFound);
@@ -84,7 +83,7 @@ class ImportRacesHandlerTest extends TestCase
         ]);
 
         $this->repository->expects($this->once())->method('save')->with($this->callback(function (Race $race) {
-            return $race->getName() === 'Maraton Krakowski' && $race->getCity() === 'Kraków';
+            return 'Maraton Krakowski' === $race->getName() && 'Kraków' === $race->getCity();
         }));
 
         $handler = new ImportRacesHandler($this->repository);
@@ -128,7 +127,8 @@ class ImportRacesHandlerTest extends TestCase
         $this->repository->method('findBySlug')->willReturn(null);
         $this->repository->expects($this->once())->method('save')->with($this->callback(function (Race $race) {
             $editions = $race->getEditions();
-            return \count($editions) === 1 && $editions[0]->getDate()->format('Y-m-d') === '2026-11-15';
+
+            return 1 === \count($editions) && '2026-11-15' === $editions[0]->getDate()->format('Y-m-d');
         }));
 
         $handler = new ImportRacesHandler($this->repository);

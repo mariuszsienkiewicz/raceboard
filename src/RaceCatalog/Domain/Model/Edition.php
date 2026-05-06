@@ -14,7 +14,7 @@ class Edition
     private ?Race $race = null;
 
     /** @var Collection<int, Distance> */
-    private  Collection $distances;
+    private Collection $distances;
 
     /**
      * @param list<Distance> $distances

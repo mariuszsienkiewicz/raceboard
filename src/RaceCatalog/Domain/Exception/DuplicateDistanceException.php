@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace App\RaceCatalog\Domain\Exception;
 
 class DuplicateDistanceException extends \DomainException

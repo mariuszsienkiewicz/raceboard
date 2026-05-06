@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\RaceCatalog\Infrastructure\Persistence;
 
-use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Model\Race;
+use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
@@ -33,7 +33,7 @@ class DoctrineRaceRepositoryTest extends KernelTestCase
             RaceId::generate(),
             'Test Race',
             'Warsaw',
-            'Masovian'
+            'Masovian',
         );
 
         // Save the race
@@ -60,7 +60,7 @@ class DoctrineRaceRepositoryTest extends KernelTestCase
             RaceId::generate(),
             'Test Race',
             'Warsaw',
-            'Masovian'
+            'Masovian',
         );
 
         // Create an edition with distances
@@ -101,7 +101,7 @@ class DoctrineRaceRepositoryTest extends KernelTestCase
             RaceId::generate(),
             'Test Race',
             'Warsaw',
-            'Masovian'
+            'Masovian',
         );
 
         // Save the race
@@ -128,13 +128,13 @@ class DoctrineRaceRepositoryTest extends KernelTestCase
             RaceId::generate(),
             'Test Race 1',
             'Warsaw',
-            'Masovian'
+            'Masovian',
         );
         $race2 = Race::create(
             RaceId::generate(),
             'Test Race 2',
             'Krakow',
-            'Lesser Poland'
+            'Lesser Poland',
         );
 
         $this->repository->save($race1);

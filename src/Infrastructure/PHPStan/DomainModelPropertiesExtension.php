@@ -13,7 +13,7 @@ class DomainModelPropertiesExtension implements ReadWritePropertiesExtension
     {
         return str_contains(
             $property->getDeclaringClass()->getName(),
-            'Domain\\Model'
+            'Domain\\Model',
         );
     }
 

@@ -7,9 +7,6 @@ namespace App\DataImport\Application;
 class ImportResult
 {
     /**
-     * @param int $importedCount
-     * @param int $updatedCount
-     * @param int $skippedCount
      * @param array<string> $errors
      */
     public function __construct(
@@ -22,17 +19,17 @@ class ImportResult
 
     public function incrementImported(): void
     {
-        $this->importedCount++;
+        ++$this->importedCount;
     }
 
     public function incrementUpdated(): void
     {
-        $this->updatedCount++;
+        ++$this->updatedCount;
     }
 
     public function incrementSkipped(): void
     {
-        $this->skippedCount++;
+        ++$this->skippedCount;
     }
 
     public function addError(string $error): void

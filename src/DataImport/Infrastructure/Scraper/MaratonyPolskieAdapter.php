@@ -28,6 +28,7 @@ class MaratonyPolskieAdapter implements ImportAdapterInterface
     {
         $response = $this->httpClient->request('GET', self::URL);
         $html = $response->getContent();
+
         return $this->parseHtml($html);
     }
 
@@ -39,7 +40,7 @@ class MaratonyPolskieAdapter implements ImportAdapterInterface
         $crawler = new Crawler($html);
         $crawler->filter('a.czte')->each(function ($linkNode) use (&$rawRaceDataList) {
             $row = $linkNode->closest('tr');
-            if ($row === null) {
+            if (null === $row) {
                 return;
             }
 
@@ -61,8 +62,8 @@ class MaratonyPolskieAdapter implements ImportAdapterInterface
                 $city,
                 '',
                 [],
-                self::DOMAIN . $url,
-                ''
+                self::DOMAIN.$url,
+                '',
             );
         });
 
@@ -71,20 +72,20 @@ class MaratonyPolskieAdapter implements ImportAdapterInterface
 
     private function extractCity(Crawler $cell): string
     {
-        // sometimes city contains additional info, for example distances, so we need to extract only the city name 
+        // sometimes city contains additional info, for example distances, so we need to extract only the city name
         // <font size="1" face="verdana" color="black">Kępno<p align="right">10 km</p></font>
         // and sometimes it contains only city name like here:
         // <font size="1" face="verdana" color="black">Jelcz-Laskowice</font>
         $fontNode = $cell->filter('font')->getNode(0);
 
-        if ($fontNode === null) {
+        if (null === $fontNode) {
             return trim($cell->text());
         }
 
         foreach ($fontNode->childNodes as $child) {
-            if ($child->nodeType === XML_TEXT_NODE) {
+            if (XML_TEXT_NODE === $child->nodeType) {
                 $text = trim($child->nodeValue ?? '');
-                if ($text !== '') {
+                if ('' !== $text) {
                     return $text;
                 }
             }

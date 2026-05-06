@@ -26,7 +26,7 @@ class ImportRacesHandler
 
         foreach ($racesData as $rawRaceData) {
             $date = \DateTimeImmutable::createFromFormat('Y-m-d', $rawRaceData->date);
-            if ($date === false) {
+            if (false === $date) {
                 $importResult->incrementSkipped();
                 continue;
             }

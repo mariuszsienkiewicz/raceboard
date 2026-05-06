@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\DataImport\Infrastructure\Scraper;
 
-use App\DataImport\Domain\RawRaceData;
 use App\DataImport\Infrastructure\Scraper\MaratonyPolskieAdapter;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
@@ -12,13 +11,13 @@ use Symfony\Component\HttpClient\Response\MockResponse;
 
 class MaratonyPolskieAdapterTest extends TestCase
 {
-    private const string FIXTURES_DIR = __DIR__ . '/Fixtures';
+    private const string FIXTURES_DIR = __DIR__.'/Fixtures';
 
     private MaratonyPolskieAdapter $adapter;
 
     protected function setUp(): void
     {
-        $html = file_get_contents(self::FIXTURES_DIR . '/maratony_polskie_calendar.html');
+        $html = file_get_contents(self::FIXTURES_DIR.'/maratony_polskie_calendar.html');
         $this->assertNotFalse($html);
 
         $mockClient = new MockHttpClient(new MockResponse($html));
