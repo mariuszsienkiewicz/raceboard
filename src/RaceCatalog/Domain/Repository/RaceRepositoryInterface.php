@@ -16,5 +16,8 @@ interface RaceRepositoryInterface
     public function findBySlug(string $slug): ?Race;
 
     /** @return list<Race> */
+    public function findSimilar(string $date, string $city): array;
+
+    /** @return list<Race> */
     public function findAll(): array;
 }

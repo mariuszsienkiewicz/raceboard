@@ -38,6 +38,22 @@ class DoctrineRaceRepository implements RaceRepositoryInterface
     }
 
     /** @return list<Race> */
+    public function findSimilar(string $date, string $city): array
+    {
+        return $this->entityManager->createQueryBuilder()
+            ->select('r')
+            ->from(Race::class, 'r')
+            ->join('r.editions', 'e')
+            ->where('e.date BETWEEN :dateFrom AND :dateTo')
+            ->andWhere('LOWER(r.city) = LOWER(:city)')
+            ->setParameter('dateFrom', (new \DateTimeImmutable($date))->modify('-1 day'))
+            ->setParameter('dateTo', (new \DateTimeImmutable($date))->modify('+1 day'))
+            ->setParameter('city', $city)
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return list<Race> */
     public function findAll(): array
     {
         return $this->entityManager->getRepository(Race::class)->findAll();
