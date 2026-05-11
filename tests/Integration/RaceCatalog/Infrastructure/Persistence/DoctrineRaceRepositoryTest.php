@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\RaceCatalog\Infrastructure\Persistence;
 
+use App\RaceCatalog\Domain\Model\Distance;
+use App\RaceCatalog\Domain\Model\Edition;
 use App\RaceCatalog\Domain\Model\Race;
 use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
@@ -64,9 +66,9 @@ class DoctrineRaceRepositoryTest extends KernelTestCase
         );
 
         // Create an edition with distances
-        $edition = new \App\RaceCatalog\Domain\Model\Edition(new \DateTimeImmutable('+3 months'));
-        $edition->addDistance(new \App\RaceCatalog\Domain\Model\Distance('Maraton', 42.195, 150.0));
-        $edition->addDistance(new \App\RaceCatalog\Domain\Model\Distance('Half-Marathon', 21.0975, 100.0));
+        $edition = new Edition(new \DateTimeImmutable('+3 months'));
+        $edition->addDistance(new Distance('Maraton', 42.195, 150.0));
+        $edition->addDistance(new Distance('Half-Marathon', 21.0975, 100.0));
 
         // Assign the edition to the race
         $race->addEdition($edition);
@@ -158,5 +160,29 @@ class DoctrineRaceRepositoryTest extends KernelTestCase
 
         // Test that the retrieved race is null
         $this->assertNull($retrievedRace);
+    }
+
+    public function testFindSimilarReturnsRacesWithSameDateAndCity(): void
+    {
+        // Create a new race
+        $race = Race::create(
+            RaceId::generate(),
+            'Test Race',
+            'Warsaw',
+            'Masovian',
+        );
+
+        $futureDate = new \DateTimeImmutable('+3 months');
+        $searchDate = $futureDate->modify('-1 day')->format('Y-m-d');
+
+        $edition = new Edition($futureDate);
+        $race->addEdition($edition);
+
+        $this->repository->save($race);
+        $this->em->clear();
+
+        $similarRaces = $this->repository->findSimilar($searchDate, 'Warsaw');
+
+        $this->assertCount(1, $similarRaces);
     }
 }
