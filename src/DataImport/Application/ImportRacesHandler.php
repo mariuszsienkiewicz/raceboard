@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DataImport\Application;
 
 use App\DataImport\Domain\RawRaceData;
+use App\RaceCatalog\Domain\Model\Distance;
 use App\RaceCatalog\Domain\Model\Edition;
 use App\RaceCatalog\Domain\Model\Race;
 use App\RaceCatalog\Domain\Model\RaceId;
@@ -13,7 +14,7 @@ use App\Shared\Domain\Slugifier;
 
 class ImportRacesHandler
 {
-    public function __construct(private RaceRepositoryInterface $raceRepository)
+    public function __construct(private RaceRepositoryInterface $raceRepository, private DuplicateDetector $duplicateDetector)
     {
     }
 
@@ -38,6 +39,12 @@ class ImportRacesHandler
                 continue;
             }
 
+            $candidates = $this->raceRepository->findSimilar($rawRaceData->date, $rawRaceData->city);
+            if (null !== $this->duplicateDetector->findDuplicate($rawRaceData->name, $candidates)) {
+                $importResult->incrementSkipped();
+                continue;
+            }
+
             $race = Race::create(
                 RaceId::generate(),
                 $rawRaceData->name,
@@ -46,6 +53,14 @@ class ImportRacesHandler
             );
 
             $edition = new Edition($date, $rawRaceData->registrationUrl ?: null);
+            foreach ($rawRaceData->distances as $distanceData) {
+                $edition->addDistance(new Distance(
+                    $distanceData['name'],
+                    $distanceData['lengthInKm'],
+                    $distanceData['priceInPln'],
+                ));
+            }
+
             $race->addEdition($edition);
             $this->raceRepository->save($race);
             $importResult->incrementImported();
