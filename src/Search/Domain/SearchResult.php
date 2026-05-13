@@ -11,7 +11,7 @@ final readonly class SearchResult
      */
     public function __construct(
         public array $hits,
-        public int|null $totalHits,
+        public ?int $totalHits,
         public int $page,
         public int $perPage,
     ) {

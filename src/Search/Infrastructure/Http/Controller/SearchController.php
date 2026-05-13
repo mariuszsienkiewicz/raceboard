@@ -14,7 +14,8 @@ class SearchController
 {
     public function __construct(
         private SearchIndexInterface $searchIndex,
-    ) {}
+    ) {
+    }
 
     #[Route('/api/races/search', name: 'api_races_search', methods: ['GET'])]
     public function search(Request $request): JsonResponse
