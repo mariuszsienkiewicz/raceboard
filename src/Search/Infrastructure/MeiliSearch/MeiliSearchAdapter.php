@@ -1,0 +1,124 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Search\Infrastructure\MeiliSearch;
+
+use App\RaceCatalog\Domain\Model\Edition;
+use App\RaceCatalog\Domain\Model\Race;
+use App\Search\Domain\SearchIndexInterface;
+use App\Search\Domain\SearchQuery;
+use App\Search\Domain\SearchResult;
+use Meilisearch\Client;
+
+class MeiliSearchAdapter implements SearchIndexInterface
+{
+    protected const string INDEX_NAME = 'races';
+
+    public function __construct(
+        private readonly Client $client,
+    ) {
+    }
+
+    public function configureIndex(): void
+    {
+        $index = $this->client->index(self::INDEX_NAME);
+        $index->updateFilterableAttributes(['city', 'voivodeship', 'dates', 'distances']);
+        $index->updateSortableAttributes(['dates']);
+        $index->updateSearchableAttributes(['name', 'city', 'voivodeship']);
+    }
+
+    public function indexRace(Race $race): void
+    {
+        $document = $this->toDocument($race);
+        $this->client->index(self::INDEX_NAME)->addDocuments([$document]);
+    }
+
+    /**
+     * @param list<Race> $races
+     */
+    public function indexAll(array $races): void
+    {
+        $documents = array_map(fn (Race $race) => $this->toDocument($race), $races);
+        $this->client->index(self::INDEX_NAME)->addDocuments($documents);
+    }
+
+    public function search(SearchQuery $query): SearchResult
+    {
+        $filters = $this->buildFilters($query);
+
+        $options = [
+            'limit' => $query->perPage,
+            'offset' => ($query->page - 1) * $query->perPage,
+        ];
+
+        if ('' !== $filters) {
+            $options['filter'] = $filters;
+        }
+
+        $searchResult = $this->client->index(self::INDEX_NAME)->search($query->query, $options);
+
+        return new SearchResult(
+            $searchResult->getHits(),
+            $searchResult->getEstimatedTotalHits(),
+            $query->page,
+            $query->perPage,
+        );
+    }
+
+    private function buildFilters(SearchQuery $query): string
+    {
+        $filters = [];
+
+        if (null !== $query->city) {
+            $filters[] = \sprintf('city = "%s"', $query->city);
+        }
+
+        if (null !== $query->voivodeship) {
+            $filters[] = \sprintf('voivodeship = "%s"', $query->voivodeship);
+        }
+
+        if (null !== $query->distanceKm) {
+            $filters[] = \sprintf('distances = %s', $query->distanceKm);
+        }
+
+        return implode(' AND ', $filters);
+    }
+
+    /**
+     * @return array{
+     *   city: string,
+     *   dates: string[],
+     *   distances: array<int, float>,
+     *   id: string,
+     *   name: string,
+     *   slug: string,
+     *   voivodeship: string
+     * }
+     */
+    private function toDocument(Race $race): array
+    {
+        return [
+            'id' => $race->getId()->toString(),
+            'slug' => $race->getSlug(),
+            'name' => $race->getName(),
+            'city' => $race->getCity(),
+            'voivodeship' => $race->getVoivodeship(),
+            'dates' => array_map(fn (Edition $edition) => $edition->getDate()->format('Y-m-d'), $race->getEditions()),
+            'distances' => $this->flattenDistances($race),
+        ];
+    }
+
+    /** @return list<float> */
+    private function flattenDistances(Race $race): array
+    {
+        $distances = [];
+        foreach ($race->getEditions() as $edition) {
+            foreach ($edition->getDistances() as $distance) {
+                $distances[] = $distance->getLengthInKm();
+            }
+        }
+
+        return array_values(array_unique($distances));
+    }
+}
