@@ -10,6 +10,7 @@ use App\DataImport\Domain\RawRaceData;
 use App\RaceCatalog\Domain\Model\Race;
 use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
+use App\Search\Domain\SearchIndexInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 
@@ -17,23 +18,27 @@ class ImportRacesHandlerTest extends TestCase
 {
     private RaceRepositoryInterface&MockObject $repository;
     private DuplicateDetector $duplicateDetector;
+    private SearchIndexInterface&MockObject $searchIndex;
+    private ImportRacesHandler $handler;
 
     protected function setUp(): void
     {
         $this->repository = $this->createMock(RaceRepositoryInterface::class);
+        $this->repository->method('findSimilar')->willReturn([]);
         $this->duplicateDetector = new DuplicateDetector();
+        $this->searchIndex = $this->createMock(SearchIndexInterface::class);
+        $this->handler = new ImportRacesHandler($this->repository, $this->duplicateDetector, $this->searchIndex);
     }
 
     public function testImportsNewRaceWhenSlugDoesNotExist(): void
     {
         $this->repository->method('findBySlug')->willReturn(null);
-        $this->repository->method('findSimilar')->willReturn([]);
         $this->repository->expects($this->once())->method('save');
+        $this->searchIndex->expects($this->once())->method('indexRace');
 
-        $handler = new ImportRacesHandler($this->repository, $this->duplicateDetector);
         $futureDate = (new \DateTimeImmutable('+3 months'))->format('Y-m-d');
 
-        $result = $handler->handle([
+        $result = $this->handler->handle([
             $this->createRawRaceData(
                 'Maraton Warszawski',
                 $futureDate,
@@ -57,11 +62,11 @@ class ImportRacesHandlerTest extends TestCase
 
         $this->repository->method('findBySlug')->willReturn($raceToBeFound);
         $this->repository->expects($this->never())->method('save');
+        $this->searchIndex->expects($this->never())->method('indexRace');
 
-        $handler = new ImportRacesHandler($this->repository, $this->duplicateDetector);
         $futureDate = (new \DateTimeImmutable('+3 months'))->format('Y-m-d');
 
-        $result = $handler->handle([
+        $result = $this->handler->handle([
             $this->createRawRaceData(
                 'Maraton Warszawski',
                 $futureDate,
@@ -81,18 +86,16 @@ class ImportRacesHandlerTest extends TestCase
             ['maraton-krakowski', null],
             ['maraton-gdanski', $this->createStub(Race::class)],
         ]);
-        $this->repository->method('findSimilar')->willReturn([]);
-
         $this->repository->expects($this->once())->method('save')->with($this->callback(function (Race $race) {
             return 'Maraton Krakowski' === $race->getName() && 'Kraków' === $race->getCity();
         }));
+        $this->searchIndex->expects($this->once())->method('indexRace');
 
-        $handler = new ImportRacesHandler($this->repository, $this->duplicateDetector);
         $futureDate1 = (new \DateTimeImmutable('+3 months'))->format('Y-m-d');
         $futureDate2 = (new \DateTimeImmutable('+4 months'))->format('Y-m-d');
         $futureDate3 = (new \DateTimeImmutable('+5 months'))->format('Y-m-d');
 
-        $result = $handler->handle([
+        $result = $this->handler->handle([
             $this->createRawRaceData(
                 'Maraton Warszawski',
                 $futureDate1,
@@ -121,15 +124,14 @@ class ImportRacesHandlerTest extends TestCase
     {
         $futureDate = (new \DateTimeImmutable('+3 months'))->format('Y-m-d');
         $this->repository->method('findBySlug')->willReturn(null);
-        $this->repository->method('findSimilar')->willReturn([]);
         $this->repository->expects($this->once())->method('save')->with($this->callback(function (Race $race) use ($futureDate) {
             $editions = $race->getEditions();
 
             return 1 === \count($editions) && $futureDate === $editions[0]->getDate()->format('Y-m-d');
         }));
+        $this->searchIndex->expects($this->once())->method('indexRace');
 
-        $handler = new ImportRacesHandler($this->repository, $this->duplicateDetector);
-        $handler->handle([
+        $this->handler->handle([
             $this->createRawRaceData(
                 'Maraton Testowy',
                 $futureDate,
@@ -142,11 +144,10 @@ class ImportRacesHandlerTest extends TestCase
     public function testSkipsEditionWhenDateIsInvalid(): void
     {
         $this->repository->method('findBySlug')->willReturn(null);
-        $this->repository->method('findSimilar')->willReturn([]);
         $this->repository->expects($this->never())->method('save');
+        $this->searchIndex->expects($this->never())->method('indexRace');
 
-        $handler = new ImportRacesHandler($this->repository, $this->duplicateDetector);
-        $result = $handler->handle([
+        $result = $this->handler->handle([
             $this->createRawRaceData(
                 'Maraton Testowy',
                 'invalid-date',
@@ -168,17 +169,15 @@ class ImportRacesHandlerTest extends TestCase
             ['maraton-testowy', null],
             ['maraton-poznanski', $this->createStub(Race::class)],
         ]);
-        $this->repository->method('findSimilar')->willReturn([]);
-
         $this->repository->expects($this->exactly(2))->method('save');
+        $this->searchIndex->expects($this->exactly(2))->method('indexRace');
 
-        $handler = new ImportRacesHandler($this->repository, $this->duplicateDetector);
         $futureDate1 = (new \DateTimeImmutable('+3 months'))->format('Y-m-d');
         $futureDate2 = (new \DateTimeImmutable('+4 months'))->format('Y-m-d');
         $futureDate3 = (new \DateTimeImmutable('+5 months'))->format('Y-m-d');
         $futureDate4 = (new \DateTimeImmutable('+6 months'))->format('Y-m-d');
         $futureDate5 = (new \DateTimeImmutable('+7 months'))->format('Y-m-d');
-        $result = $handler->handle([
+        $result = $this->handler->handle([
             $this->createRawRaceData(
                 'Maraton Warszawski',
                 $futureDate1,
@@ -219,12 +218,12 @@ class ImportRacesHandlerTest extends TestCase
     {
         $this->repository->method('findBySlug')->willReturn($this->createStub(Race::class));
         $this->repository->expects($this->never())->method('save');
+        $this->searchIndex->expects($this->never())->method('indexRace');
 
-        $handler = new ImportRacesHandler($this->repository, $this->duplicateDetector);
         $futureDate1 = (new \DateTimeImmutable('+3 months'))->format('Y-m-d');
         $futureDate2 = (new \DateTimeImmutable('+4 months'))->format('Y-m-d');
         $futureDate3 = (new \DateTimeImmutable('+5 months'))->format('Y-m-d');
-        $result = $handler->handle([
+        $result = $this->handler->handle([
             $this->createRawRaceData(
                 'Maraton Warszawski',
                 $futureDate1,
@@ -252,9 +251,9 @@ class ImportRacesHandlerTest extends TestCase
     public function testHandlesEmptyInputList(): void
     {
         $this->repository->expects($this->never())->method('save');
+        $this->searchIndex->expects($this->never())->method('indexRace');
 
-        $handler = new ImportRacesHandler($this->repository, $this->duplicateDetector);
-        $result = $handler->handle([]);
+        $result = $this->handler->handle([]);
 
         $this->assertSame(0, $result->importedCount);
         $this->assertSame(0, $result->skippedCount);
