@@ -10,11 +10,12 @@ use App\RaceCatalog\Domain\Model\Edition;
 use App\RaceCatalog\Domain\Model\Race;
 use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
+use App\Search\Domain\SearchIndexInterface;
 use App\Shared\Domain\Slugifier;
 
 class ImportRacesHandler
 {
-    public function __construct(private RaceRepositoryInterface $raceRepository, private DuplicateDetector $duplicateDetector)
+    public function __construct(private RaceRepositoryInterface $raceRepository, private DuplicateDetector $duplicateDetector, private SearchIndexInterface $searchIndex)
     {
     }
 
@@ -63,6 +64,7 @@ class ImportRacesHandler
 
             $race->addEdition($edition);
             $this->raceRepository->save($race);
+            $this->searchIndex->indexRace($race);
             $importResult->incrementImported();
         }
 

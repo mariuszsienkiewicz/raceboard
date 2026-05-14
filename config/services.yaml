@@ -24,3 +24,8 @@ services:
     _instanceof:
         App\DataImport\Domain\ImportAdapterInterface:
             tags: ['app.import_adapter']
+    
+    Meilisearch\Client:
+        arguments:
+            $url: '%env(MEILISEARCH_URL)%'
+            $apiKey: '%env(MEILISEARCH_API_KEY)%'
