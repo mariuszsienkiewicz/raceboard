@@ -57,6 +57,19 @@ final class UserTest extends TestCase
         $this->assertSame('hashed_password', $user->getPassword());
     }
 
+    public function testUpdatesPassword(): void
+    {
+        $user = User::create(
+            UserId::generate(),
+            'test@example.com',
+            'hashed_password',
+        );
+
+        $user->updatePassword('new_hashed_password');
+
+        $this->assertSame('new_hashed_password', $user->getPassword());
+    }
+
     public function testThrowsOnEmptyEmail(): void
     {
         $this->expectException(\InvalidArgumentException::class);

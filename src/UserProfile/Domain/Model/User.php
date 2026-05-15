@@ -48,6 +48,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->passwordHash;
     }
 
+    public function updatePassword(string $newHash): void
+    {
+        $this->passwordHash = $newHash;
+    }
+
     public function getCreatedAt(): \DateTimeImmutable
     {
         return $this->createdAt;
