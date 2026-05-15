@@ -66,4 +66,15 @@ class Edition
     {
         return $this->distances->getValues();
     }
+
+    public function hasDistance(float $lengthInKm): bool
+    {
+        foreach ($this->distances as $distance) {
+            if (abs($distance->getLengthInKm() - $lengthInKm) < 0.01) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

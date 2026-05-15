@@ -93,6 +93,15 @@ class Race
         return $this->voivodeship;
     }
 
+    public function updateVoivodeship(string $voivodeship): void
+    {
+        if ('' !== $this->voivodeship) {
+            return;
+        }
+
+        $this->voivodeship = $voivodeship;
+    }
+
     public function getCountry(): string
     {
         return $this->country;
@@ -102,6 +111,18 @@ class Race
     public function getEditions(): array
     {
         return $this->editions->getValues();
+    }
+
+    public function findEditionByDate(\DateTimeImmutable $date): ?Edition
+    {
+        foreach ($this->editions as $edition) {
+            $diff = abs($edition->getDate()->getTimestamp() - $date->getTimestamp());
+            if ($diff <= 86400) {
+                return $edition;
+            }
+        }
+
+        return null;
     }
 
     /** @return list<object> */
