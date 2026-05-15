@@ -13,6 +13,7 @@ doctrine:
             edition_id: App\RaceCatalog\Infrastructure\Persistence\Doctrine\Type\EditionIdType
             distance_id: App\RaceCatalog\Infrastructure\Persistence\Doctrine\Type\DistanceIdType
             user_id: App\UserProfile\Infrastructure\Persistence\Doctrine\Type\UserIdType
+            watchlist_entry_id: App\UserProfile\Infrastructure\Persistence\Doctrine\Type\WatchlistEntryIdType
 
     orm:
         validate_xml_mapping: true
