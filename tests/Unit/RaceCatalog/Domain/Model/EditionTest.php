@@ -118,4 +118,27 @@ final class EditionTest extends TestCase
         $this->expectException(\DomainException::class);
         $edition->addDistance(new Distance('Maraton', 42.195, 150.0));
     }
+
+    public function testHasDistanceReturnsTrueWhenDistanceExists(): void
+    {
+        $edition = new Edition(new \DateTimeImmutable('+3 months'));
+        $edition->addDistance(new Distance('Maraton', 42.195));
+
+        $this->assertTrue($edition->hasDistance(42.195));
+    }
+
+    public function testHasDistanceReturnsFalseWhenDistanceDoesNotExist(): void
+    {
+        $edition = new Edition(new \DateTimeImmutable('+3 months'));
+        $edition->addDistance(new Distance('Maraton', 42.195));
+
+        $this->assertFalse($edition->hasDistance(10.0));
+    }
+
+    public function testHasDistanceReturnsFalseWhenNoDistances(): void
+    {
+        $edition = new Edition(new \DateTimeImmutable('+3 months'));
+
+        $this->assertFalse($edition->hasDistance(42.195));
+    }
 }

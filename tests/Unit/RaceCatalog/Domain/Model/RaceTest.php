@@ -106,6 +106,52 @@ final class RaceTest extends TestCase
         $this->assertFalse($ten->isHalfMarathon());
     }
 
+    public function testUpdateVoivodeship(): void
+    {
+        $race = Race::create(RaceId::generate(), 'Test Race', 'Warszawa', '');
+        $race->updateVoivodeship('mazowieckie');
+        $this->assertSame('mazowieckie', $race->getVoivodeship());
+    }
+
+    public function testUpdateVoivodeshipDoesNotOverwriteExistingValue(): void
+    {
+        $race = Race::create(RaceId::generate(), 'Test Race', 'Warszawa', 'mazowieckie');
+        $race->updateVoivodeship('pomorskie');
+        $this->assertSame('mazowieckie', $race->getVoivodeship());
+    }
+
+    public function testFindsEditionByDate(): void
+    {
+        $race = $this->createRace();
+        $date = new \DateTimeImmutable('+2 days');
+        $edition = new Edition($date);
+        $race->addEdition($edition);
+
+        $dateToFind = new \DateTimeImmutable('+3 days');
+        $found = $race->findEditionByDate($dateToFind);
+        $this->assertSame($edition, $found);
+    }
+
+    public function testFindEditionByDateReturnsNullWhenNoMatch(): void
+    {
+        $race = $this->createRace();
+        $race->addEdition(new Edition(new \DateTimeImmutable('+2 months')));
+
+        $found = $race->findEditionByDate(new \DateTimeImmutable('+5 months'));
+        $this->assertNull($found);
+    }
+
+    public function testFindEditionByDateMatchesExactDate(): void
+    {
+        $race = $this->createRace();
+        $date = new \DateTimeImmutable('+3 months');
+        $edition = new Edition($date);
+        $race->addEdition($edition);
+
+        $found = $race->findEditionByDate($date);
+        $this->assertSame($edition, $found);
+    }
+
     private function createRace(): Race
     {
         return Race::create(
