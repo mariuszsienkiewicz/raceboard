@@ -5,3 +5,7 @@ services:
   App\RaceCatalog\Domain\Repository\RaceRepositoryInterface:
     alias: App\RaceCatalog\Infrastructure\Persistence\Doctrine\Repository\DoctrineRaceRepository
     public: true
+
+  App\UserProfile\Domain\Repository\UserRepositoryInterface:
+    alias: App\UserProfile\Infrastructure\Persistence\Doctrine\Repository\DoctrineUserRepository
+    public: true

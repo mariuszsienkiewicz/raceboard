@@ -12,6 +12,7 @@ doctrine:
             race_id: App\RaceCatalog\Infrastructure\Persistence\Doctrine\Type\RaceIdType
             edition_id: App\RaceCatalog\Infrastructure\Persistence\Doctrine\Type\EditionIdType
             distance_id: App\RaceCatalog\Infrastructure\Persistence\Doctrine\Type\DistanceIdType
+            user_id: App\UserProfile\Infrastructure\Persistence\Doctrine\Type\UserIdType
 
     orm:
         validate_xml_mapping: true
@@ -26,6 +27,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/RaceCatalog/Infrastructure/Persistence/Mapping'
                 prefix: 'App\RaceCatalog\Domain\Model'
                 alias: RaceCatalog
+            UserProfile:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/UserProfile/Infrastructure/Persistence/Mapping'
+                prefix: 'App\UserProfile\Domain\Model'
+                alias: UserProfile
 
 when@test:
     doctrine:
