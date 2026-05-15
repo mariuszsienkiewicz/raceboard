@@ -5,6 +5,11 @@ security:
 
     # https://symfony.com/doc/current/security.html#loading-the-user-the-user-provider
     providers:
+        app_user_provider:
+            entity:
+                class: App\UserProfile\Domain\Model\User
+                property: email
+
         users_in_memory: { memory: null }
 
     firewalls:
@@ -12,6 +17,10 @@ security:
             # Ensure dev tools and static assets are always allowed
             pattern: ^/(_profiler|_wdt|assets|build)/
             security: false
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: app_user_provider
         main:
             lazy: true
             provider: users_in_memory
@@ -24,8 +33,10 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/api/register, roles: PUBLIC_ACCESS }
+        - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/races, roles: PUBLIC_ACCESS }
+        - { path: ^/api/me, roles: ROLE_USER }
 
 when@test:
     security:
