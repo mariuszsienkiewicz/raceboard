@@ -9,3 +9,6 @@ services:
   App\UserProfile\Domain\Repository\UserRepositoryInterface:
     alias: App\UserProfile\Infrastructure\Persistence\Doctrine\Repository\DoctrineUserRepository
     public: true
+
+  App\UserProfile\Domain\Repository\WatchlistEntryRepositoryInterface:
+    alias: App\UserProfile\Infrastructure\Persistence\Doctrine\Repository\DoctrineWatchlistEntryRepository
