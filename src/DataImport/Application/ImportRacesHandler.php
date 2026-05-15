@@ -36,13 +36,16 @@ class ImportRacesHandler
             $slug = Slugifier::slugify($rawRaceData->name);
             $existing = $this->raceRepository->findBySlug($slug);
             if ($existing) {
-                $importResult->incrementSkipped();
+                $this->enrichRace($existing, $rawRaceData, $date);
+                $importResult->incrementUpdated();
                 continue;
             }
 
             $candidates = $this->raceRepository->findSimilar($rawRaceData->date, $rawRaceData->city);
-            if (null !== $this->duplicateDetector->findDuplicate($rawRaceData->name, $candidates)) {
-                $importResult->incrementSkipped();
+            $duplicate = $this->duplicateDetector->findDuplicate($rawRaceData->name, $candidates);
+            if (null !== $duplicate) {
+                $this->enrichRace($duplicate, $rawRaceData, $date);
+                $importResult->incrementUpdated();
                 continue;
             }
 
@@ -69,5 +72,34 @@ class ImportRacesHandler
         }
 
         return $importResult;
+    }
+
+    private function enrichRace(Race $race, RawRaceData $data, \DateTimeImmutable $date): void
+    {
+        $changed = false;
+
+        if ('' === $race->getVoivodeship() && '' !== $data->voivodeship) {
+            $race->updateVoivodeship($data->voivodeship);
+            $changed = true;
+        }
+
+        $edition = $race->findEditionByDate($date);
+        if (null !== $edition) {
+            foreach ($data->distances as $distanceData) {
+                if (!$edition->hasDistance($distanceData['lengthInKm'])) {
+                    $edition->addDistance(new Distance(
+                        $distanceData['name'],
+                        $distanceData['lengthInKm'],
+                        $distanceData['priceInPln'],
+                    ));
+                    $changed = true;
+                }
+            }
+        }
+
+        if ($changed) {
+            $this->raceRepository->save($race);
+            $this->searchIndex->indexRace($race);
+        }
     }
 }
