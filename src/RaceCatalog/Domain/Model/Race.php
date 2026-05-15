@@ -73,6 +73,11 @@ class Race
         return $this->id;
     }
 
+    public function getIdString(): string
+    {
+        return $this->id->toString();
+    }
+
     public function getName(): string
     {
         return $this->name;

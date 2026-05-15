@@ -1,7 +1,10 @@
 api_platform:
-    title: Hello API Platform
-    version: 1.0.0
+    title: RaceBoard API
+    version: 0.1.0
     defaults:
         stateless: true
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']
+    mapping:
+        paths:
+            - '%kernel.project_dir%/config/api_platform/resources'

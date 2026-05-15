@@ -1,0 +1,35 @@
+App\RaceCatalog\Domain\Model\Race:
+    attributes:
+        idString:
+            groups: ['race:read']
+            serialized_name: id
+        name:
+            groups: ['race:read']
+        slug:
+            groups: ['race:read']
+        city:
+            groups: ['race:read']
+        voivodeship:
+            groups: ['race:read']
+        country:
+            groups: ['race:read']
+        editions:
+            groups: ['race:read']
+
+App\RaceCatalog\Domain\Model\Edition:
+    attributes:
+        date:
+            groups: ['race:read']
+        registrationUrl:
+            groups: ['race:read']
+        distances:
+            groups: ['race:read']
+
+App\RaceCatalog\Domain\Model\Distance:
+    attributes:
+        name:
+            groups: ['race:read']
+        lengthInKm:
+            groups: ['race:read']
+        priceInPln:
+            groups: ['race:read']
