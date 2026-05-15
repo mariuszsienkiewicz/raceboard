@@ -1,0 +1,16 @@
+resources:
+  App\RaceCatalog\Domain\Model\Race:
+    shortName: Race
+    operations:
+      ApiPlatform\Metadata\GetCollection:
+        uriTemplate: /races
+        provider: App\RaceCatalog\Infrastructure\Api\RaceCollectionProvider
+      ApiPlatform\Metadata\Get:
+        uriTemplate: /races/{id}
+        uriVariables:
+          id:
+            fromClass: App\RaceCatalog\Domain\Model\Race
+            fromProperty: id
+        provider: App\RaceCatalog\Infrastructure\Api\RaceItemProvider
+    normalizationContext:
+      groups: ["race:read"]
