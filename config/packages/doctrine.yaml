@@ -14,6 +14,7 @@ doctrine:
             distance_id: App\RaceCatalog\Infrastructure\Persistence\Doctrine\Type\DistanceIdType
             user_id: App\UserProfile\Infrastructure\Persistence\Doctrine\Type\UserIdType
             watchlist_entry_id: App\UserProfile\Infrastructure\Persistence\Doctrine\Type\WatchlistEntryIdType
+            review_id: App\Review\Infrastructure\Persistence\Doctrine\Type\ReviewIdType
 
     orm:
         validate_xml_mapping: true
@@ -34,7 +35,12 @@ doctrine:
                 dir: '%kernel.project_dir%/src/UserProfile/Infrastructure/Persistence/Mapping'
                 prefix: 'App\UserProfile\Domain\Model'
                 alias: UserProfile
-
+            Review:
+                type: xml
+                is_bundle: false
+                dir: '%kernel.project_dir%/src/Review/Infrastructure/Persistence/Mapping'
+                prefix: 'App\Review\Domain\Model'
+                alias: Review
 when@test:
     doctrine:
         dbal:

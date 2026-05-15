@@ -12,3 +12,6 @@ services:
 
   App\UserProfile\Domain\Repository\WatchlistEntryRepositoryInterface:
     alias: App\UserProfile\Infrastructure\Persistence\Doctrine\Repository\DoctrineWatchlistEntryRepository
+
+  App\Review\Domain\Repository\ReviewRepositoryInterface:
+    alias: App\Review\Infrastructure\Persistence\Doctrine\Repository\DoctrineReviewRepository
