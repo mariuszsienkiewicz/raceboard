@@ -17,7 +17,7 @@ class SearchController
     ) {
     }
 
-    #[Route('/api/races/search', name: 'api_races_search', methods: ['GET'])]
+    #[Route('/api/search', name: 'api_races_search', methods: ['GET'])]
     public function search(Request $request): JsonResponse
     {
         $query = new SearchQuery(
