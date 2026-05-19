@@ -6,7 +6,6 @@ namespace App\RaceCatalog\Domain\Model;
 
 use App\RaceCatalog\Domain\Event\RaceCreated;
 use App\RaceCatalog\Domain\Exception\DuplicateEditionException;
-use App\RaceCatalog\Domain\Exception\EditionInThePastException;
 use App\Shared\Domain\Slugifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
@@ -44,10 +43,6 @@ class Race
 
     public function addEdition(Edition $edition): void
     {
-        if ($edition->getDate() < new \DateTimeImmutable('today')) {
-            throw EditionInThePastException::forRace($this->name, $edition->getDate());
-        }
-
         foreach ($this->editions as $existing) {
             if ($existing->getDate()->format('Y') === $edition->getDate()->format('Y')) {
                 throw DuplicateEditionException::forYear($this->name, (int) $edition->getDate()->format('Y'));

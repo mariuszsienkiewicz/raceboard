@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataImport\Infrastructure\Scraper;
 
+use App\DataImport\Application\DateParser;
 use App\DataImport\Application\Normalizer\DistanceNormalizer;
 use App\DataImport\Application\Normalizer\VoivodeshipNormalizer;
 use App\DataImport\Domain\ImportAdapterInterface;
@@ -14,25 +15,12 @@ use Symfony\Contracts\HttpClient\HttpClientInterface;
 class RunningLifeAdapter implements ImportAdapterInterface
 {
     private const string URL = 'https://running.life/kalendarz-biegow/polska';
-    private const array MONTHS = [
-        'sty' => 1,
-        'lut' => 2,
-        'mar' => 3,
-        'kwi' => 4,
-        'maj' => 5,
-        'cze' => 6,
-        'lip' => 7,
-        'sie' => 8,
-        'wrz' => 9,
-        'paź' => 10,
-        'lis' => 11,
-        'gru' => 12,
-    ];
 
     public function __construct(
         private HttpClientInterface $httpClient,
         private VoivodeshipNormalizer $voivodeshipNormalizer,
         private DistanceNormalizer $distanceNormalizer,
+        private DateParser $dateParser,
     ) {
     }
 
@@ -113,26 +101,11 @@ class RunningLifeAdapter implements ImportAdapterInterface
             return null;
         }
 
-        $monthStr = mb_strtolower(trim($divs->eq(0)->text()));
-        $dayStr = trim($divs->eq(1)->text());
+        $date = $this->dateParser->parseWithoutYear(
+            $divs->eq(0)->text(),
+            $divs->eq(1)->text(),
+        );
 
-        // Range: "7-10" → bierz pierwszy dzień
-        $day = (int) explode('-', $dayStr)[0];
-
-        $month = self::MONTHS[$monthStr] ?? null;
-        if (null === $month || 0 === $day) {
-            return null;
-        }
-
-        // Rok: jeśli miesiąc już minął, to następny rok
-        $currentMonth = (int) date('n');
-        $year = (int) date('Y');
-        if ($month < $currentMonth) {
-            ++$year;
-        }
-
-        $date = \DateTimeImmutable::createFromFormat('Y-n-j', "$year-$month-$day");
-
-        return $date ? $date->format('Y-m-d') : null;
+        return $date?->format('Y-m-d');
     }
 }

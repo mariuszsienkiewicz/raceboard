@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\DataImport\Infrastructure\Scraper;
 
+use App\DataImport\Application\DateParser;
 use App\DataImport\Application\Normalizer\DistanceNormalizer;
 use App\DataImport\Application\Normalizer\VoivodeshipNormalizer;
 use App\DataImport\Infrastructure\Scraper\RunningLifeAdapter;
@@ -25,7 +26,8 @@ class RunningLifeAdapterTest extends TestCase
         $mockClient = new MockHttpClient(new MockResponse($html));
         $voivodeshipNormalizer = new VoivodeshipNormalizer();
         $distanceNormalizer = new DistanceNormalizer();
-        $this->adapter = new RunningLifeAdapter($mockClient, $voivodeshipNormalizer, $distanceNormalizer);
+        $dateParser = new DateParser();
+        $this->adapter = new RunningLifeAdapter($mockClient, $voivodeshipNormalizer, $distanceNormalizer, $dateParser);
     }
 
     public function testParsesRaceNameCorrectly(): void

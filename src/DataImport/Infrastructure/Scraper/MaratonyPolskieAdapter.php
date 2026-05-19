@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataImport\Infrastructure\Scraper;
 
+use App\DataImport\Application\DateParser;
 use App\DataImport\Domain\ImportAdapterInterface;
 use App\DataImport\Domain\RawRaceData;
 use Symfony\Component\DomCrawler\Crawler;
@@ -14,7 +15,7 @@ class MaratonyPolskieAdapter implements ImportAdapterInterface
     private const string URL = 'https://www.maratonypolskie.pl/mp_index.php?dzial=3&action=1&grp=13';
     private const string DOMAIN = 'https://www.maratonypolskie.pl/';
 
-    public function __construct(private HttpClientInterface $httpClient)
+    public function __construct(private HttpClientInterface $httpClient, private DateParser $dateParser)
     {
     }
 
@@ -47,9 +48,11 @@ class MaratonyPolskieAdapter implements ImportAdapterInterface
             $cells = $row->filter('td');
 
             $rawDate = trim($cells->eq(1)->text());
-            $dateString = explode(' ', $rawDate)[0];     // "2026.04.30 (pt)"
-            $parsed = \DateTimeImmutable::createFromFormat('Y.n.j', $dateString);
-            $date = $parsed ? $parsed->format('Y-m-d') : $rawDate;  // "2026-04-30"
+            $parsed = $this->dateParser->parse($rawDate);
+            if (null === $parsed) {
+                return;
+            }
+            $date = $parsed->format('Y-m-d');
 
             $city = $this->extractCity($cells->eq(2));
 

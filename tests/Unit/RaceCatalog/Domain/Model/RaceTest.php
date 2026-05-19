@@ -6,7 +6,6 @@ namespace App\Tests\Unit\RaceCatalog\Domain\Model;
 
 use App\RaceCatalog\Domain\Event\RaceCreated;
 use App\RaceCatalog\Domain\Exception\DuplicateEditionException;
-use App\RaceCatalog\Domain\Exception\EditionInThePastException;
 use App\RaceCatalog\Domain\Model\Distance;
 use App\RaceCatalog\Domain\Model\Edition;
 use App\RaceCatalog\Domain\Model\Race;
@@ -51,15 +50,6 @@ final class RaceTest extends TestCase
         $race->addEdition($edition);
 
         $this->assertCount(1, $race->getEditions());
-    }
-
-    public function testCannotAddEditionWithPastDate(): void
-    {
-        $race = $this->createRace();
-        $pastDate = new \DateTimeImmutable('-1 day');
-
-        $this->expectException(EditionInThePastException::class);
-        $race->addEdition(new Edition($pastDate));
     }
 
     public function testCannotAddTwoEditionsInSameYear(): void
