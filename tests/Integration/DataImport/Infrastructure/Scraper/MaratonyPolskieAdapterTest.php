@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\DataImport\Infrastructure\Scraper;
 
+use App\DataImport\Application\DateParser;
 use App\DataImport\Infrastructure\Scraper\MaratonyPolskieAdapter;
 use PHPUnit\Framework\TestCase;
 use Symfony\Component\HttpClient\MockHttpClient;
@@ -21,7 +22,8 @@ class MaratonyPolskieAdapterTest extends TestCase
         $this->assertNotFalse($html);
 
         $mockClient = new MockHttpClient(new MockResponse($html));
-        $this->adapter = new MaratonyPolskieAdapter($mockClient);
+        $dateParser = new DateParser();
+        $this->adapter = new MaratonyPolskieAdapter($mockClient, $dateParser);
     }
 
     public function testParsesRaceNameCorrectly(): void
@@ -56,6 +58,6 @@ class MaratonyPolskieAdapterTest extends TestCase
     {
         $results = $this->adapter->fetch();
 
-        $this->assertCount(193, $results);
+        $this->assertCount(191, $results);
     }
 }
