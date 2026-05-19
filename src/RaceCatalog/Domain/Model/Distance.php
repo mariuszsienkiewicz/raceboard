@@ -6,7 +6,7 @@ namespace App\RaceCatalog\Domain\Model;
 
 class Distance
 {
-    private ?DistanceId $id = null;
+    private DistanceId $id;
     private ?Edition $edition = null;
 
     public function __construct(
@@ -15,6 +15,11 @@ class Distance
         private readonly ?float $priceInPln = null,
     ) {
         $this->id = DistanceId::generate();
+    }
+
+    public function getId(): DistanceId
+    {
+        return $this->id;
     }
 
     public function assignEdition(Edition $edition): void
