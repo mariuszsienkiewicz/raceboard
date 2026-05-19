@@ -33,6 +33,17 @@ class WatchlistController
         ], $entries));
     }
 
+    #[Route('/api/me/watchlist/{raceId}/check', name: 'api_watchlist_check', methods: ['GET'])]
+    public function check(#[CurrentUser] User $user, string $raceId): JsonResponse
+    {
+        $entry = $this->watchlistRepository->findByUserAndRace(
+            $user->getId(),
+            RaceId::fromString($raceId),
+        );
+
+        return new JsonResponse(['watched' => null !== $entry]);
+    }
+
     #[Route('/api/me/watchlist/{raceId}', name: 'api_watchlist_add', methods: ['POST'])]
     public function add(#[CurrentUser] User $user, string $raceId): JsonResponse
     {

@@ -1,16 +1,13 @@
 import { useEffect, useState } from "react";
 import { apiFetch } from "../api/client";
 
-// hooks/useWatchlist.ts
 export function useWatchlist(raceId: string) {
     const [watched, setWatched] = useState<boolean | null>(null); // null = loading
 
     useEffect(() => {
-        apiFetch(`/api/me/watchlist`)
+        apiFetch(`/api/me/watchlist/${raceId}/check`)
             .then(res => res.json())
-            .then((data: { raceId: string }[]) => {
-                setWatched(data.some((entry) => entry.raceId === raceId));
-            })
+            .then(data => setWatched(data.watched))
             .catch(() => setWatched(false));
     }, [raceId]);
 
