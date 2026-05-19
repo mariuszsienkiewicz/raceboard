@@ -18,13 +18,13 @@ class RegisterUserHandler
     ) {
     }
 
-    public function handle(string $email, string $plainPassword): User
+    public function handle(string $email, string $plainPassword, string $displayName): User
     {
         if (null !== $this->repository->findByEmail($email)) {
             throw EmailAlreadyExistsException::forEmail($email);
         }
 
-        $user = User::create(UserId::generate(), $email, 'placeholder');
+        $user = User::create(UserId::generate(), $email, 'placeholder', $displayName);
         $user->updatePassword($this->hasher->hashPassword($user, $plainPassword));
         $this->repository->save($user);
 

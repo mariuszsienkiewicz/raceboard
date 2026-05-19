@@ -33,6 +33,7 @@ class DoctrineUserRepositoryTest extends KernelTestCase
             UserId::generate(),
             'test@example.com',
             'hashed_password',
+            'John Doe',
         );
 
         // Save the user
@@ -58,6 +59,7 @@ class DoctrineUserRepositoryTest extends KernelTestCase
             UserId::generate(),
             'test@example.com',
             'hashed_password',
+            'John Doe',
         );
 
         // Save the user
@@ -90,7 +92,9 @@ class DoctrineUserRepositoryTest extends KernelTestCase
         // Create a new user
         $user1 = User::create(
             UserId::generate(),
-            'test@example.com', 'hashed_password',
+            'test@example.com',
+            'hashed_password',
+            'John Doe',
         );
 
         // Save the user
@@ -104,6 +108,7 @@ class DoctrineUserRepositoryTest extends KernelTestCase
             UserId::generate(),
             'test@example.com',
             'hashed_password2',
+            'Jane Doe',
         );
 
         // Expect an exception when trying to save the second user with the same email

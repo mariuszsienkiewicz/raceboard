@@ -25,13 +25,14 @@ class RegistrationController
 
         $email = $data['email'] ?? '';
         $plainPassword = $data['password'] ?? '';
+        $displayName = $data['displayName'] ?? '';
 
-        if ('' === $email || '' === $plainPassword) {
-            return new JsonResponse(['error' => 'Email and password are required.'], Response::HTTP_BAD_REQUEST);
+        if ('' === $email || '' === $plainPassword || '' === $displayName) {
+            return new JsonResponse(['error' => 'Email, password, and name are required.'], Response::HTTP_BAD_REQUEST);
         }
 
         try {
-            $user = $this->handler->handle($email, $plainPassword);
+            $user = $this->handler->handle($email, $plainPassword, $displayName);
 
             return new JsonResponse(['id' => $user->getIdString(), 'email' => $user->getEmail()], Response::HTTP_CREATED);
         } catch (EmailAlreadyExistsException) {

@@ -48,12 +48,10 @@ export default function RaceReviews({ raceId }: RaceReviewsProps) {
                             <div className="flex items-center justify-between gap-4">
                                 <div className="flex items-center gap-3">
                                     <Avatar>
-                                        {/* TODO - change it to first char of the username */}
-                                        <AvatarFallback>{review.userId.charAt(0)}</AvatarFallback>
+                                        <AvatarFallback>{review.displayName.charAt(0)}</AvatarFallback>
                                     </Avatar>
                                     <div>
-                                        {/* TODO - change it to display the username */}
-                                        <p className="text-sm font-medium text-foreground">{review.userId}</p>
+                                        <p className="text-sm font-medium text-foreground">{review.displayName}</p>
                                         <p className="text-xs text-muted">{review.createdAt}</p>
                                     </div>
                                 </div>
