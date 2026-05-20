@@ -78,6 +78,39 @@ class DoctrineUserRepositoryTest extends KernelTestCase
         $this->assertEquals($user->getPassword(), $retrievedUser->getPassword());
     }
 
+    public function testFindByIdsReturnsCorrectUsers(): void
+    {
+        // Create multiple users
+        $user1Id = UserId::generate();
+        $user2Id = UserId::generate();
+
+        $user1 = User::create($user1Id, 'test1@example.com', 'hashed_password1', 'John Doe');
+        $user2 = User::create($user2Id, 'test2@example.com', 'hashed_password2', 'Jane Doe');
+
+        // Save the users
+        $this->repository->save($user1);
+        $this->repository->save($user2);
+
+        // Clear the EntityManager to ensure we fetch a fresh instance from the database
+        $this->em->clear();
+
+        // Retrieve the users by their IDs
+        $retrievedUsers = $this->repository->findByIds([$user1Id, $user2Id]);
+
+        // Test that both users are retrieved correctly
+        $this->assertCount(2, $retrievedUsers);
+        $this->assertArrayHasKey($user1Id->toString(), $retrievedUsers);
+        $this->assertArrayHasKey($user2Id->toString(), $retrievedUsers);
+        $this->assertEquals($user1->getEmail(), $retrievedUsers[$user1Id->toString()]->getEmail());
+        $this->assertEquals($user2->getEmail(), $retrievedUsers[$user2Id->toString()]->getEmail());
+    }
+
+    public function testFindByIdsReturnsEmptyArrayForEmptyInput(): void
+    {
+        $result = $this->repository->findByIds([]);
+        $this->assertSame([], $result);
+    }
+
     public function testFindByEmailReturnsNullForNonExistent(): void
     {
         // Attempt to retrieve a user with a non-existent email
