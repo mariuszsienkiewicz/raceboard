@@ -36,4 +36,28 @@ class DoctrineUserRepository implements UserRepositoryInterface
             ->getQuery()
             ->getOneOrNullResult();
     }
+
+    public function findByIds(array $ids): array
+    {
+        if ([] === $ids) {
+            return [];
+        }
+
+        $stringIds = array_map(fn (UserId $id) => $id->toString(), $ids);
+
+        $users = $this->entityManager->createQueryBuilder()
+            ->select('u')
+            ->from(User::class, 'u')
+            ->where('u.id IN (:ids)')
+            ->setParameter('ids', $stringIds)
+            ->getQuery()
+            ->getResult();
+
+        $indexed = [];
+        foreach ($users as $user) {
+            $indexed[$user->getId()->toString()] = $user;
+        }
+
+        return $indexed;
+    }
 }

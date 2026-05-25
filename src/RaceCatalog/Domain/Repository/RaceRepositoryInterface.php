@@ -13,6 +13,13 @@ interface RaceRepositoryInterface
 
     public function findById(RaceId $id): ?Race;
 
+    /**
+     * @param array<RaceId> $ids
+     *
+     * @return array<string, Race>
+     */
+    public function findByIds(array $ids): array;
+
     public function findBySlug(string $slug): ?Race;
 
     /** @return list<Race> */

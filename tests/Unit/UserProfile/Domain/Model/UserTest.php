@@ -17,10 +17,12 @@ final class UserTest extends TestCase
             $id,
             'test@example.com',
             'hashed_password',
+            'John Doe',
         );
 
         $this->assertSame($id, $user->getId());
         $this->assertSame('test@example.com', $user->getEmail());
+        $this->assertSame('John Doe', $user->getDisplayName());
         $this->assertInstanceOf(\DateTimeImmutable::class, $user->getCreatedAt());
     }
 
@@ -30,6 +32,7 @@ final class UserTest extends TestCase
             UserId::generate(),
             'test@example.com',
             'hashed_password',
+            'John Doe',
         );
 
         $this->assertSame('test@example.com', $user->getUserIdentifier());
@@ -41,6 +44,7 @@ final class UserTest extends TestCase
             UserId::generate(),
             'test@example.com',
             'hashed_password',
+            'John Doe',
         );
 
         $this->assertSame(['ROLE_USER'], $user->getRoles());
@@ -52,6 +56,7 @@ final class UserTest extends TestCase
             UserId::generate(),
             'test@example.com',
             'hashed_password',
+            'John Doe',
         );
 
         $this->assertSame('hashed_password', $user->getPassword());
@@ -63,6 +68,7 @@ final class UserTest extends TestCase
             UserId::generate(),
             'test@example.com',
             'hashed_password',
+            'John Doe',
         );
 
         $user->updatePassword('new_hashed_password');
@@ -78,6 +84,19 @@ final class UserTest extends TestCase
             UserId::generate(),
             '',
             'hashed_password',
+            'John Doe',
+        );
+    }
+
+    public function testThrowsOnEmptyDisplayName(): void
+    {
+        $this->expectException(\InvalidArgumentException::class);
+
+        new User(
+            UserId::generate(),
+            'test@example.com',
+            'hashed_password',
+            '',
         );
     }
 
@@ -87,6 +106,7 @@ final class UserTest extends TestCase
             UserId::generate(),
             'test@example.com',
             'hashed_password',
+            'John Doe',
         );
 
         $user->eraseCredentials();

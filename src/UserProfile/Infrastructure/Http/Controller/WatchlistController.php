@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace App\UserProfile\Infrastructure\Http\Controller;
 
+use App\RaceCatalog\Domain\Model\Distance;
+use App\RaceCatalog\Domain\Model\Edition;
 use App\RaceCatalog\Domain\Model\RaceId;
+use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
 use App\UserProfile\Domain\Model\User;
 use App\UserProfile\Domain\Model\WatchlistEntry;
 use App\UserProfile\Domain\Model\WatchlistEntryId;
@@ -18,6 +21,7 @@ class WatchlistController
 {
     public function __construct(
         private WatchlistEntryRepositoryInterface $watchlistRepository,
+        private RaceRepositoryInterface $raceRepository,
     ) {
     }
 
@@ -25,12 +29,44 @@ class WatchlistController
     public function list(#[CurrentUser] User $user): JsonResponse
     {
         $entries = $this->watchlistRepository->findByUser($user->getId());
+        $raceIds = array_map(fn (WatchlistEntry $entry) => $entry->getRaceId(), $entries);
+        $races = $this->raceRepository->findByIds($raceIds);
 
-        return new JsonResponse(array_map(fn (WatchlistEntry $entry) => [
-            'id' => $entry->getId()->toString(),
-            'raceId' => $entry->getRaceId()->toString(),
-            'createdAt' => $entry->getCreatedAt()->format('Y-m-d H:i:s'),
-        ], $entries));
+        return new JsonResponse(array_map(function (WatchlistEntry $entry) use ($races) {
+            $race = $races[$entry->getRaceId()->toString()] ?? null;
+
+            return [
+                'id' => $entry->getId()->toString(),
+                'race' => $race ? [
+                    'id' => $race->getId()->toString(),
+                    'name' => $race->getName(),
+                    'city' => $race->getCity(),
+                    'slug' => $race->getSlug(),
+                    'voivodeship' => $race->getVoivodeship(),
+                    'country' => $race->getCountry(),
+                    'editions' => array_map(fn (Edition $edition) => [
+                        'date' => $edition->getDate()->format('Y-m-d'),
+                        'distances' => array_map(fn (Distance $distance) => [
+                            'id' => $distance->getId()->toString(),
+                            'name' => $distance->getName(),
+                            'lengthInKm' => $distance->getLengthInKm(),
+                        ], $edition->getDistances()),
+                    ], $race->getEditions()),
+                ] : null,
+                'createdAt' => $entry->getCreatedAt()->format('Y-m-d H:i:s'),
+            ];
+        }, $entries));
+    }
+
+    #[Route('/api/me/watchlist/{raceId}/check', name: 'api_watchlist_check', methods: ['GET'])]
+    public function check(#[CurrentUser] User $user, string $raceId): JsonResponse
+    {
+        $entry = $this->watchlistRepository->findByUserAndRace(
+            $user->getId(),
+            RaceId::fromString($raceId),
+        );
+
+        return new JsonResponse(['watched' => null !== $entry]);
     }
 
     #[Route('/api/me/watchlist/{raceId}', name: 'api_watchlist_add', methods: ['POST'])]

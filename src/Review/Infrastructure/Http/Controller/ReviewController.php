@@ -9,6 +9,7 @@ use App\Review\Domain\Model\Review;
 use App\Review\Domain\Model\ReviewId;
 use App\Review\Domain\Repository\ReviewRepositoryInterface;
 use App\UserProfile\Domain\Model\User;
+use App\UserProfile\Domain\Repository\UserRepositoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -19,22 +20,24 @@ class ReviewController
 {
     public function __construct(
         private ReviewRepositoryInterface $reviewRepository,
+        private UserRepositoryInterface $userRepository,
     ) {
     }
 
     #[Route('/api/races/{raceId}/reviews', name: 'api_review_race_list', methods: ['GET'])]
     public function list(string $raceId): JsonResponse
     {
-        $raceReviews = $this->reviewRepository->findByRace(RaceId::fromString($raceId));
+        $reviews = $this->reviewRepository->findByRace(RaceId::fromString($raceId));
+        $userIds = array_map(fn (Review $review) => $review->getUserId(), $reviews);
+        $users = $this->userRepository->findByIds($userIds);
 
-        return new JsonResponse(array_map(fn ($review) => [
-            'id' => $review->getId()->toString(),
-            'userId' => $review->getUserId()->toString(),
-            'raceId' => $review->getRaceId()->toString(),
-            'rating' => $review->getRating(),
-            'comment' => $review->getComment(),
-            'createdAt' => $review->getCreatedAt()->format('Y-m-d H:i:s'),
-        ], $raceReviews));
+        return new JsonResponse(array_map(fn (Review $r) => [
+            'id' => $r->getId()->toString(),
+            'rating' => $r->getRating(),
+            'comment' => $r->getComment(),
+            'displayName' => $users[$r->getUserId()->toString()]->getDisplayName() ?: 'Anonymous',
+            'createdAt' => $r->getCreatedAt()->format('Y-m-d H:i:s'),
+        ], $reviews));
     }
 
     #[Route('/api/races/{raceId}/reviews', name: 'api_review_race_add', methods: ['POST'])]

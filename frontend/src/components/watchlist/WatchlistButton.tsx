@@ -12,7 +12,7 @@ export default function WatchlistButton({ raceId }: WatchlistButtonProps) {
     const { watched, toggle } = useWatchlist(raceId);
 
     if (!isAuthenticated) {
-        return null; // Nie pokazuj przycisku, jeśli użytkownik nie jest zalogowany
+        return null;
     }
 
     if (watched === null) {

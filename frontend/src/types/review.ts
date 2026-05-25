@@ -1,6 +1,6 @@
 export interface Review {
     id: string;
-    userId: string;
+    displayName: string;
     raceId: string;
     rating: number;
     comment: string;

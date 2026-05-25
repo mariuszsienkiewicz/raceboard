@@ -7,7 +7,6 @@ import {
     ArrowRightIcon,
 } from "@heroicons/react/24/outline";
 import { useAuth } from "../context/useAuth";
-import type { RaceDetails } from "../types/race";
 import { apiFetch } from "../api/client";
 import type { WatchlistEntry } from "../types/watchlist";
 import WatchlistCard from "../components/watchlist/WatchlistCard";
@@ -16,16 +15,6 @@ async function fetchWatchlist(): Promise<WatchlistEntry[]> {
     return apiFetch("/api/me/watchlist")
         .then((res) => res.json())
         .then((data: WatchlistEntry[]) => data)
-        .then((data) => {
-            // fetch race details for each entry
-            return Promise.all(
-                data.map((entry) =>
-                    apiFetch(`/api/races/${entry.raceId}`)
-                        .then((res) => res.json())
-                        .then((race: RaceDetails) => ({ ...entry, race }))
-                )
-            );
-        })
         .catch((err) => {
             console.error("Failed to fetch watchlist:", err);
             return [];

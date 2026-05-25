@@ -10,7 +10,7 @@ use Doctrine\Common\Collections\Collection;
 
 class Edition
 {
-    private ?EditionId $id = null;
+    private EditionId $id;
     private ?Race $race = null;
 
     /** @var Collection<int, Distance> */
@@ -30,6 +30,11 @@ class Edition
         foreach ($distances as $distance) {
             $this->addDistance($distance);
         }
+    }
+
+    public function getId(): EditionId
+    {
+        return $this->id;
     }
 
     public function addDistance(Distance $distance): void

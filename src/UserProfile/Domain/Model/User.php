@@ -13,10 +13,14 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         private readonly UserId $id,
         private string $email,
         private string $passwordHash,
+        private string $displayName,
         private \DateTimeImmutable $createdAt = new \DateTimeImmutable(),
     ) {
         if ('' === $email) {
             throw new \InvalidArgumentException('Email cannot be empty.');
+        }
+        if ('' === $displayName) {
+            throw new \InvalidArgumentException('Display name cannot be empty.');
         }
     }
 
@@ -24,8 +28,9 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         UserId $id,
         string $email,
         string $passwordHash,
+        string $displayName,
     ): self {
-        return new self($id, $email, $passwordHash);
+        return new self($id, $email, $passwordHash, $displayName);
     }
 
     public function getId(): UserId
@@ -36,6 +41,11 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     public function getIdString(): string
     {
         return $this->id->toString();
+    }
+
+    public function getDisplayName(): string
+    {
+        return $this->displayName;
     }
 
     public function getEmail(): string

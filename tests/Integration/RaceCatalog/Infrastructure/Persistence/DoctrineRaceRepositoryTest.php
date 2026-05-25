@@ -96,6 +96,41 @@ class DoctrineRaceRepositoryTest extends KernelTestCase
         $this->assertSame(100.0, $distances[1]->getPriceInPln());
     }
 
+    public function testFindByIdsReturnsCorrectRaces(): void
+    {
+        // Create multiple races
+        $race1Id = RaceId::generate();
+        $race2Id = RaceId::generate();
+        $race3Id = RaceId::generate();
+
+        $race1 = Race::create($race1Id, 'Test Race 1', 'Warsaw', 'Masovian');
+        $race2 = Race::create($race2Id, 'Test Race 2', 'Warsaw', 'Masovian');
+        $race3 = Race::create($race3Id, 'Test Race 3', 'Warsaw', 'Masovian');
+
+        $this->repository->save($race1);
+        $this->repository->save($race2);
+        $this->repository->save($race3);
+
+        // Clear the EntityManager to ensure we fetch fresh instances from the database
+        $this->em->clear();
+
+        // Retrieve races by IDs
+        $retrievedRaces = $this->repository->findByIds([$race1Id, $race3Id]);
+
+        // Test that the correct races are retrieved
+        $this->assertCount(2, $retrievedRaces);
+        $this->assertArrayHasKey($race1Id->toString(), $retrievedRaces);
+        $this->assertArrayHasKey($race3Id->toString(), $retrievedRaces);
+        $this->assertEquals($race1->getName(), $retrievedRaces[$race1Id->toString()]->getName());
+        $this->assertEquals($race3->getName(), $retrievedRaces[$race3Id->toString()]->getName());
+    }
+
+    public function testFindByIdsReturnsEmptyArrayForEmptyInput(): void
+    {
+        $result = $this->repository->findByIds([]);
+        $this->assertSame([], $result);
+    }
+
     public function testFindBySlug(): void
     {
         // Create a new race

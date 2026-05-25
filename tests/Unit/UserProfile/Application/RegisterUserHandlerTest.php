@@ -35,18 +35,18 @@ class RegisterUserHandlerTest extends TestCase
             fn (User $user) => 'test@example.com' === $user->getEmail(),
         ));
 
-        $this->handler->handle('test@example.com', 'password');
+        $this->handler->handle('test@example.com', 'password', 'John Doe');
     }
 
     public function testThrowsWhenEmailAlreadyExists(): void
     {
         $this->repository->expects($this->once())
             ->method('findByEmail')
-            ->willReturn(new User(UserId::generate(), 'test@example.com', 'hashed_password_123'));
+            ->willReturn(new User(UserId::generate(), 'test@example.com', 'hashed_password_123', 'John Doe'));
 
         $this->expectException(EmailAlreadyExistsException::class);
 
-        $this->handler->handle('test@example.com', 'password');
+        $this->handler->handle('test@example.com', 'password', 'John Doe');
     }
 
     public function testHashesPassword(): void
@@ -58,6 +58,6 @@ class RegisterUserHandlerTest extends TestCase
             fn (User $user) => 'password' !== $user->getPassword() && 'hashed_password_123' === $user->getPassword(),
         ));
 
-        $this->handler->handle('test@example.com', 'password');
+        $this->handler->handle('test@example.com', 'password', 'John Doe');
     }
 }

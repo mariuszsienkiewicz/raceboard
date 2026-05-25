@@ -26,6 +26,28 @@ class DoctrineRaceRepository implements RaceRepositoryInterface
         return $this->entityManager->find(Race::class, $id);
     }
 
+    public function findByIds(array $ids): array
+    {
+        if (empty($ids)) {
+            return [];
+        }
+
+        $races = $this->entityManager->createQueryBuilder()
+            ->select('r')
+            ->from(Race::class, 'r')
+            ->where('r.id IN (:ids)')
+            ->setParameter('ids', $ids)
+            ->getQuery()
+            ->getResult();
+
+        $indexed = [];
+        foreach ($races as $race) {
+            $indexed[$race->getId()->toString()] = $race;
+        }
+
+        return $indexed;
+    }
+
     public function findBySlug(string $slug): ?Race
     {
         return $this->entityManager->createQueryBuilder()
