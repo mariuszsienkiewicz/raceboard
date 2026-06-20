@@ -9,11 +9,11 @@ interface WatchlistButtonProps {
 
 export default function WatchlistButton({ raceId }: WatchlistButtonProps) {
     const { isAuthenticated } = useAuth();
-    const { watched, toggle } = useWatchlist(raceId);
-
     if (!isAuthenticated) {
         return null;
     }
+
+    const { watched, toggle } = useWatchlist(raceId);
 
     if (watched === null) {
         return <button disabled className="px-4 py-2 rounded-full border text-sm font-medium">Loading...</button>;
