@@ -9,6 +9,7 @@ use App\RaceCatalog\Domain\Model\Race;
 use App\Search\Domain\SearchIndexInterface;
 use App\Search\Domain\SearchQuery;
 use App\Search\Domain\SearchResult;
+use App\Shared\Domain\CityCoordinates;
 use Meilisearch\Client;
 
 class MeiliSearchAdapter implements SearchIndexInterface
@@ -108,6 +109,7 @@ class MeiliSearchAdapter implements SearchIndexInterface
      */
     private function toDocument(Race $race): array
     {
+        $coords = CityCoordinates::get($race->getCity());
         return [
             'id' => $race->getId()->toString(),
             'slug' => $race->getSlug(),
@@ -116,6 +118,7 @@ class MeiliSearchAdapter implements SearchIndexInterface
             'voivodeship' => $race->getVoivodeship(),
             'dates' => array_map(fn (Edition $edition) => $edition->getDate()->getTimestamp(), $race->getEditions()),
             'distances' => $this->flattenDistances($race),
+            '_geo' => $coords ? ['lat' => $coords['lat'], 'lng' => $coords['lng']] : null,
         ];
     }
 
