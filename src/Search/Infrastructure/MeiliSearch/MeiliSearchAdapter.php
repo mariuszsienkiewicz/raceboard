@@ -110,6 +110,7 @@ class MeiliSearchAdapter implements SearchIndexInterface
     private function toDocument(Race $race): array
     {
         $coords = CityCoordinates::get($race->getCity());
+
         return [
             'id' => $race->getId()->toString(),
             'slug' => $race->getSlug(),
