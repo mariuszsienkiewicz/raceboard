@@ -1,4 +1,4 @@
-import { FieldError, Label, SearchField, Separator, type Key } from "@heroui/react";
+import { FieldError, Label, SearchField, Separator, type DateRange, type Key } from "@heroui/react";
 import { Surface } from "@heroui/react/surface";
 import DistanceTags from "./DistanceTags";
 import { VoivodeshipSelect } from "./VoivodeshipSelect";
@@ -9,9 +9,10 @@ interface SearchBarProps {
     onSearchTermChange?: (value: string) => void;
     onDistanceChange?: (selected: Set<Key>) => void;
     onVoivodeshipChange?: (selected: Set<Key>) => void;
+    onDateChange?: (selected: DateRange | null) => void;
 }
 
-export default function SearchBar({ value, onSearchTermChange, onDistanceChange, onVoivodeshipChange }: SearchBarProps) {
+export default function SearchBar({ value, onSearchTermChange, onDistanceChange, onVoivodeshipChange, onDateChange }: SearchBarProps) {
     return (
         <Surface className="flex flex-col gap-5 rounded-3xl px-6 py-5 shadow-sm">
             <SearchField variant="secondary">
@@ -33,7 +34,7 @@ export default function SearchBar({ value, onSearchTermChange, onDistanceChange,
                 <Separator orientation="vertical" className="hidden sm:block" />
                 <VoivodeshipSelect onChange={onVoivodeshipChange} />
                 <Separator orientation="vertical" className="hidden sm:block" />
-                <DateFilter />
+                <DateFilter onChange={onDateChange} />
             </div>
         </Surface>
     );

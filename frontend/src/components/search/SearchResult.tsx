@@ -6,7 +6,7 @@ import { Link } from "react-router-dom";
 import { useState } from "react";
 
 function formatDate(dateStr: string): string {
-    return new Date(dateStr).toLocaleDateString("pl-PL", {
+    return new Date(Number(dateStr) * 1000).toLocaleDateString("pl-PL", {
         day: "numeric",
         month: "short",
         year: "numeric",

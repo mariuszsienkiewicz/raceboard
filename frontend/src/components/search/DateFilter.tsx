@@ -1,8 +1,12 @@
-import { DateField, DateRangePicker, Label, RangeCalendar } from "@heroui/react";
+import { DateField, DateRangePicker, Label, RangeCalendar, type DateRange } from "@heroui/react";
 
-export function DateFilter() {
+interface DateFilterProps {
+    onChange?: (selected: DateRange | null) => void;
+}
+
+export function DateFilter({ onChange }: DateFilterProps) {
     return (
-        <DateRangePicker className="w-72" endName="endDate" startName="startDate">
+        <DateRangePicker className="w-72" endName="endDate" startName="startDate" onChange={onChange}>
             <Label className="text-xs font-medium text-muted uppercase tracking-wide mb-1.5 block">
                 Date
             </Label>
@@ -21,7 +25,7 @@ export function DateFilter() {
                 </DateField.Suffix>
             </DateField.Group>
             <DateRangePicker.Popover>
-                <RangeCalendar aria-label="Trip dates">
+                <RangeCalendar aria-label="Race date range">
                     <RangeCalendar.Header>
                         <RangeCalendar.YearPickerTrigger>
                             <RangeCalendar.YearPickerTriggerHeading />

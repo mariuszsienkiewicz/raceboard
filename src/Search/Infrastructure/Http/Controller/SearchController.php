@@ -25,8 +25,8 @@ class SearchController
             $request->query->get('city'),
             $request->query->get('voivodeship'),
             $request->query->has('distance') ? (float) $request->query->get('distance') : null,
-            null,
-            null,
+            $request->query->get('dateFrom'),
+            $request->query->get('dateTo'),
             $request->query->getInt('page', 1),
             $request->query->getInt('perPage', 20),
         );
