@@ -39,7 +39,7 @@ class MeiliSearchAdapter implements SearchIndexInterface
      */
     public function indexAll(array $races): void
     {
-        $documents = array_map(fn (Race $race) => $this->toDocument($race), $races);
+        $documents = array_map(fn(Race $race) => $this->toDocument($race), $races);
         $this->client->index(self::INDEX_NAME)->addDocuments($documents);
     }
 
@@ -82,13 +82,23 @@ class MeiliSearchAdapter implements SearchIndexInterface
             $filters[] = \sprintf('distances = %s', $query->distanceKm);
         }
 
+        if ($query->dateFrom !== null) {
+            $from = (new \DateTimeImmutable($query->dateFrom))->getTimestamp();
+            $filters[] = \sprintf('dates >= %d', $from);
+        }
+
+        if ($query->dateTo !== null) {
+            $to = (new \DateTimeImmutable($query->dateTo))->getTimestamp();
+            $filters[] = \sprintf('dates <= %d', $to);
+        }
+
         return implode(' AND ', $filters);
     }
 
     /**
      * @return array{
      *   city: string,
-     *   dates: string[],
+     *   dates: int[],
      *   distances: array<int, float>,
      *   id: string,
      *   name: string,
@@ -104,7 +114,7 @@ class MeiliSearchAdapter implements SearchIndexInterface
             'name' => $race->getName(),
             'city' => $race->getCity(),
             'voivodeship' => $race->getVoivodeship(),
-            'dates' => array_map(fn (Edition $edition) => $edition->getDate()->format('Y-m-d'), $race->getEditions()),
+            'dates' => array_map(fn(Edition $edition) => $edition->getDate()->getTimestamp(), $race->getEditions()),
             'distances' => $this->flattenDistances($race),
         ];
     }

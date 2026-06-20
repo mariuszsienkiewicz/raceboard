@@ -1,4 +1,4 @@
-import { Separator, type Key } from "@heroui/react";
+import { Separator, type DateRange, type Key } from "@heroui/react";
 import SearchBar from "./SearchBar";
 import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "../../api/client";
@@ -17,6 +17,7 @@ export default function Search() {
     const [searchTerm, setSearchTerm] = useState("");
     const [selectedDistances, setSelectedDistances] = useState<Set<Key>>(new Set());
     const [selectedVoivodeships, setSelectedVoivodeships] = useState<Set<Key>>(new Set());
+    const [selectedDateRange, setSelectedDateRange] = useState<DateRange | null>(null);
     const [searchResponse, setSearchResponse] = useState<SearchResponse | null>(null);
     const [page, setPage] = useState(1);
     const [perPage] = useState(20);
@@ -38,6 +39,11 @@ export default function Search() {
         setPage(1);
     }, []);
 
+    const handleDateChange = useCallback((selected: DateRange | null) => {
+        setSelectedDateRange(selected);
+        setPage(1);
+    }, []);
+
     useEffect(() => {
         const controller = new AbortController();
 
@@ -47,6 +53,10 @@ export default function Search() {
                 const params = new URLSearchParams({ q: searchTerm });
                 selectedDistances.forEach((d) => params.append("distance", d.toString()));
                 selectedVoivodeships.forEach((v) => params.append("voivodeship", v.toString()));
+                if (selectedDateRange) {
+                    params.append("dateFrom", selectedDateRange.start.toString());
+                    params.append("dateTo", selectedDateRange.end.toString());
+                }
                 params.append("page", page.toString());
                 params.append("perPage", perPage.toString());
 
@@ -68,7 +78,7 @@ export default function Search() {
             clearTimeout(timeout);
             controller.abort();
         };
-    }, [searchTerm, selectedDistances, selectedVoivodeships, page, perPage]);
+    }, [searchTerm, selectedDistances, selectedVoivodeships, selectedDateRange, page, perPage]);
 
     return (
         <div className="flex flex-col gap-6">
@@ -77,6 +87,7 @@ export default function Search() {
                 onSearchTermChange={handleSearchTermChange}
                 onDistanceChange={handleDistanceChange}
                 onVoivodeshipChange={handleVoivodeshipChange}
+                onDateChange={handleDateChange}
             />
 
             {!loading && searchResponse && searchResponse.totalHits > 0 && (
