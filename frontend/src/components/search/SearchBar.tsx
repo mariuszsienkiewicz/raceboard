@@ -10,6 +10,7 @@ interface SearchBarProps {
     onDistanceChange?: (selected: Set<Key>) => void;
     onVoivodeshipChange?: (selected: Set<Key>) => void;
     onDateChange?: (selected: DateRange | null) => void;
+    onViewModeChange?: (viewMode: "list" | "map") => void;
 }
 
 export default function SearchBar({ value, onSearchTermChange, onDistanceChange, onVoivodeshipChange, onDateChange }: SearchBarProps) {
