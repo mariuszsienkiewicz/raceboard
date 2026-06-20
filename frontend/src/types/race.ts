@@ -6,6 +6,7 @@ export interface Race {
     voivodeship: string;
     dates: string[];
     distances: number[];
+    _geo?: { lat: number; lng: number } | null;
 }
 
 export interface RaceDetails {

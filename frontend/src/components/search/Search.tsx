@@ -6,6 +6,8 @@ import SearchResult, { SearchResultSkeleton } from "./SearchResult";
 import type { Race } from "../../types/race";
 import type { SearchResponse } from "../../types/search";
 import SearchPagination from "./SearchPagination";
+import RaceMap from "./RaceMap";
+import ResultViewModeSwitcher from "./ResultViewModeSwitcher";
 
 const SKELETON_COUNT = 5;
 
@@ -23,6 +25,7 @@ export default function Search() {
     const [perPage] = useState(20);
     const [results, setResults] = useState<Race[]>([]);
     const [loading, setLoading] = useState(true);
+    const [viewMode, setViewMode] = useState<"list" | "map">("map");
 
     const handleSearchTermChange = useCallback((value: string) => {
         setSearchTerm(value);
@@ -88,13 +91,17 @@ export default function Search() {
                 onDistanceChange={handleDistanceChange}
                 onVoivodeshipChange={handleVoivodeshipChange}
                 onDateChange={handleDateChange}
+                onViewModeChange={setViewMode}
             />
 
             {!loading && searchResponse && searchResponse.totalHits > 0 && (
-                <p className="text-sm text-muted px-1">
-                    <span className="font-semibold text-foreground">{searchResponse.totalHits}</span>{" "}
-                    {searchResponse.totalHits === 1 ? "race found" : "races found"}
-                </p>
+                <div className="flex items-center justify-between">
+                    <p className="text-sm text-muted px-1">
+                        <span className="font-semibold text-foreground">{searchResponse.totalHits}</span>{" "}
+                        {searchResponse.totalHits === 1 ? "race found" : "races found"}
+                    </p>
+                    <ResultViewModeSwitcher onViewModeChange={setViewMode} />
+                </div>
             )}
 
             <Separator />
@@ -114,13 +121,17 @@ export default function Search() {
                     <p className="text-sm text-muted">Try different keywords or remove some filters</p>
                 </div>
             ) : (
-                <ul className="flex flex-col">
-                    {results.map((result) => (
-                        <li key={result.id} className="list-none">
-                            <SearchResult race={result} />
-                        </li>
-                    ))}
-                </ul>
+                (viewMode === "list" ? (
+                    <ul className="flex flex-col">
+                        {results.map((result) => (
+                            <li key={result.id} className="list-none">
+                                <SearchResult race={result} />
+                            </li>
+                        ))}
+                    </ul>
+                ) : (
+                    <RaceMap races={results} />
+                ))
             )}
 
             <SearchPagination
