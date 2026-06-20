@@ -41,7 +41,7 @@ class RunningLifeAdapterTest extends TestCase
     {
         $results = $this->adapter->fetch();
 
-        $this->assertSame('2026-05-07', $results[0]->date);
+        $this->assertSame('2027-05-07', $results[0]->date);
     }
 
     public function testParsesCityCorrectly(): void

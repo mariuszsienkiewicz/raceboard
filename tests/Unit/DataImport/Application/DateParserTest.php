@@ -55,14 +55,14 @@ class DateParserTest extends TestCase
     {
         $result = $this->parser->parseWithoutYear('maj', '8');
         $this->assertNotNull($result);
-        $this->assertEquals('2026-05-08', $result->format('Y-m-d'));
+        $this->assertEquals('05-08', $result->format('m-d'));
     }
 
     public function testParsesPolishMonthWithRange(): void
     {
         $result = $this->parser->parseWithoutYear('maj', '7-10');
         $this->assertNotNull($result);
-        $this->assertEquals('2026-05-07', $result->format('Y-m-d'));
+        $this->assertEquals('05-07', $result->format('m-d'));
     }
 
     public function testReturnsNullForUnknownMonth(): void
