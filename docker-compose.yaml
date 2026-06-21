@@ -16,6 +16,7 @@ services:
       REDIS_URL: redis://redis:6379
       MEILISEARCH_URL: http://meilisearch:7700
       MEILISEARCH_API_KEY: raceboard_master_key
+      MESSENGER_TRANSPORT_DSN: redis://redis:6379/messages
 
   nginx:
     image: nginx:1.27-alpine
