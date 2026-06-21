@@ -8,5 +8,6 @@ final readonly class ImportRacesFromSource
 {
     public function __construct(
         public string $sourceName,
-    ) {}
+    ) {
+    }
 }

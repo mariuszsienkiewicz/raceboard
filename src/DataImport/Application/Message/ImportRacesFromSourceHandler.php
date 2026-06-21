@@ -34,8 +34,9 @@ class ImportRacesFromSourceHandler
     public function __invoke(ImportRacesFromSource $message): void
     {
         $adapter = $this->adaptersByName[$message->sourceName] ?? null;
-        if ($adapter === null) {
+        if (null === $adapter) {
             $this->logger->error(\sprintf('Unknown import source: %s', $message->sourceName));
+
             return;
         }
 

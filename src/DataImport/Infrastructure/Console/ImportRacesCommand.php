@@ -33,7 +33,7 @@ class ImportRacesCommand extends Command
         #[AutowireIterator('app.import_adapter')]
         iterable $adapters,
         private ImportRacesHandler $handler,
-        private MessageBusInterface $messageBus
+        private MessageBusInterface $messageBus,
     ) {
         parent::__construct();
 
