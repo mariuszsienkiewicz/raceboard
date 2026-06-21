@@ -25,7 +25,7 @@ export default function Search() {
     const [perPage] = useState(20);
     const [results, setResults] = useState<Race[]>([]);
     const [loading, setLoading] = useState(true);
-    const [viewMode, setViewMode] = useState<"list" | "map">("map");
+    const [viewMode, setViewMode] = useState<"list" | "map">("list");
 
     const handleSearchTermChange = useCallback((value: string) => {
         setSearchTerm(value);
