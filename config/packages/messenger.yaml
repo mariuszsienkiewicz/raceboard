@@ -25,3 +25,4 @@ framework:
             # Route your messages to the transports
             # 'App\Message\YourMessage': async
             App\DataImport\Application\Message\ImportRacesFromSource: async
+            App\RaceCatalog\Domain\Event\RacesImported: async

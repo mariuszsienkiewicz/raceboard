@@ -16,6 +16,9 @@ interface WatchlistEntryRepositoryInterface
 
     public function findByUserAndRace(UserId $userId, RaceId $raceId): ?WatchlistEntry;
 
+    /** @return list<UserId> */
+    public function findUserIdsByCity(string $city): array;
+
     /** @return list<WatchlistEntry> */
     public function findByUser(UserId $userId): array;
 }

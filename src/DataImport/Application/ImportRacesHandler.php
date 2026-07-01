@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\DataImport\Application;
 
 use App\DataImport\Domain\RawRaceData;
+use App\RaceCatalog\Domain\Event\RacesImported;
 use App\RaceCatalog\Domain\Model\Distance;
 use App\RaceCatalog\Domain\Model\Edition;
 use App\RaceCatalog\Domain\Model\Race;
@@ -12,10 +13,11 @@ use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
 use App\Search\Domain\SearchIndexInterface;
 use App\Shared\Domain\Slugifier;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class ImportRacesHandler
 {
-    public function __construct(private RaceRepositoryInterface $raceRepository, private DuplicateDetector $duplicateDetector, private SearchIndexInterface $searchIndex)
+    public function __construct(private RaceRepositoryInterface $raceRepository, private DuplicateDetector $duplicateDetector, private SearchIndexInterface $searchIndex, private MessageBusInterface $messageBus)
     {
     }
 
@@ -25,6 +27,7 @@ class ImportRacesHandler
     public function handle(array $racesData): ImportResult
     {
         $importResult = new ImportResult();
+        $newRaceIds = [];
 
         foreach ($racesData as $rawRaceData) {
             $date = \DateTimeImmutable::createFromFormat('Y-m-d', $rawRaceData->date);
@@ -68,7 +71,13 @@ class ImportRacesHandler
             $race->addEdition($edition);
             $this->raceRepository->save($race);
             $this->searchIndex->indexRace($race);
+
+            $newRaceIds[] = $race->getId();
             $importResult->incrementImported();
+        }
+
+        if ([] !== $newRaceIds) {
+            $this->messageBus->dispatch(new RacesImported($newRaceIds));
         }
 
         return $importResult;

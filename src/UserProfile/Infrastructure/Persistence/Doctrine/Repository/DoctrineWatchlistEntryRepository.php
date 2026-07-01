@@ -46,6 +46,26 @@ class DoctrineWatchlistEntryRepository implements WatchlistEntryRepositoryInterf
             ->getOneOrNullResult();
     }
 
+    public function findUserIdsByCity(string $city): array
+    {
+        $result = $this->entityManager->createQueryBuilder()
+            ->select('DISTINCT w.userId')
+            ->from(WatchlistEntry::class, 'w')
+            ->where('w.raceId IN (
+                SELECT r.id FROM App\RaceCatalog\Domain\Model\Race r WHERE LOWER(r.city) = LOWER(:city)
+            )')
+            ->setParameter('city', $city)
+            ->getQuery()
+            ->getResult();
+
+        $userIds = [];
+        foreach ($result as $row) {
+            $userIds[] = $row['userId'];
+        }
+
+        return $userIds;
+    }
+
     public function remove(WatchlistEntry $entry): void
     {
         $this->entityManager->remove($entry);

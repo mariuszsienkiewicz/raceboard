@@ -13,6 +13,8 @@ use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
 use App\Search\Domain\SearchIndexInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
+use Symfony\Component\Messenger\Envelope;
+use Symfony\Component\Messenger\MessageBusInterface;
 
 class ImportRacesHandlerTest extends TestCase
 {
@@ -27,7 +29,10 @@ class ImportRacesHandlerTest extends TestCase
         $this->repository->method('findSimilar')->willReturn([]);
         $this->duplicateDetector = new DuplicateDetector();
         $this->searchIndex = $this->createMock(SearchIndexInterface::class);
-        $this->handler = new ImportRacesHandler($this->repository, $this->duplicateDetector, $this->searchIndex);
+        $messageBus = $this->createStub(MessageBusInterface::class);
+        $messageBus->method('dispatch')->willReturn(new Envelope(new \stdClass()));
+
+        $this->handler = new ImportRacesHandler($this->repository, $this->duplicateDetector, $this->searchIndex, $messageBus);
     }
 
     public function testImportsNewRaceWhenSlugDoesNotExist(): void
