@@ -4,10 +4,14 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\UserProfile\Infrastructure\Persistence;
 
+use App\RaceCatalog\Domain\Model\Race;
 use App\RaceCatalog\Domain\Model\RaceId;
+use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
+use App\UserProfile\Domain\Model\User;
 use App\UserProfile\Domain\Model\UserId;
 use App\UserProfile\Domain\Model\WatchlistEntry;
 use App\UserProfile\Domain\Model\WatchlistEntryId;
+use App\UserProfile\Domain\Repository\UserRepositoryInterface;
 use App\UserProfile\Domain\Repository\WatchlistEntryRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
@@ -16,6 +20,8 @@ class DoctrineWatchlistEntryRepositoryTest extends KernelTestCase
 {
     private WatchlistEntryRepositoryInterface $repository;
     private EntityManagerInterface $em;
+    private RaceRepositoryInterface $raceRepository;
+    private UserRepositoryInterface $userRepository;
 
     public function setUp(): void
     {
@@ -26,6 +32,15 @@ class DoctrineWatchlistEntryRepositoryTest extends KernelTestCase
 
         $em = self::getContainer()->get('doctrine.orm.entity_manager');
         assert($em instanceof EntityManagerInterface);
+
+        $raceRepository = self::getContainer()->get(RaceRepositoryInterface::class);
+        assert($raceRepository instanceof RaceRepositoryInterface);
+        $this->raceRepository = $raceRepository;
+
+        $userRepository = self::getContainer()->get(UserRepositoryInterface::class);
+        assert($userRepository instanceof UserRepositoryInterface);
+        $this->userRepository = $userRepository;
+
         $this->em = $em;
     }
 
@@ -129,5 +144,100 @@ class DoctrineWatchlistEntryRepositoryTest extends KernelTestCase
         $this->assertCount(1, $entriesForUser2);
         $this->assertEquals($entry1->getId(), $entriesForUser1[0]->getId());
         $this->assertEquals($entry2->getId(), $entriesForUser2[0]->getId());
+    }
+
+    public function testFindUserIdsByCityReturnsUsersWatchingRacesInCity(): void
+    {
+        // races
+        $race1Id = RaceId::generate();
+        $race1 = Race::create(
+            $race1Id,
+            'Test Race',
+            'Warsaw',
+            'Masovian',
+        );
+
+        $race2Id = RaceId::generate();
+        $race2 = Race::create(
+            $race2Id,
+            'Test Race 2',
+            'Warsaw',
+            'Masovian',
+        );
+
+        $this->raceRepository->save($race1);
+        $this->raceRepository->save($race2);
+
+        // users
+        $user1 = User::create(
+            UserId::generate(),
+            'test@example.com',
+            'password',
+            'John Doe',
+        );
+        $user2 = User::create(
+            UserId::generate(),
+            'test2@example.com',
+            'password',
+            'Jane Doe',
+        );
+        $this->userRepository->save($user1);
+        $this->userRepository->save($user2);
+
+        // watchlist entry for user
+        $entry1 = WatchlistEntry::create(WatchlistEntryId::generate(), $user1->getId(), $race1Id);
+        $entry2 = WatchlistEntry::create(WatchlistEntryId::generate(), $user1->getId(), $race2Id);
+        $entry3 = WatchlistEntry::create(WatchlistEntryId::generate(), $user2->getId(), $race1Id);
+
+        $this->repository->save($entry1);
+        $this->repository->save($entry2);
+        $this->repository->save($entry3);
+        $this->em->clear();
+
+        // find user ids by city
+        $userIds = $this->repository->findUserIdsByCity('Warsaw');
+
+        // check that both users are returned
+        $userIdStrings = array_map(fn (UserId $id) => $id->toString(), $userIds);
+        $this->assertContains($user1->getId()->toString(), $userIdStrings);
+        $this->assertContains($user2->getId()->toString(), $userIdStrings);
+
+        // check that the correct number of users are returned
+        $this->assertCount(2, $userIds);
+    }
+
+    public function testFindUserIdsByCityReturnsEmptyForUnwatchedCity(): void
+    {
+        $raceId = RaceId::generate();
+        $race = Race::create($raceId, 'Krakow Race', 'Krakow', 'Lesser Poland');
+
+        $this->raceRepository->save($race);
+        $this->em->clear();
+
+        $userIds = $this->repository->findUserIdsByCity('Krakow');
+
+        $this->assertCount(0, $userIds);
+    }
+
+    public function testFindUserIdsByCityReturnsDistinctUsers(): void
+    {
+        $race1Id = RaceId::generate();
+        $race2Id = RaceId::generate();
+        $race1 = Race::create($race1Id, 'Race 1', 'Gdansk', 'Pomeranian');
+        $race2 = Race::create($race2Id, 'Race 2', 'Gdansk', 'Pomeranian');
+
+        $this->raceRepository->save($race1);
+        $this->raceRepository->save($race2);
+
+        $user = User::create(UserId::generate(), 'test@example.com', 'password', 'John Doe');
+        $this->userRepository->save($user);
+
+        $this->repository->save(WatchlistEntry::create(WatchlistEntryId::generate(), $user->getId(), $race1Id));
+        $this->repository->save(WatchlistEntry::create(WatchlistEntryId::generate(), $user->getId(), $race2Id));
+        $this->em->clear();
+
+        $userIds = $this->repository->findUserIdsByCity('Gdansk');
+
+        $this->assertCount(1, $userIds);
     }
 }
