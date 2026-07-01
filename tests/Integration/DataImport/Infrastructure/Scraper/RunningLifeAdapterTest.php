@@ -9,6 +9,7 @@ use App\DataImport\Application\Normalizer\DistanceNormalizer;
 use App\DataImport\Application\Normalizer\VoivodeshipNormalizer;
 use App\DataImport\Infrastructure\Scraper\RunningLifeAdapter;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
@@ -27,7 +28,7 @@ class RunningLifeAdapterTest extends TestCase
         $voivodeshipNormalizer = new VoivodeshipNormalizer();
         $distanceNormalizer = new DistanceNormalizer();
         $dateParser = new DateParser();
-        $this->adapter = new RunningLifeAdapter($mockClient, $voivodeshipNormalizer, $distanceNormalizer, $dateParser);
+        $this->adapter = new RunningLifeAdapter($mockClient, $voivodeshipNormalizer, $distanceNormalizer, $dateParser, new NullLogger(), 0);
     }
 
     public function testParsesRaceNameCorrectly(): void

@@ -7,6 +7,7 @@ namespace App\Tests\Integration\DataImport\Infrastructure\Scraper;
 use App\DataImport\Application\DateParser;
 use App\DataImport\Infrastructure\Scraper\MaratonyPolskieAdapter;
 use PHPUnit\Framework\TestCase;
+use Psr\Log\NullLogger;
 use Symfony\Component\HttpClient\MockHttpClient;
 use Symfony\Component\HttpClient\Response\MockResponse;
 
@@ -23,7 +24,7 @@ class MaratonyPolskieAdapterTest extends TestCase
 
         $mockClient = new MockHttpClient(new MockResponse($html));
         $dateParser = new DateParser();
-        $this->adapter = new MaratonyPolskieAdapter($mockClient, $dateParser);
+        $this->adapter = new MaratonyPolskieAdapter($mockClient, $dateParser, new NullLogger(), 1, 0);
     }
 
     public function testParsesRaceNameCorrectly(): void

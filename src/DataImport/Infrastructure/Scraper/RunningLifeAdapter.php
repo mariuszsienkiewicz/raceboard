@@ -9,6 +9,7 @@ use App\DataImport\Application\Normalizer\DistanceNormalizer;
 use App\DataImport\Application\Normalizer\VoivodeshipNormalizer;
 use App\DataImport\Domain\ImportAdapterInterface;
 use App\DataImport\Domain\RawRaceData;
+use Psr\Log\LoggerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Contracts\HttpClient\HttpClientInterface;
 
@@ -21,6 +22,8 @@ class RunningLifeAdapter implements ImportAdapterInterface
         private VoivodeshipNormalizer $voivodeshipNormalizer,
         private DistanceNormalizer $distanceNormalizer,
         private DateParser $dateParser,
+        private LoggerInterface $logger,
+        private int $delaySeconds = 2,
     ) {
     }
 
@@ -32,7 +35,34 @@ class RunningLifeAdapter implements ImportAdapterInterface
     /** @return list<RawRaceData> */
     public function fetch(): array
     {
-        $response = $this->httpClient->request('GET', self::URL);
+        /** @var list<RawRaceData> */
+        $allRaces = [];
+        $maxPages = 100;
+        $page = 1;
+        while ($page <= $maxPages) {
+            try {
+                $pageRaces = $this->fetchPage($page);
+                if (empty($pageRaces)) {
+                    break;
+                }
+                $allRaces = [...$allRaces, ...$pageRaces];
+            } catch (\Throwable $e) {
+                $this->logger->warning(sprintf('Failed to fetch page %s: %s', $page, $e->getMessage()));
+                break;
+            }
+            ++$page;
+            if ($this->delaySeconds > 0) {
+                sleep($this->delaySeconds);
+            }
+        }
+
+        return $allRaces;
+    }
+
+    /** @return list<RawRaceData> */
+    private function fetchPage(int $page): array
+    {
+        $response = $this->httpClient->request('GET', self::URL.'?page='.$page);
         $html = $response->getContent();
 
         return $this->parseHtml($html);
