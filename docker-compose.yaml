@@ -28,6 +28,14 @@ services:
     depends_on:
       - php
 
+  mailpit:
+    image: axllent/mailpit:latest
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+    environment:
+      MP_MAX_MESSAGES: 500
+
   database:
     image: postgres:16-alpine
     environment:
