@@ -1,16 +1,17 @@
-import { Separator, type DateRange, type Key } from "@heroui/react";
-import SearchBar from "./SearchBar";
 import { useCallback, useEffect, useState } from "react";
-import { apiFetch } from "../../api/client";
-import SearchResult, { SearchResultSkeleton } from "./SearchResult";
-import type { Race } from "../../types/race";
-import type { SearchResponse } from "../../types/search";
-import SearchPagination from "./SearchPagination";
+import { apiFetch } from "@/api/client";
+import EmptyState from "@/components/EmptyState";
+import { Separator } from "@/components/ui/separator";
+import type { DateRange, FilterKey } from "@/types/search-filters";
+import type { Race } from "@/types/race";
+import type { SearchResponse } from "@/types/search";
+import { restoreSearchScrollPosition, useSearchState } from "@/hooks/useSearchState";
 import MapSearchView from "./MapSearchView";
+import SearchBar from "./SearchBar";
+import SearchPagination from "./SearchPagination";
+import SearchResult, { SearchResultSkeleton } from "./SearchResult";
 import SearchResultsToolbar from "./SearchResultsToolbar";
-import { restoreSearchScrollPosition, useSearchState } from "../../hooks/useSearchState";
 import type { SearchMode } from "./SearchModeSwitcher";
-import EmptyState from "../EmptyState";
 
 const SKELETON_COUNT = 20;
 const PER_PAGE = 20;
@@ -37,12 +38,12 @@ export default function Search() {
     );
 
     const handleDistanceChange = useCallback(
-        (selected: Set<Key>) => updateState({ distances: selected, page: 1 }),
+        (selected: Set<FilterKey>) => updateState({ distances: selected, page: 1 }),
         [updateState],
     );
 
     const handleVoivodeshipChange = useCallback(
-        (selected: Set<Key>) => updateState({ voivodeships: selected, page: 1 }),
+        (selected: Set<FilterKey>) => updateState({ voivodeships: selected, page: 1 }),
         [updateState],
     );
 

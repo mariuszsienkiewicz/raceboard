@@ -1,36 +1,41 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { Button } from "@heroui/react";
-import { Surface } from "@heroui/react/surface";
-import { EnvelopeIcon, LockClosedIcon, UserIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
-import { CheckCircleIcon } from "@heroicons/react/24/solid";
-import { Footprints } from "lucide-react";
-import { apiFetch } from "../api/client";
+import { CheckCircle2, Eye, EyeOff, Footprints, Lock, Mail, User } from "lucide-react";
+import { apiFetch } from "@/api/client";
+import { Badge } from "@/components/ui/badge";
+import { Button, buttonVariants } from "@/components/ui/button";
+import {
+    InputGroup,
+    InputGroupAddon,
+    InputGroupButton,
+    InputGroupInput,
+} from "@/components/ui/input-group";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/lib/utils";
 
 interface RegisterPayload {
     email: string;
     password: string;
 }
 
-async function registerUser(_payload: RegisterPayload): Promise<void> {
-    apiFetch("/api/register", {
+async function registerUser(payload: RegisterPayload): Promise<void> {
+    const res = await apiFetch("/api/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(_payload),
-    }).then((res) => {
-        if (!res.ok) {
-            return res.json().then((data) => {
-                throw new Error(data.message || "Registration failed");
-            });
-        }
+        body: JSON.stringify(payload),
     });
+
+    if (!res.ok) {
+        const data = await res.json();
+        throw new Error(data.message || "Registration failed");
+    }
 }
 
 const PERKS = [
     "Save races to your watchlist",
     "Leave reviews after running",
     "Get notified about new editions",
-];
+] as const;
 
 export default function RegistrationPage() {
     const [email, setEmail] = useState("");
@@ -44,9 +49,11 @@ export default function RegistrationPage() {
     const passwordsMatch = confirmPassword === "" || password === confirmPassword;
     const isValid = email.length > 0 && password.length >= 8 && password === confirmPassword;
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!isValid) return;
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        if (!isValid) {
+            return;
+        }
 
         setLoading(true);
         setError(null);
@@ -66,17 +73,17 @@ export default function RegistrationPage() {
             <div className="flex min-h-[60vh] items-center justify-center px-4">
                 <div className="flex flex-col items-center gap-4 text-center">
                     <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
-                        <CheckCircleIcon className="size-9 text-primary" />
+                        <CheckCircle2 className="size-9 text-primary" />
                     </div>
                     <div className="flex flex-col gap-1">
                         <h2 className="text-xl font-bold text-foreground">Account created!</h2>
-                        <p className="text-sm text-muted">Welcome to Raceboard. You can now log in.</p>
+                        <p className="text-sm text-muted-foreground">
+                            Welcome to Raceboard. You can now log in.
+                        </p>
                     </div>
-                    <Link to="/login">
-                        <Button size="sm" className="mt-2 rounded-lg font-medium">
-                            Go to login
-                        </Button>
-                    </Link>
+                    <Button size="sm" render={<Link to="/login" />} nativeButton={false}>
+                        Go to login
+                    </Button>
                 </div>
             </div>
         );
@@ -84,26 +91,29 @@ export default function RegistrationPage() {
 
     return (
         <div className="mx-auto flex max-w-4xl flex-col gap-10 py-8 md:flex-row md:gap-16 md:py-16">
-            {/* Left — value prop */}
             <div className="flex flex-col gap-6 md:flex-1 md:justify-center">
                 <div className="flex flex-col gap-3">
-                    <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1 text-xs font-medium uppercase tracking-wide text-muted">
+                    <Badge
+                        variant="outline"
+                        className="h-7 w-fit gap-2 border-border/80 bg-background/80 px-3.5 text-xs font-medium tracking-wide text-muted-foreground uppercase"
+                    >
                         <Footprints className="size-3.5" strokeWidth={1.75} />
                         Free account
-                    </div>
-                    <h1 className="text-3xl font-bold tracking-tight text-foreground leading-snug">
+                    </Badge>
+                    <h1 className="text-3xl leading-snug font-bold tracking-tight text-foreground">
                         Join the running community
                     </h1>
-                    <p className="text-sm text-muted leading-relaxed">
-                        Track races you want to run, leave reviews and stay up to date with new editions - all in one place.
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                        Track races you want to run, leave reviews and stay up to date with new editions — all in
+                        one place.
                     </p>
                 </div>
 
                 <ul className="flex flex-col gap-3">
                     {PERKS.map((perk) => (
-                        <li key={perk} className="flex items-center gap-3 text-sm text-muted">
+                        <li key={perk} className="flex items-center gap-3 text-sm text-muted-foreground">
                             <span className="flex size-5 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                                <CheckCircleIcon className="size-3.5 text-primary" />
+                                <CheckCircle2 className="size-3.5 text-primary" />
                             </span>
                             {perk}
                         </li>
@@ -111,130 +121,145 @@ export default function RegistrationPage() {
                 </ul>
             </div>
 
-            {/* Right — form */}
             <div className="md:flex-1">
-                <Surface variant="default" className="rounded-3xl p-8 shadow-sm">
+                <div className="rounded-3xl border border-border bg-card p-8 text-card-foreground shadow-sm">
                     <div className="flex flex-col gap-6">
                         <div className="flex flex-col gap-1">
                             <h2 className="text-xl font-bold text-foreground">Create account</h2>
-                            <p className="text-sm text-muted">
+                            <p className="text-sm text-muted-foreground">
                                 Already have one?{" "}
-                                <Link to="/login" className="font-medium text-primary hover:underline underline-offset-2">
+                                <Link
+                                    to="/login"
+                                    className={cn(buttonVariants({ variant: "link", size: "sm" }), "h-auto p-0")}
+                                >
                                     Log in
                                 </Link>
                             </p>
                         </div>
 
                         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-                            {/* Email */}
                             <div className="flex flex-col gap-1.5">
-                                <label htmlFor="email" className="text-xs font-semibold uppercase tracking-wide text-muted">
+                                <Label
+                                    htmlFor="email"
+                                    className="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                                >
                                     Email
-                                </label>
-                                <div className="relative">
-                                    <EnvelopeIcon className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted pointer-events-none" />
-                                    <input
+                                </Label>
+                                <InputGroup className="h-11">
+                                    <InputGroupAddon>
+                                        <Mail />
+                                    </InputGroupAddon>
+                                    <InputGroupInput
                                         id="email"
                                         type="email"
                                         autoComplete="email"
                                         required
                                         value={email}
-                                        onChange={(e) => setEmail(e.target.value)}
+                                        onChange={(event) => setEmail(event.target.value)}
                                         placeholder="you@example.com"
-                                        className="h-11 w-full rounded-xl border border-border bg-surface pl-10 pr-4 text-sm text-foreground placeholder:text-muted/60 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
                                     />
-                                </div>
+                                </InputGroup>
                             </div>
 
-                            {/* Password */}
                             <div className="flex flex-col gap-1.5">
-                                <label htmlFor="password" className="text-xs font-semibold uppercase tracking-wide text-muted">
+                                <Label
+                                    htmlFor="password"
+                                    className="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                                >
                                     Password
-                                </label>
-                                <div className="relative">
-                                    <LockClosedIcon className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted pointer-events-none" />
-                                    <input
+                                </Label>
+                                <InputGroup className="h-11">
+                                    <InputGroupAddon>
+                                        <Lock />
+                                    </InputGroupAddon>
+                                    <InputGroupInput
                                         id="password"
                                         type={showPassword ? "text" : "password"}
                                         autoComplete="new-password"
                                         required
                                         value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                        onChange={(event) => setPassword(event.target.value)}
                                         placeholder="Min. 8 characters"
-                                        className="h-11 w-full rounded-xl border border-border bg-surface pl-10 pr-11 text-sm text-foreground placeholder:text-muted/60 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
                                     />
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowPassword((v) => !v)}
-                                        className="absolute right-3.5 top-1/2 -translate-y-1/2 text-muted hover:text-foreground transition-colors"
-                                        aria-label={showPassword ? "Hide password" : "Show password"}
-                                    >
-                                        {showPassword
-                                            ? <EyeSlashIcon className="size-4" />
-                                            : <EyeIcon className="size-4" />
-                                        }
-                                    </button>
-                                </div>
+                                    <InputGroupAddon align="inline-end">
+                                        <InputGroupButton
+                                            onClick={() => setShowPassword((value) => !value)}
+                                            aria-label={showPassword ? "Hide password" : "Show password"}
+                                        >
+                                            {showPassword ? <EyeOff /> : <Eye />}
+                                        </InputGroupButton>
+                                    </InputGroupAddon>
+                                </InputGroup>
                                 {password.length > 0 && password.length < 8 && (
-                                    <p className="text-xs text-red-500">Password must be at least 8 characters.</p>
+                                    <p className="text-xs text-destructive">
+                                        Password must be at least 8 characters.
+                                    </p>
                                 )}
                             </div>
 
-                            {/* Confirm password */}
                             <div className="flex flex-col gap-1.5">
-                                <label htmlFor="confirm-password" className="text-xs font-semibold uppercase tracking-wide text-muted">
+                                <Label
+                                    htmlFor="confirm-password"
+                                    className="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                                >
                                     Confirm password
-                                </label>
-                                <div className="relative">
-                                    <UserIcon className="absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted pointer-events-none" />
-                                    <input
+                                </Label>
+                                <InputGroup
+                                    className={cn(
+                                        "h-11",
+                                        !passwordsMatch &&
+                                            "has-[[data-slot=input-group-control]:focus-visible]:border-destructive has-[[data-slot=input-group-control]:focus-visible]:ring-destructive/20 border-destructive/40",
+                                    )}
+                                >
+                                    <InputGroupAddon>
+                                        <User />
+                                    </InputGroupAddon>
+                                    <InputGroupInput
                                         id="confirm-password"
                                         type={showPassword ? "text" : "password"}
                                         autoComplete="new-password"
                                         required
                                         value={confirmPassword}
-                                        onChange={(e) => setConfirmPassword(e.target.value)}
+                                        onChange={(event) => setConfirmPassword(event.target.value)}
                                         placeholder="Repeat password"
-                                        className={`h-11 w-full rounded-xl border bg-surface pl-10 pr-4 text-sm text-foreground placeholder:text-muted/60 outline-none transition-colors focus:ring-2 ${
-                                            !passwordsMatch
-                                                ? "border-red-400 focus:border-red-400 focus:ring-red-200"
-                                                : "border-border focus:border-primary focus:ring-primary/20"
-                                        }`}
+                                        aria-invalid={!passwordsMatch}
                                     />
-                                </div>
+                                </InputGroup>
                                 {!passwordsMatch && (
-                                    <p className="text-xs text-red-500">Passwords do not match.</p>
+                                    <p className="text-xs text-destructive">Passwords do not match.</p>
                                 )}
                             </div>
 
                             {error && (
-                                <div className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-600">
+                                <div className="rounded-2xl border border-destructive/20 bg-destructive/10 px-4 py-3 text-sm text-destructive">
                                     {error}
                                 </div>
                             )}
 
-                            <Button
-                                type="submit"
-                                isDisabled={!isValid || loading}
-                                className="mt-1 h-11 w-full rounded-xl font-semibold"
-                            >
+                            <Button type="submit" disabled={!isValid || loading} className="mt-1 h-11 w-full">
                                 {loading ? "Creating account…" : "Create account"}
                             </Button>
                         </form>
 
-                        <p className="text-center text-xs text-muted leading-relaxed">
+                        <p className="text-center text-xs leading-relaxed text-muted-foreground">
                             By signing up you agree to our{" "}
-                            <Link to="/terms" className="hover:text-foreground underline underline-offset-2 transition-colors">
+                            <Link
+                                to="/terms"
+                                className="underline underline-offset-2 transition-colors hover:text-foreground"
+                            >
                                 Terms of use
                             </Link>{" "}
                             and{" "}
-                            <Link to="/privacy" className="hover:text-foreground underline underline-offset-2 transition-colors">
+                            <Link
+                                to="/privacy"
+                                className="underline underline-offset-2 transition-colors hover:text-foreground"
+                            >
                                 Privacy policy
                             </Link>
                             .
                         </p>
                     </div>
-                </Surface>
+                </div>
             </div>
         </div>
     );

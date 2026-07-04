@@ -1,24 +1,25 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Spinner, Surface, Skeleton, type DateRange, type Key } from "@heroui/react";
-import { MapPin } from "lucide-react";
-import { ArrowRightIcon } from "@heroicons/react/24/outline";
-import { apiFetch } from "../../api/client";
-import type { MapSearchPoint } from "../../types/search";
+import { ArrowRight, Loader2, MapPin } from "lucide-react";
+import { apiFetch } from "@/api/client";
+import EmptyState from "@/components/EmptyState";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import type { DateRange, FilterKey } from "@/types/search-filters";
+import type { MapSearchPoint } from "@/types/search";
 import RaceMap, { type MapBounds } from "./RaceMap";
 import SearchBar from "./SearchBar";
 import SearchModeSwitcher from "./SearchModeSwitcher";
 import SearchReturnLink from "./SearchReturnLink";
-import EmptyState from "../EmptyState";
 
 interface MapSearchViewProps {
     searchTerm: string;
-    selectedDistances: Set<Key>;
-    selectedVoivodeships: Set<Key>;
+    selectedDistances: Set<FilterKey>;
+    selectedVoivodeships: Set<FilterKey>;
     selectedDateRange: DateRange | null;
     initialBounds: MapBounds | null;
     onSearchTermChange: (value: string) => void;
-    onDistanceChange: (selected: Set<Key>) => void;
-    onVoivodeshipChange: (selected: Set<Key>) => void;
+    onDistanceChange: (selected: Set<FilterKey>) => void;
+    onVoivodeshipChange: (selected: Set<FilterKey>) => void;
     onDateChange: (selected: DateRange | null) => void;
     onModeChange: (mode: "list" | "map") => void;
     onMapBoundsChange: (bounds: MapBounds) => void;
@@ -26,8 +27,8 @@ interface MapSearchViewProps {
 
 function buildMapSearchParams(
     searchTerm: string,
-    selectedDistances: Set<Key>,
-    selectedVoivodeships: Set<Key>,
+    selectedDistances: Set<FilterKey>,
+    selectedVoivodeships: Set<FilterKey>,
     selectedDateRange: DateRange | null,
     bounds: MapBounds | null,
 ): URLSearchParams {
@@ -50,19 +51,21 @@ function buildMapSearchParams(
 function MapSearchResult({ point }: { point: MapSearchPoint }) {
     return (
         <SearchReturnLink to={`/races/${point.id}`} className="block">
-            <Surface
-                className="group flex flex-col gap-2 rounded-2xl p-4 transition-all duration-200 hover:-translate-y-px hover:shadow-md"
-                variant="default"
+            <article
+                className={cn(
+                    "group flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 text-card-foreground",
+                    "transition-all duration-200 hover:-translate-y-px hover:shadow-md",
+                )}
             >
-                <h3 className="flex items-center gap-1.5 text-sm font-semibold leading-snug text-foreground transition-colors group-hover:text-primary">
+                <h3 className="flex items-center gap-1.5 text-sm leading-snug font-semibold text-foreground transition-colors group-hover:text-primary">
                     {point.name}
-                    <ArrowRightIcon className="size-3.5 shrink-0 opacity-0 -translate-x-1 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100" />
+                    <ArrowRight className="size-3.5 shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100" />
                 </h3>
-                <div className="flex items-center gap-1.5 text-sm text-muted">
+                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
                     <MapPin className="size-3.5 shrink-0" />
                     <span>{point.city}</span>
                 </div>
-            </Surface>
+            </article>
         </SearchReturnLink>
     );
 }
@@ -80,7 +83,6 @@ export default function MapSearchView({
     onModeChange,
     onMapBoundsChange,
 }: MapSearchViewProps) {
-    const restoreBoundsRef = useRef(initialBounds);
     const [points, setPoints] = useState<MapSearchPoint[]>([]);
     const [loading, setLoading] = useState(false);
     const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
@@ -152,7 +154,7 @@ export default function MapSearchView({
     const geoCount = points.length;
 
     return (
-        <div className="fixed inset-x-0 bottom-0 top-16 z-20 flex flex-col bg-background">
+        <div className="fixed inset-x-0 top-16 bottom-0 z-20 flex flex-col bg-background">
             <div className="shrink-0 border-b border-border bg-background/95 px-4 py-3 backdrop-blur-md sm:px-6">
                 <div className="mx-auto max-w-[1600px]">
                     <SearchBar
@@ -172,7 +174,7 @@ export default function MapSearchView({
             <div className="flex min-h-0 flex-1">
                 <aside className="hidden w-[400px] shrink-0 flex-col border-r border-border lg:flex">
                     <div className="shrink-0 border-b border-border px-5 py-4">
-                        <p className="text-sm text-muted">
+                        <p className="text-sm text-muted-foreground">
                             {showSidebarLoading ? (
                                 "Searching…"
                             ) : (
@@ -211,13 +213,13 @@ export default function MapSearchView({
                 <div className="relative min-w-0 flex-1">
                     {loading && hasLoadedOnce && (
                         <div className="absolute inset-0 z-10 flex items-center justify-center bg-background/40 backdrop-blur-[1px]">
-                            <Spinner size="lg" />
+                            <Loader2 className="size-8 animate-spin text-muted-foreground" aria-label="Loading map results" />
                         </div>
                     )}
                     <RaceMap
                         points={points}
                         fullHeight
-                        restoreBounds={restoreBoundsRef.current}
+                        restoreBounds={initialBounds}
                         onBoundsChange={handleBoundsChange}
                     />
                     <div className="absolute bottom-6 left-1/2 z-[1000] -translate-x-1/2">

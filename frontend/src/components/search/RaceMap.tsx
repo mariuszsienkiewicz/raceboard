@@ -1,9 +1,13 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { MapContainer, TileLayer, Popup, CircleMarker, useMap, useMapEvents } from "react-leaflet";
-import type { MapSearchPoint } from "../../types/search";
-import "leaflet/dist/leaflet.css";
 import MarkerClusterGroup from "react-leaflet-cluster";
+import type { MapSearchPoint } from "@/types/search";
 import SearchReturnLink from "./SearchReturnLink";
+import "leaflet/dist/leaflet.css";
+
+/** Matches `--primary` from shadcn theme (oklch(0.205 0 0)). */
+const MARKER_FILL = "oklch(0.205 0 0)";
+const MARKER_STROKE = "oklch(1 0 0)";
 
 export interface MapBounds {
     topLat: number;
@@ -27,7 +31,10 @@ function BoundsWatcher({
     suppressInitial?: boolean;
 }) {
     const onBoundsChangeRef = useRef(onBoundsChange);
-    onBoundsChangeRef.current = onBoundsChange;
+
+    useEffect(() => {
+        onBoundsChangeRef.current = onBoundsChange;
+    }, [onBoundsChange]);
 
     const map = useMapEvents({
         moveend: () => {
@@ -81,25 +88,25 @@ export default function RaceMap({
     restoreBounds = null,
     onBoundsChange,
 }: RaceMapProps) {
-    const boundsToRestore = useRef(restoreBounds);
+    const [boundsToRestore] = useState(restoreBounds);
     const pointsWithGeo = points.filter((p) => p._geo);
 
     return (
         <MapContainer
             center={[52.0, 19.0]}
             zoom={6}
-            className={fullHeight ? "h-full w-full" : "w-full rounded-xl"}
+            className={fullHeight ? "h-full w-full" : "w-full rounded-2xl border border-border"}
             style={fullHeight ? undefined : { height: "600px" }}
         >
             <TileLayer
                 attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
                 url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
             />
-            {boundsToRestore.current && <InitialBoundsFitter bounds={boundsToRestore.current} />}
+            {boundsToRestore && <InitialBoundsFitter bounds={boundsToRestore} />}
             {onBoundsChange && (
                 <BoundsWatcher
                     onBoundsChange={onBoundsChange}
-                    suppressInitial={!!boundsToRestore.current}
+                    suppressInitial={boundsToRestore !== null}
                 />
             )}
             <MarkerClusterGroup chunkedLoading maxClusterRadius={50}>
@@ -109,9 +116,9 @@ export default function RaceMap({
                         center={[point._geo!.lat, point._geo!.lng]}
                         radius={8}
                         pathOptions={{
-                            fillColor: "#006FEE",
+                            fillColor: MARKER_FILL,
                             fillOpacity: 0.9,
-                            color: "#fff",
+                            color: MARKER_STROKE,
                             weight: 2,
                         }}
                     >

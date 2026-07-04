@@ -1,5 +1,5 @@
-import { Surface } from "@heroui/react/surface";
 import SearchModeSwitcher, { type SearchMode } from "./SearchModeSwitcher";
+import { cn } from "@/lib/utils";
 
 interface SearchResultsToolbarProps {
     mode: SearchMode;
@@ -40,9 +40,13 @@ export default function SearchResultsToolbar({
     })();
 
     return (
-        <Surface className="flex items-center justify-between gap-4 rounded-2xl px-4 py-3 shadow-sm">
-            <p className="text-sm text-muted">{label}</p>
+        <div
+            className={cn(
+                "flex items-center justify-between gap-4 rounded-2xl border border-border bg-card px-4 py-3 text-card-foreground shadow-sm",
+            )}
+        >
+            <p className="text-sm text-muted-foreground">{label}</p>
             <SearchModeSwitcher mode={mode} onModeChange={onModeChange} />
-        </Surface>
+        </div>
     );
 }
