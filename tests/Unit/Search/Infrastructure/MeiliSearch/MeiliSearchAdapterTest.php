@@ -121,7 +121,7 @@ class MeiliSearchAdapterTest extends TestCase
 
         $searchResults = $this->createStub(\Meilisearch\Search\SearchResult::class);
         $searchResults->method('getHits')->willReturn($hits);
-        $searchResults->method('getEstimatedTotalHits')->willReturn(2);
+        $searchResults->method('getTotalHits')->willReturn(2);
 
         $this->index->expects($this->once())->method('search')->willReturn($searchResults);
 
@@ -156,20 +156,20 @@ class MeiliSearchAdapterTest extends TestCase
         $this->adapter->search($query);
     }
 
-    public function testSearchCalculatesOffsetFromPage(): void
+    public function testSearchCalculatesPageAndHitsPerPage(): void
     {
         $query = new SearchQuery('maraton', 'Warszawa', 'mazowieckie', 42.195, null, null, 2, 40);
 
         $searchResults = $this->createStub(\Meilisearch\Search\SearchResult::class);
         $searchResults->method('getHits')->willReturn([]);
-        $searchResults->method('getEstimatedTotalHits')->willReturn(0);
+        $searchResults->method('getTotalHits')->willReturn(0);
 
         $this->index->expects($this->once())
             ->method('search')
             ->with(
                 'maraton',
                 $this->callback(function (array $options) {
-                    return isset($options['offset']) && 40 === $options['offset'] && isset($options['limit']) && 40 === $options['limit'];
+                    return isset($options['page']) && 2 === $options['page'] && isset($options['hitsPerPage']) && 40 === $options['hitsPerPage'];
                 }),
             )
             ->willReturn($searchResults);

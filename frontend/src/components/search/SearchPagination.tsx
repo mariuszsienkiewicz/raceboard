@@ -1,20 +1,18 @@
 import { Pagination } from "@heroui/react";
-import { useState } from "react";
 
 interface SearchPaginationProps {
     size?: "sm" | "md" | "lg";
-    onPageChange?: (page: number) => void;
-    totalPages?: number;
+    currentPage: number;
+    totalPages: number;
+    onPageChange: (page: number) => void;
 }
 
-export default function SearchPagination({ size = "sm", onPageChange, totalPages = 1 }: SearchPaginationProps) {
-    const [page, setPage] = useState(1);
-
-    const handlePageChange = (newPage: number) => {
-        setPage(newPage);
-        onPageChange?.(newPage);
-    }
-
+export default function SearchPagination({
+    size = "sm",
+    currentPage,
+    totalPages,
+    onPageChange,
+}: SearchPaginationProps) {
     const getPageNumbers = () => {
         const pages: (number | "ellipsis")[] = [];
         if (totalPages <= 7) {
@@ -23,15 +21,15 @@ export default function SearchPagination({ size = "sm", onPageChange, totalPages
             }
         } else {
             pages.push(1);
-            if (page > 3) {
+            if (currentPage > 3) {
                 pages.push("ellipsis");
             }
-            const start = Math.max(2, page - 1);
-            const end = Math.min(totalPages - 1, page + 1);
+            const start = Math.max(2, currentPage - 1);
+            const end = Math.min(totalPages - 1, currentPage + 1);
             for (let i = start; i <= end; i++) {
                 pages.push(i);
             }
-            if (page < totalPages - 2) {
+            if (currentPage < totalPages - 2) {
                 pages.push("ellipsis");
             }
             pages.push(totalPages);
@@ -44,26 +42,35 @@ export default function SearchPagination({ size = "sm", onPageChange, totalPages
             <Pagination className="justify-center" size={size}>
                 <Pagination.Content>
                     <Pagination.Item>
-                        <Pagination.Previous isDisabled={page === 1} onPress={() => handlePageChange(page - 1)}>
+                        <Pagination.Previous
+                            isDisabled={currentPage === 1}
+                            onPress={() => onPageChange(currentPage - 1)}
+                        >
                             <Pagination.PreviousIcon />
                             <span>Previous</span>
                         </Pagination.Previous>
                     </Pagination.Item>
-                    {getPageNumbers().map((p, i) =>
-                        p === "ellipsis" ? (
+                    {getPageNumbers().map((pageNumber, i) =>
+                        pageNumber === "ellipsis" ? (
                             <Pagination.Item key={`ellipsis-${i}`}>
                                 <Pagination.Ellipsis />
                             </Pagination.Item>
                         ) : (
-                            <Pagination.Item key={p}>
-                                <Pagination.Link isActive={p === page} onPress={() => handlePageChange(p)}>
-                                    {p}
+                            <Pagination.Item key={pageNumber}>
+                                <Pagination.Link
+                                    isActive={pageNumber === currentPage}
+                                    onPress={() => onPageChange(pageNumber)}
+                                >
+                                    {pageNumber}
                                 </Pagination.Link>
                             </Pagination.Item>
                         ),
                     )}
                     <Pagination.Item>
-                        <Pagination.Next isDisabled={page === totalPages} onPress={() => handlePageChange(page + 1)}>
+                        <Pagination.Next
+                            isDisabled={currentPage === totalPages}
+                            onPress={() => onPageChange(currentPage + 1)}
+                        >
                             <span>Next</span>
                             <Pagination.NextIcon />
                         </Pagination.Next>

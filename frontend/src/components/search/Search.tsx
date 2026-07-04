@@ -9,11 +9,8 @@ import SearchPagination from "./SearchPagination";
 import RaceMap from "./RaceMap";
 import ResultViewModeSwitcher from "./ResultViewModeSwitcher";
 
-const SKELETON_COUNT = 5;
-
-function totalPages(totalHits: number, pageSize: number): number {
-    return Math.max(1, Math.ceil(totalHits / pageSize));
-}
+const SKELETON_COUNT = 20;
+const PER_PAGE = 20;
 
 export default function Search() {
     const [searchTerm, setSearchTerm] = useState("");
@@ -22,7 +19,6 @@ export default function Search() {
     const [selectedDateRange, setSelectedDateRange] = useState<DateRange | null>(null);
     const [searchResponse, setSearchResponse] = useState<SearchResponse | null>(null);
     const [page, setPage] = useState(1);
-    const [perPage] = useState(20);
     const [results, setResults] = useState<Race[]>([]);
     const [loading, setLoading] = useState(true);
     const [viewMode, setViewMode] = useState<"list" | "map">("list");
@@ -47,6 +43,12 @@ export default function Search() {
         setPage(1);
     }, []);
 
+    const handlePageChange = useCallback((newPage: number) => {
+        setLoading(true);
+        setPage(newPage);
+        window.scrollTo({ top: 0, behavior: "smooth" });
+    }, []);
+
     useEffect(() => {
         const controller = new AbortController();
 
@@ -61,7 +63,7 @@ export default function Search() {
                     params.append("dateTo", selectedDateRange.end.toString());
                 }
                 params.append("page", page.toString());
-                params.append("perPage", perPage.toString());
+                params.append("perPage", PER_PAGE.toString());
 
                 const res = await apiFetch(`/api/search?${params.toString()}`, { signal: controller.signal });
                 const data: SearchResponse = await res.json();
@@ -81,7 +83,7 @@ export default function Search() {
             clearTimeout(timeout);
             controller.abort();
         };
-    }, [searchTerm, selectedDistances, selectedVoivodeships, selectedDateRange, page, perPage]);
+    }, [searchTerm, selectedDistances, selectedVoivodeships, selectedDateRange, page]);
 
     return (
         <div className="flex flex-col gap-6">
@@ -134,10 +136,13 @@ export default function Search() {
                 ))
             )}
 
-            <SearchPagination
-                onPageChange={setPage}
-                totalPages={totalPages(searchResponse?.totalHits ?? 0, searchResponse?.perPage ?? perPage)}
-            />
+            {!loading && searchResponse && searchResponse.totalPages > 1 && (
+                <SearchPagination
+                    currentPage={page}
+                    totalPages={searchResponse.totalPages}
+                    onPageChange={handlePageChange}
+                />
+            )}
         </div>
     );
 }

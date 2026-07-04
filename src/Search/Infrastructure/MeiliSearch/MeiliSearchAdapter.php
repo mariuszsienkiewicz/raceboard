@@ -15,6 +15,7 @@ use Meilisearch\Client;
 class MeiliSearchAdapter implements SearchIndexInterface
 {
     protected const string INDEX_NAME = 'races';
+    protected const int MAX_TOTAL_HITS = 5000;
 
     public function __construct(
         private readonly Client $client,
@@ -27,6 +28,7 @@ class MeiliSearchAdapter implements SearchIndexInterface
         $index->updateFilterableAttributes(['city', 'voivodeship', 'dates', 'distances']);
         $index->updateSortableAttributes(['dates']);
         $index->updateSearchableAttributes(['name', 'city', 'voivodeship']);
+        $index->updatePagination(['maxTotalHits' => self::MAX_TOTAL_HITS]);
     }
 
     public function indexRace(Race $race): void
@@ -50,8 +52,8 @@ class MeiliSearchAdapter implements SearchIndexInterface
         $filters = $this->buildFilters($query);
 
         $options = [
-            'limit' => $query->perPage,
-            'offset' => ($query->page - 1) * $query->perPage,
+            'page' => $query->page,
+            'hitsPerPage' => $query->perPage,
         ];
 
         if ('' !== $filters) {
@@ -62,9 +64,10 @@ class MeiliSearchAdapter implements SearchIndexInterface
 
         return new SearchResult(
             $searchResult->getHits(),
-            $searchResult->getEstimatedTotalHits(),
+            $searchResult->getTotalHits(),
             $query->page,
             $query->perPage,
+            $searchResult->getTotalPages(),
         );
     }
 
