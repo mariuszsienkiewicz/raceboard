@@ -76,6 +76,17 @@ class DoctrineRaceRepository implements RaceRepositoryInterface
     }
 
     /** @return list<Race> */
+    public function findWithoutCoordinates(): array
+    {
+        return $this->entityManager->createQueryBuilder()
+            ->select('r')
+            ->from(Race::class, 'r')
+            ->where('r.latitude IS NULL OR r.longitude IS NULL')
+            ->getQuery()
+            ->getResult();
+    }
+
+    /** @return list<Race> */
     public function findAll(): array
     {
         return $this->entityManager->getRepository(Race::class)->findAll();

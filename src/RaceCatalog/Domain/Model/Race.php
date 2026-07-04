@@ -25,6 +25,8 @@ class Race
         private string $city,
         private string $voivodeship,
         private string $country = 'PL',
+        private ?float $latitude = null,
+        private ?float $longitude = null,
     ) {
         $this->editions = new ArrayCollection();
         $this->recordEvent(new RaceCreated($this->id));
@@ -35,10 +37,13 @@ class Race
         string $name,
         string $city,
         string $voivodeship,
+        string $country = 'PL',
+        ?float $latitude = null,
+        ?float $longitude = null,
     ): self {
         $slug = Slugifier::slugify($name);
 
-        return new self($id, $name, $slug, $city, $voivodeship);
+        return new self($id, $name, $slug, $city, $voivodeship, $country, $latitude, $longitude);
     }
 
     public function addEdition(Edition $edition): void
@@ -105,6 +110,27 @@ class Race
     public function getCountry(): string
     {
         return $this->country;
+    }
+
+    public function hasCoordinates(): bool
+    {
+        return null !== $this->latitude && null !== $this->longitude;
+    }
+
+    public function getLatitude(): ?float
+    {
+        return $this->latitude;
+    }
+
+    public function getLongitude(): ?float
+    {
+        return $this->longitude;
+    }
+
+    public function setCoordinates(float $latitude, float $longitude): void
+    {
+        $this->latitude = $latitude;
+        $this->longitude = $longitude;
     }
 
     /** @return list<Edition> */

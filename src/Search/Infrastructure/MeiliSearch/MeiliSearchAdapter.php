@@ -9,7 +9,6 @@ use App\RaceCatalog\Domain\Model\Race;
 use App\Search\Domain\SearchIndexInterface;
 use App\Search\Domain\SearchQuery;
 use App\Search\Domain\SearchResult;
-use App\Shared\Domain\CityCoordinates;
 use Meilisearch\Client;
 
 class MeiliSearchAdapter implements SearchIndexInterface
@@ -119,8 +118,10 @@ class MeiliSearchAdapter implements SearchIndexInterface
         if (null !== $query->topLat && null !== $query->bottomLat) {
             $filters[] = sprintf(
                 '_geoBoundingBox([%f, %f], [%f, %f])',
-                $query->topLat, $query->topLng,
-                $query->bottomLat, $query->bottomLng,
+                $query->topLat,
+                $query->topLng,
+                $query->bottomLat,
+                $query->bottomLng,
             );
         }
 
@@ -129,18 +130,20 @@ class MeiliSearchAdapter implements SearchIndexInterface
 
     /**
      * @return array{
-     *   city: string,
-     *   dates: int[],
-     *   distances: array<int, float>,
      *   id: string,
-     *   name: string,
      *   slug: string,
-     *   voivodeship: string
+     *   name: string,
+     *   city: string,
+     *   voivodeship: string,
+     *   dates: list<int>,
+     *   distances: list<float>,
+     *   _geo: array{lat: float, lng: float}|null
      * }
      */
     private function toDocument(Race $race): array
     {
-        $coords = CityCoordinates::get($race->getCity());
+        $latitude = $race->getLatitude();
+        $longitude = $race->getLongitude();
 
         return [
             'id' => $race->getId()->toString(),
@@ -150,7 +153,9 @@ class MeiliSearchAdapter implements SearchIndexInterface
             'voivodeship' => $race->getVoivodeship(),
             'dates' => array_map(fn (Edition $edition) => $edition->getDate()->getTimestamp(), $race->getEditions()),
             'distances' => $this->flattenDistances($race),
-            '_geo' => $coords ? ['lat' => $coords['lat'], 'lng' => $coords['lng']] : null,
+            '_geo' => null !== $latitude && null !== $longitude
+                ? ['lat' => $latitude, 'lng' => $longitude]
+                : null,
         ];
     }
 

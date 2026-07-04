@@ -26,5 +26,8 @@ interface RaceRepositoryInterface
     public function findSimilar(string $date, string $city): array;
 
     /** @return list<Race> */
+    public function findWithoutCoordinates(): array;
+
+    /** @return list<Race> */
     public function findAll(): array;
 }
