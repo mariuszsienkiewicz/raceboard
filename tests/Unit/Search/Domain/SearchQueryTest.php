@@ -23,7 +23,7 @@ class SearchQueryTest extends TestCase
     {
         $dateFrom = new \DateTimeImmutable('+4 days')->format('Y-m-d');
         $dateTo = new \DateTimeImmutable('+5 days')->format('Y-m-d');
-        $query = new SearchQuery('test', 'Test City', 'Test Voivodeship', 10, $dateFrom, $dateTo, 2, 40);
+        $query = new SearchQuery('test', 'Test City', 'Test Voivodeship', 10, $dateFrom, $dateTo, page: 2, perPage: 40);
         $this->assertSame('test', $query->query);
         $this->assertSame('Test City', $query->city);
         $this->assertSame('Test Voivodeship', $query->voivodeship);
