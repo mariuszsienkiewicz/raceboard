@@ -1,17 +1,23 @@
 import { Label, Tag, TagGroup, type Key, type Selection } from "@heroui/react";
 
 interface DistanceTagsProps {
+    selectedKeys?: Set<Key>;
     onChange?: (selected: Set<Key>) => void;
 }
 
-export default function DistanceTags({ onChange }: DistanceTagsProps) {
+export default function DistanceTags({ selectedKeys, onChange }: DistanceTagsProps) {
     function handleSelectionChange(selection: Selection) {
         if (selection === "all") return;
         onChange?.(selection);
     }
 
     return (
-        <TagGroup aria-label="Filter by distance" selectionMode="multiple" onSelectionChange={handleSelectionChange}>
+        <TagGroup
+            aria-label="Filter by distance"
+            selectionMode="multiple"
+            selectedKeys={selectedKeys}
+            onSelectionChange={handleSelectionChange}
+        >
             <Label className="text-xs font-medium text-muted uppercase tracking-wide mb-1.5 block">
                 Distance
             </Label>

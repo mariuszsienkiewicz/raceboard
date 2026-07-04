@@ -16,6 +16,7 @@ class MeiliSearchAdapter implements SearchIndexInterface
 {
     protected const string INDEX_NAME = 'races';
     protected const int MAX_TOTAL_HITS = 5000;
+    protected const int MAX_MAP_POINTS = 1000;
 
     public function __construct(
         private readonly Client $client,
@@ -25,7 +26,7 @@ class MeiliSearchAdapter implements SearchIndexInterface
     public function configureIndex(): void
     {
         $index = $this->client->index(self::INDEX_NAME);
-        $index->updateFilterableAttributes(['city', 'voivodeship', 'dates', 'distances']);
+        $index->updateFilterableAttributes(['city', 'voivodeship', 'dates', 'distances', '_geo']);
         $index->updateSortableAttributes(['dates']);
         $index->updateSearchableAttributes(['name', 'city', 'voivodeship']);
         $index->updatePagination(['maxTotalHits' => self::MAX_TOTAL_HITS]);
@@ -71,6 +72,24 @@ class MeiliSearchAdapter implements SearchIndexInterface
         );
     }
 
+    public function searchMapPoints(SearchQuery $query): array
+    {
+        $filters = $this->buildFilters($query);
+
+        $options = [
+            'limit' => self::MAX_MAP_POINTS,
+            'attributesToRetrieve' => ['id', 'name', 'city', '_geo'],
+        ];
+
+        if ('' !== $filters) {
+            $options['filter'] = $filters;
+        }
+
+        $searchResult = $this->client->index(self::INDEX_NAME)->search($query->query, $options);
+
+        return $searchResult->getHits();
+    }
+
     private function buildFilters(SearchQuery $query): string
     {
         $filters = [];
@@ -95,6 +114,14 @@ class MeiliSearchAdapter implements SearchIndexInterface
         if (null !== $query->dateTo) {
             $to = (new \DateTimeImmutable($query->dateTo))->getTimestamp();
             $filters[] = \sprintf('dates <= %d', $to);
+        }
+
+        if (null !== $query->topLat && null !== $query->bottomLat) {
+            $filters[] = sprintf(
+                '_geoBoundingBox([%f, %f], [%f, %f])',
+                $query->topLat, $query->topLng,
+                $query->bottomLat, $query->bottomLng,
+            );
         }
 
         return implode(' AND ', $filters);

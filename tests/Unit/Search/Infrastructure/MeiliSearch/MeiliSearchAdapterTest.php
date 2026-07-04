@@ -158,7 +158,7 @@ class MeiliSearchAdapterTest extends TestCase
 
     public function testSearchCalculatesPageAndHitsPerPage(): void
     {
-        $query = new SearchQuery('maraton', 'Warszawa', 'mazowieckie', 42.195, null, null, 2, 40);
+        $query = new SearchQuery('maraton', 'Warszawa', 'mazowieckie', 42.195, page: 2, perPage: 40);
 
         $searchResults = $this->createStub(\Meilisearch\Search\SearchResult::class);
         $searchResults->method('getHits')->willReturn([]);

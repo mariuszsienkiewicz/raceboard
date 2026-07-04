@@ -7,3 +7,10 @@ export interface SearchResponse {
     perPage: number;
     totalPages: number;
 }
+
+export interface MapSearchPoint {
+    id: string;
+    name: string;
+    city: string;
+    _geo?: { lat: number; lng: number } | null;
+}

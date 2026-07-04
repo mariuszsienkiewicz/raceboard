@@ -9,14 +9,13 @@ import {
     TagGroup,
     useFilter,
 } from "@heroui/react";
-import { useState } from "react";
 
 interface VoivodeshipSelectProps {
+    selectedKeys?: Set<Key>;
     onChange?: (selected: Set<Key>) => void;
 }
 
-export function VoivodeshipSelect({ onChange }: VoivodeshipSelectProps) {
-    const [selectedKeys, setSelectedKeys] = useState<Set<Key>>(new Set());
+export function VoivodeshipSelect({ selectedKeys = new Set(), onChange }: VoivodeshipSelectProps) {
     const { contains } = useFilter({ sensitivity: "base" });
     const items = [
         { id: "dolnośląskie", name: "dolnośląskie" },
@@ -38,16 +37,12 @@ export function VoivodeshipSelect({ onChange }: VoivodeshipSelectProps) {
     ];
 
     const onRemoveTags = (keys: Set<Key>) => {
-        setSelectedKeys((prev) => {
-            const newKeys = new Set([...prev].filter((key) => !keys.has(key)));
-            onChange?.(newKeys);
-            return newKeys;
-        });
+        const newKeys = new Set([...selectedKeys].filter((key) => !keys.has(key)));
+        onChange?.(newKeys);
     };
 
     const handleChange = (value: Key | Key[] | null) => {
         const newKeys = new Set(Array.isArray(value) ? value : value != null ? [value] : []);
-        setSelectedKeys(newKeys);
         onChange?.(newKeys);
     };
 
