@@ -1,15 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Skeleton } from "@heroui/react";
-import { Surface } from "@heroui/react/surface";
-import {
-    HeartIcon,
-    ArrowRightIcon,
-} from "@heroicons/react/24/outline";
-import { useAuth } from "../context/useAuth";
-import { apiFetch } from "../api/client";
-import type { WatchlistEntry } from "../types/watchlist";
-import WatchlistCard from "../components/watchlist/WatchlistCard";
+import { ArrowRight, Heart } from "lucide-react";
+import WatchlistCard from "@/components/watchlist/WatchlistCard";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import { apiFetch } from "@/api/client";
+import { useAuth } from "@/context/useAuth";
+import type { WatchlistEntry } from "@/types/watchlist";
 
 async function fetchWatchlist(): Promise<WatchlistEntry[]> {
     return apiFetch("/api/me/watchlist")
@@ -24,18 +22,21 @@ async function fetchWatchlist(): Promise<WatchlistEntry[]> {
 function WatchlistSkeleton() {
     return (
         <div className="flex flex-col gap-3">
-            {Array.from({ length: 3 }).map((_, i) => (
-                <Surface key={i} variant="default" className="flex flex-col gap-3 rounded-2xl p-5">
+            {Array.from({ length: 3 }).map((_, index) => (
+                <div
+                    key={index}
+                    className="flex flex-col gap-3 rounded-2xl border border-border bg-card p-5"
+                >
                     <div className="flex items-start justify-between gap-4">
-                        <Skeleton className="h-5 w-2/3 rounded-lg" />
+                        <Skeleton className="h-5 w-2/3" />
                         <Skeleton className="h-6 w-28 rounded-full" />
                     </div>
-                    <Skeleton className="h-4 w-1/3 rounded-lg" />
+                    <Skeleton className="h-4 w-1/3" />
                     <div className="flex gap-2">
                         <Skeleton className="h-6 w-12 rounded-full" />
                         <Skeleton className="h-6 w-20 rounded-full" />
                     </div>
-                </Surface>
+                </div>
             ))}
         </div>
     );
@@ -44,22 +45,19 @@ function WatchlistSkeleton() {
 function EmptyWatchlist() {
     return (
         <div className="flex flex-col items-center gap-5 py-20 text-center">
-            <div className="flex size-16 items-center justify-center rounded-full bg-surface border border-border">
-                <HeartIcon className="size-8 text-muted" style={{ opacity: 0.4 }} />
+            <div className="flex size-16 items-center justify-center rounded-full border border-border bg-muted">
+                <Heart className="size-8 text-muted-foreground/40" />
             </div>
             <div className="flex flex-col gap-1.5">
                 <p className="font-semibold text-foreground">Your watchlist is empty</p>
-                <p className="text-sm text-muted leading-relaxed max-w-xs">
+                <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
                     Browse races and click the heart icon to save ones you want to run.
                 </p>
             </div>
-            <Link
-                to="/"
-                className="inline-flex items-center gap-1.5 rounded-xl border border-border bg-surface px-4 py-2 text-sm font-medium text-foreground hover:bg-background transition-colors"
-            >
+            <Button variant="outline" render={<Link to="/" />} nativeButton={false}>
                 Browse races
-                <ArrowRightIcon className="size-4" />
-            </Link>
+                <ArrowRight />
+            </Button>
         </div>
     );
 }
@@ -68,14 +66,17 @@ function NotAuthenticated() {
     return (
         <div className="flex flex-col items-center gap-5 py-20 text-center">
             <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
-                <HeartIcon className="size-8 text-primary" />
+                <Heart className="size-8 text-primary" />
             </div>
             <div className="flex flex-col gap-1.5">
                 <p className="font-semibold text-foreground">Log in to see your watchlist</p>
-                <p className="text-sm text-muted leading-relaxed max-w-xs">
+                <p className="max-w-xs text-sm leading-relaxed text-muted-foreground">
                     Save races you want to run and track them all in one place.
                 </p>
             </div>
+            <Link to="/login" className={cn(buttonVariants({ size: "sm" }))}>
+                Log in
+            </Link>
         </div>
     );
 }
@@ -86,11 +87,36 @@ export default function WatchlistPage() {
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        if (!isAuthenticated) { setLoading(false); return; }
-        fetchWatchlist()
-            .then(setEntries)
-            .catch(() => setEntries([]))
-            .finally(() => setLoading(false));
+        if (!isAuthenticated) {
+            return;
+        }
+
+        let cancelled = false;
+
+        const timeout = setTimeout(() => {
+            setLoading(true);
+            fetchWatchlist()
+                .then((data) => {
+                    if (!cancelled) {
+                        setEntries(data);
+                    }
+                })
+                .catch(() => {
+                    if (!cancelled) {
+                        setEntries([]);
+                    }
+                })
+                .finally(() => {
+                    if (!cancelled) {
+                        setLoading(false);
+                    }
+                });
+        }, 0);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timeout);
+        };
     }, [isAuthenticated]);
 
     const handleRemove = (raceId: string) => {
@@ -99,7 +125,7 @@ export default function WatchlistPage() {
                 if (!res.ok) {
                     throw new Error("Failed to remove from watchlist");
                 }
-                setEntries((prev) => prev.filter((e) => e.raceId !== raceId));
+                setEntries((prev) => prev.filter((entry) => entry.raceId !== raceId));
             })
             .catch((err) => {
                 console.error(err);
@@ -111,7 +137,7 @@ export default function WatchlistPage() {
         <div className="flex flex-col gap-8 py-4">
             <div className="flex flex-col gap-1">
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">Watchlist</h1>
-                <p className="text-sm text-muted">Races you want to run.</p>
+                <p className="text-sm text-muted-foreground">Races you want to run.</p>
             </div>
 
             {!isAuthenticated ? (
@@ -122,12 +148,16 @@ export default function WatchlistPage() {
                 <EmptyWatchlist />
             ) : (
                 <>
-                    <p className="text-xs text-muted">
+                    <p className="text-xs text-muted-foreground">
                         {entries.length} {entries.length === 1 ? "race" : "races"} saved
                     </p>
                     <div className="flex flex-col gap-3">
                         {entries.map((entry) => (
-                            <WatchlistCard key={entry.id} entry={entry} onRemove={() => handleRemove(entry.raceId)} />
+                            <WatchlistCard
+                                key={entry.id}
+                                entry={entry}
+                                onRemove={() => handleRemove(entry.raceId)}
+                            />
                         ))}
                     </div>
                 </>

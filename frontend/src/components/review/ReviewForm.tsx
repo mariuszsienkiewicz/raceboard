@@ -1,40 +1,32 @@
-import { Button, Surface } from "@heroui/react";
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { StarIcon, StarIcon as StarSolidIcon } from "@heroicons/react/24/solid";
-import { useAuth } from "../../context/useAuth";
+import { Star } from "lucide-react";
+import { Button, buttonVariants } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { useAuth } from "@/context/useAuth";
 
-export default function ReviewForm({ onSubmit }: { onSubmit: (rating: number, comment: string) => Promise<void> }) {
+const RATING_LABELS = ["Terrible", "Poor", "OK", "Good", "Excellent"] as const;
+
+interface ReviewFormProps {
+    onSubmit: (rating: number, comment: string) => Promise<void>;
+}
+
+function ReviewCard({ className, ...props }: React.ComponentProps<"div">) {
+    return (
+        <div
+            className={cn(
+                "rounded-2xl border border-border bg-card p-5 text-card-foreground shadow-sm",
+                className,
+            )}
+            {...props}
+        />
+    );
+}
+
+export default function ReviewForm({ onSubmit }: ReviewFormProps) {
     const { isAuthenticated } = useAuth();
-    if (!isAuthenticated) {
-        return (
-            <Surface variant="default" className="flex flex-col items-center gap-4 rounded-2xl p-8 text-center">
-                <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
-                    <StarSolidIcon className="size-6 text-primary" />
-                </div>
-                <div className="flex flex-col gap-1">
-                    <p className="text-sm font-semibold text-foreground">Have you run this race?</p>
-                    <p className="text-sm text-muted leading-relaxed">
-                        Log in to share your experience and help other runners decide.
-                    </p>
-                </div>
-                <div className="flex items-center gap-3">
-                    <Link to="/login">
-                        <Button size="sm" className="rounded-xl font-medium px-5">
-                            Log in
-                        </Button>
-                    </Link>
-                    <Link
-                        to="/register"
-                        className="text-sm font-medium text-muted hover:text-foreground transition-colors"
-                    >
-                        Create account
-                    </Link>
-                </div>
-            </Surface>
-        );
-    }
-
     const [rating, setRating] = useState(0);
     const [hovered, setHovered] = useState(0);
     const [comment, setComment] = useState("");
@@ -43,9 +35,12 @@ export default function ReviewForm({ onSubmit }: { onSubmit: (rating: number, co
 
     const isValid = rating > 0 && comment.trim().length > 0;
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!isValid) return;
+    const handleSubmit = async (event: React.FormEvent) => {
+        event.preventDefault();
+        if (!isValid) {
+            return;
+        }
+
         setLoading(true);
         try {
             await onSubmit(rating, comment.trim());
@@ -55,38 +50,67 @@ export default function ReviewForm({ onSubmit }: { onSubmit: (rating: number, co
         }
     };
 
+    if (!isAuthenticated) {
+        return (
+            <ReviewCard className="flex flex-col items-center gap-4 p-8 text-center">
+                <div className="flex size-12 items-center justify-center rounded-full bg-primary/10">
+                    <Star className="size-6 fill-primary text-primary" />
+                </div>
+                <div className="flex flex-col gap-1">
+                    <p className="text-sm font-semibold text-foreground">Have you run this race?</p>
+                    <p className="text-sm leading-relaxed text-muted-foreground">
+                        Log in to share your experience and help other runners decide.
+                    </p>
+                </div>
+                <div className="flex items-center gap-3">
+                    <Button size="sm" render={<Link to="/login" />} nativeButton={false}>
+                        Log in
+                    </Button>
+                    <Link
+                        to="/register"
+                        className={cn(buttonVariants({ variant: "link", size: "sm" }), "px-0")}
+                    >
+                        Create account
+                    </Link>
+                </div>
+            </ReviewCard>
+        );
+    }
+
     if (submitted) {
         return (
-            <Surface variant="default" className="flex items-center gap-3 rounded-2xl p-5">
+            <ReviewCard className="flex items-center gap-3">
                 <div className="flex size-9 shrink-0 items-center justify-center rounded-full bg-primary/10">
-                    <StarSolidIcon className="size-4 text-primary" />
+                    <Star className="size-4 fill-primary text-primary" />
                 </div>
                 <div>
                     <p className="text-sm font-medium text-foreground">Review submitted!</p>
-                    <p className="text-xs text-muted">Thank you for sharing your experience.</p>
+                    <p className="text-xs text-muted-foreground">Thank you for sharing your experience.</p>
                 </div>
-            </Surface>
+            </ReviewCard>
         );
     }
 
     return (
-        <Surface variant="default" className="flex flex-col gap-4 rounded-2xl p-5">
+        <ReviewCard className="flex flex-col gap-4">
             <div className="flex flex-col gap-1">
                 <p className="text-sm font-semibold text-foreground">Leave a review</p>
-                <p className="text-xs text-muted">Share your experience with other runners.</p>
+                <p className="text-xs text-muted-foreground">Share your experience with other runners.</p>
             </div>
 
             <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-                {/* Star picker */}
                 <div className="flex flex-col gap-1.5">
-                    <label className="text-xs font-semibold uppercase tracking-wide text-muted">Rating</label>
+                    <Label className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                        Rating
+                    </Label>
                     <div className="flex items-center gap-1">
-                        {Array.from({ length: 5 }).map((_, i) => {
-                            const value = i + 1;
+                        {Array.from({ length: 5 }).map((_, index) => {
+                            const value = index + 1;
                             const filled = value <= (hovered || rating);
+
                             return (
                                 <button
-                                    key={i}
+                                    key={value}
                                     type="button"
                                     onClick={() => setRating(value)}
                                     onMouseEnter={() => setHovered(value)}
@@ -94,48 +118,48 @@ export default function ReviewForm({ onSubmit }: { onSubmit: (rating: number, co
                                     aria-label={`Rate ${value} out of 5`}
                                     className="transition-transform hover:scale-110"
                                 >
-                                    {filled
-                                        ? <StarSolidIcon className="size-6 text-amber-400" />
-                                        : <StarIcon className="size-6 text-muted/40 hover:text-amber-300" />
-                                    }
+                                    <Star
+                                        className={cn(
+                                            "size-6",
+                                            filled
+                                                ? "fill-amber-400 text-amber-400"
+                                                : "text-muted-foreground/40 hover:text-amber-300",
+                                        )}
+                                    />
                                 </button>
                             );
                         })}
                         {rating > 0 && (
-                            <span className="ml-2 text-xs text-muted">
-                                {["Terrible", "Poor", "OK", "Good", "Excellent"][rating - 1]}
+                            <span className="ml-2 text-xs text-muted-foreground">
+                                {RATING_LABELS[rating - 1]}
                             </span>
                         )}
                     </div>
                 </div>
 
-                {/* Comment */}
                 <div className="flex flex-col gap-1.5">
-                    <label htmlFor="review-comment" className="text-xs font-semibold uppercase tracking-wide text-muted">
+                    <Label
+                        htmlFor="review-comment"
+                        className="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                    >
                         Comment
-                    </label>
-                    <textarea
+                    </Label>
+                    <Textarea
                         id="review-comment"
                         rows={3}
                         value={comment}
-                        onChange={(e) => setComment(e.target.value)}
+                        onChange={(event) => setComment(event.target.value.slice(0, 500))}
                         placeholder="How was the organisation, the route, the atmosphere…"
-                        className="w-full resize-none rounded-xl border border-border bg-surface px-4 py-3 text-sm text-foreground placeholder:text-muted/60 outline-none transition-colors focus:border-primary focus:ring-2 focus:ring-primary/20"
                     />
-                    <p className="text-right text-xs text-muted/60">{comment.length} / 500</p>
+                    <p className="text-right text-xs text-muted-foreground/60">{comment.length} / 500</p>
                 </div>
 
                 <div className="flex justify-end">
-                    <Button
-                        type="submit"
-                        size="sm"
-                        isDisabled={!isValid || loading}
-                        className="rounded-xl font-medium px-6"
-                    >
+                    <Button type="submit" size="sm" disabled={!isValid || loading}>
                         {loading ? "Submitting…" : "Submit review"}
                     </Button>
                 </div>
             </form>
-        </Surface>
+        </ReviewCard>
     );
 }

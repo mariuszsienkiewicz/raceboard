@@ -1,32 +1,48 @@
-import { Label, Tag, TagGroup, type Key, type Selection } from "@heroui/react";
+import type { FilterKey } from "@/types/search-filters";
+import { Label } from "@/components/ui/label";
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
+
+const DISTANCES = [
+    { value: "5", label: "5K" },
+    { value: "10", label: "10K" },
+    { value: "21", label: "Half" },
+    { value: "42", label: "Marathon" },
+] as const;
 
 interface DistanceTagsProps {
-    selectedKeys?: Set<Key>;
-    onChange?: (selected: Set<Key>) => void;
+    selectedKeys?: Set<FilterKey>;
+    onChange?: (selected: Set<FilterKey>) => void;
+}
+
+function toValueArray(keys?: Set<FilterKey>): string[] {
+    if (!keys) {
+        return [];
+    }
+
+    return Array.from(keys, (key) => String(key));
 }
 
 export default function DistanceTags({ selectedKeys, onChange }: DistanceTagsProps) {
-    function handleSelectionChange(selection: Selection) {
-        if (selection === "all") return;
-        onChange?.(selection);
-    }
-
     return (
-        <TagGroup
-            aria-label="Filter by distance"
-            selectionMode="multiple"
-            selectedKeys={selectedKeys}
-            onSelectionChange={handleSelectionChange}
-        >
-            <Label className="text-xs font-medium text-muted uppercase tracking-wide mb-1.5 block">
+        <div>
+            <Label className="mb-1.5 block text-xs font-medium tracking-wide text-muted-foreground uppercase">
                 Distance
             </Label>
-            <TagGroup.List className="flex gap-1.5">
-                <Tag id="5">5K</Tag>
-                <Tag id="10">10K</Tag>
-                <Tag id="21">Half</Tag>
-                <Tag id="42">Marathon</Tag>
-            </TagGroup.List>
-        </TagGroup>
+            <ToggleGroup
+                multiple
+                variant="outline"
+                size="sm"
+                aria-label="Filter by distance"
+                value={toValueArray(selectedKeys)}
+                onValueChange={(values) => onChange?.(new Set(values))}
+                className="flex flex-wrap gap-1.5"
+            >
+                {DISTANCES.map(({ value, label }) => (
+                    <ToggleGroupItem key={value} value={value}>
+                        {label}
+                    </ToggleGroupItem>
+                ))}
+            </ToggleGroup>
+        </div>
     );
 }

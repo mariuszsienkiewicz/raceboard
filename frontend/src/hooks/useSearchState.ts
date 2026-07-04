@@ -1,15 +1,15 @@
 import { useCallback, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { parseDate, type CalendarDate } from "@internationalized/date";
-import type { DateRange, Key } from "@heroui/react";
-import type { MapBounds } from "../components/search/RaceMap";
+import type { MapBounds } from "@/components/search/RaceMap";
+import type { DateRange, FilterKey } from "@/types/search-filters";
 import type { SearchMode } from "../components/search/SearchModeSwitcher";
 
 export interface SearchState {
     q: string;
     mode: SearchMode;
-    distances: Set<Key>;
-    voivodeships: Set<Key>;
+    distances: Set<FilterKey>;
+    voivodeships: Set<FilterKey>;
     dateRange: DateRange | null;
     page: number;
     mapBounds: MapBounds | null;

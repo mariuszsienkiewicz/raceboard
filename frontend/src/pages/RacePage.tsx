@@ -1,19 +1,16 @@
 import { useEffect, useState } from "react";
-import { useParams, Link, useLocation } from "react-router-dom";
-import { apiFetch } from "../api/client";
-import type { RaceDetails } from "../types/race";
-import { Chip, Separator, Skeleton } from "@heroui/react";
-import { Surface } from "@heroui/react/surface";
-import {
-    ArrowLeftIcon,
-    CalendarDaysIcon,
-    MapPinIcon,
-    MapIcon,
-} from "@heroicons/react/24/outline";
-import ReviewForm from "../components/review/ReviewForm";
-import RaceReviews from "../components/review/RaceReviews";
-import WatchlistButton from "../components/watchlist/WatchlistButton";
-import EmptyState from "../components/EmptyState";
+import { Link, useLocation, useParams } from "react-router-dom";
+import { ArrowLeft, CalendarDays, Map, MapPin } from "lucide-react";
+import { apiFetch } from "@/api/client";
+import EmptyState from "@/components/EmptyState";
+import RaceReviews from "@/components/review/RaceReviews";
+import ReviewForm from "@/components/review/ReviewForm";
+import WatchlistButton from "@/components/watchlist/WatchlistButton";
+import { Badge } from "@/components/ui/badge";
+import { Separator } from "@/components/ui/separator";
+import { Skeleton } from "@/components/ui/skeleton";
+import { cn } from "@/lib/utils";
+import type { RaceDetails } from "@/types/race";
 
 function formatDate(dateStr: string): string {
     return new Date(dateStr).toLocaleDateString("pl-PL", {
@@ -32,15 +29,15 @@ function formatDistance(km: number): string {
 function RacePageSkeleton() {
     return (
         <div className="flex flex-col gap-8">
-            <Skeleton className="h-4 w-24 rounded-lg" />
+            <Skeleton className="h-4 w-24" />
             <div className="flex flex-col gap-3">
-                <Skeleton className="h-10 w-2/3 rounded-xl" />
-                <Skeleton className="h-5 w-1/3 rounded-lg" />
+                <Skeleton className="h-10 w-2/3 rounded-2xl" />
+                <Skeleton className="h-5 w-1/3" />
             </div>
             <Skeleton className="h-px w-full" />
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                <div className="lg:col-span-2 flex flex-col gap-3">
-                    <Skeleton className="h-4 w-20 rounded-lg" />
+            <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                <div className="flex flex-col gap-3 lg:col-span-2">
+                    <Skeleton className="h-4 w-20" />
                     <Skeleton className="h-24 w-full rounded-2xl" />
                     <Skeleton className="h-20 w-full rounded-2xl" />
                 </div>
@@ -65,46 +62,72 @@ export default function RacePage() {
                 rating: _rating,
                 comment: _comment,
             }),
-        }).then((res) => {
-            if (!res.ok) {
-                throw new Error("Failed to submit review");
-            }
-            // refresh reviews - for now we just log success since reviews are placeholder data
-            console.log("Review submitted successfully");
-        }).catch((err) => {
-            console.error("Error submitting review:", err);
-            alert("Failed to submit review. Please try again.");
-        });
+        })
+            .then((res) => {
+                if (!res.ok) {
+                    throw new Error("Failed to submit review");
+                }
+                console.log("Review submitted successfully");
+            })
+            .catch((err) => {
+                console.error("Error submitting review:", err);
+                alert("Failed to submit review. Please try again.");
+            });
     };
 
     useEffect(() => {
-        if (!id) return;
-        setLoading(true);
-        apiFetch(`/api/races/${id}`)
-            .then((res) => {
-                if (!res.ok) throw new Error(res.statusText);
-                return res.json() as Promise<RaceDetails>;
-            })
-            .then(setRaceDetails)
-            .catch((err) => console.error("Error fetching race details:", err))
-            .finally(() => setLoading(false));
+        if (!id) {
+            return;
+        }
+
+        let cancelled = false;
+
+        const timeout = setTimeout(async () => {
+            setLoading(true);
+            setRaceDetails(null);
+            try {
+                const res = await apiFetch(`/api/races/${id}`);
+                if (!res.ok) {
+                    throw new Error(res.statusText);
+                }
+                const data: RaceDetails = await res.json();
+                if (!cancelled) {
+                    setRaceDetails(data);
+                }
+            } catch (err) {
+                if (!cancelled) {
+                    console.error("Error fetching race details:", err);
+                }
+            } finally {
+                if (!cancelled) {
+                    setLoading(false);
+                }
+            }
+        }, 0);
+
+        return () => {
+            cancelled = true;
+            clearTimeout(timeout);
+        };
     }, [id]);
 
     const today = new Date();
-    const upcomingEditions = raceDetails?.editions
-        .filter((e) => new Date(e.date) >= today)
-        .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) ?? [];
-    const pastEditions = raceDetails?.editions
-        .filter((e) => new Date(e.date) < today)
-        .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) ?? [];
+    const upcomingEditions =
+        raceDetails?.editions
+            .filter((e) => new Date(e.date) >= today)
+            .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()) ?? [];
+    const pastEditions =
+        raceDetails?.editions
+            .filter((e) => new Date(e.date) < today)
+            .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime()) ?? [];
 
     return (
         <div className="flex flex-col gap-8 py-4">
             <Link
                 to={backTo}
-                className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-foreground transition-colors w-fit"
+                className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
             >
-                <ArrowLeftIcon className="size-4" />
+                <ArrowLeft className="size-4" />
                 Back to search
             </Link>
 
@@ -118,14 +141,13 @@ export default function RacePage() {
                 />
             ) : (
                 <>
-                    {/* Hero */}
                     <div className="flex items-start justify-between gap-4">
                         <div className="flex flex-col gap-2">
-                            <h1 className="text-3xl font-bold tracking-tight text-foreground leading-tight">
+                            <h1 className="text-3xl leading-tight font-bold tracking-tight text-foreground">
                                 {raceDetails.name}
                             </h1>
-                            <div className="flex items-center gap-1.5 text-sm text-muted">
-                                <MapPinIcon className="size-4 shrink-0" />
+                            <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                                <MapPin className="size-4 shrink-0" />
                                 <span>
                                     {raceDetails.city}
                                     {raceDetails.voivodeship && (
@@ -142,87 +164,93 @@ export default function RacePage() {
 
                     <Separator />
 
-                    {/* Editions + Map */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                        <div className="lg:col-span-2 flex flex-col gap-5">
-                            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted">Editions</h2>
+                    <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+                        <div className="flex flex-col gap-5 lg:col-span-2">
+                            <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                                Editions
+                            </h2>
 
                             {upcomingEditions.length > 0 && (
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-xs font-semibold uppercase tracking-wide text-primary">Upcoming</span>
+                                    <span className="text-xs font-semibold tracking-wide text-primary uppercase">
+                                        Upcoming
+                                    </span>
                                     {upcomingEditions.map((edition) => (
-                                        <Surface
+                                        <article
                                             key={edition.date}
-                                            variant="default"
-                                            className="flex flex-col gap-2.5 rounded-2xl p-4 ring-1 ring-primary/25 bg-primary/5"
+                                            className={cn(
+                                                "flex flex-col gap-2.5 rounded-2xl border border-primary/25 bg-primary/5 p-4",
+                                                "ring-1 ring-primary/25",
+                                            )}
                                         >
                                             <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                                                <CalendarDaysIcon className="size-4 text-primary" />
+                                                <CalendarDays className="size-4 text-primary" />
                                                 {formatDate(edition.date)}
                                             </div>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {edition.distances.map((d) => (
-                                                    <Chip key={d.id} size="sm" variant="soft">
+                                                    <Badge key={d.id} variant="secondary">
                                                         {formatDistance(d.lengthInKm)}
-                                                    </Chip>
+                                                    </Badge>
                                                 ))}
                                             </div>
-                                        </Surface>
+                                        </article>
                                     ))}
                                 </div>
                             )}
 
                             {pastEditions.length > 0 && (
                                 <div className="flex flex-col gap-2">
-                                    <span className="text-xs font-semibold uppercase tracking-wide text-muted">Past editions</span>
+                                    <span className="text-xs font-semibold tracking-wide text-muted-foreground uppercase">
+                                        Past editions
+                                    </span>
                                     {pastEditions.map((edition) => (
-                                        <Surface
+                                        <article
                                             key={edition.date}
-                                            variant="default"
-                                            className="flex flex-col gap-2.5 rounded-2xl p-4 opacity-60"
+                                            className="flex flex-col gap-2.5 rounded-2xl border border-border bg-card p-4 opacity-60"
                                         >
                                             <div className="flex items-center gap-1.5 text-sm font-medium text-foreground">
-                                                <CalendarDaysIcon className="size-4" />
+                                                <CalendarDays className="size-4" />
                                                 {formatDate(edition.date)}
                                             </div>
                                             <div className="flex flex-wrap gap-1.5">
                                                 {edition.distances.map((d) => (
-                                                    <Chip key={d.id} size="sm" variant="soft">
+                                                    <Badge key={d.id} variant="secondary">
                                                         {formatDistance(d.lengthInKm)}
-                                                    </Chip>
+                                                    </Badge>
                                                 ))}
                                             </div>
-                                        </Surface>
+                                        </article>
                                     ))}
                                 </div>
                             )}
                         </div>
 
-                        {/* Map placeholder */}
                         <div className="flex flex-col gap-5">
-                            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted">Location</h2>
-                            <Surface
-                                variant="default"
-                                className="flex flex-col items-center justify-center gap-3 rounded-2xl p-8 min-h-[220px] border border-dashed border-border"
-                            >
-                                <MapIcon className="size-10 text-muted" style={{ opacity: 0.3 }} />
-                                <p className="text-sm font-medium text-muted">Map coming soon</p>
-                                <p className="text-xs text-center" style={{ opacity: 0.5 }}>
-                                    {raceDetails.city}{raceDetails.voivodeship && `, ${raceDetails.voivodeship}`}
+                            <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                                Location
+                            </h2>
+                            <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-card p-8">
+                                <Map className="size-10 text-muted-foreground/30" />
+                                <p className="text-sm font-medium text-muted-foreground">Map coming soon</p>
+                                <p className="text-center text-xs text-muted-foreground/50">
+                                    {raceDetails.city}
+                                    {raceDetails.voivodeship && `, ${raceDetails.voivodeship}`}
                                 </p>
-                            </Surface>
+                            </div>
                         </div>
                     </div>
 
                     <Separator />
 
-                    {/* Reviews */}
                     <div className="flex flex-col gap-5">
                         <div className="flex items-center justify-between">
-                            <h2 className="text-xs font-semibold uppercase tracking-widest text-muted">Reviews</h2>
-                            <span className="rounded-full bg-surface border border-border px-2.5 py-0.5 text-xs text-muted">
+                            <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
+                                Reviews
+                            </h2>
+                            <Badge variant="outline" className="text-xs text-muted-foreground">
                                 placeholder data
-                            </span>
+                            </Badge>
                         </div>
 
                         <ReviewForm onSubmit={handleAddReview} />
