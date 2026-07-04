@@ -67,7 +67,7 @@ class MeiliSearchAdapter implements SearchIndexInterface
             $searchResult->getTotalHits(),
             $query->page,
             $query->perPage,
-            $searchResult->getTotalPages(),
+            $searchResult->getTotalPages() ?? 1,
         );
     }
 
