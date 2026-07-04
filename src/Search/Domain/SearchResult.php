@@ -14,6 +14,7 @@ final readonly class SearchResult
         public ?int $totalHits,
         public int $page,
         public int $perPage,
+        public int $totalPages,
     ) {
     }
 }

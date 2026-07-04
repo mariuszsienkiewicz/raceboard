@@ -5,4 +5,5 @@ export interface SearchResponse {
     totalHits: number;
     page: number;
     perPage: number;
+    totalPages: number;
 }

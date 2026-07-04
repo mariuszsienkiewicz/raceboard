@@ -38,6 +38,7 @@ class SearchController
             'totalHits' => $result->totalHits,
             'page' => $result->page,
             'perPage' => $result->perPage,
+            'totalPages' => $result->totalPages,
         ]);
     }
 }
