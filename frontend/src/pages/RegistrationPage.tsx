@@ -4,6 +4,7 @@ import { Button } from "@heroui/react";
 import { Surface } from "@heroui/react/surface";
 import { EnvelopeIcon, LockClosedIcon, UserIcon, EyeIcon, EyeSlashIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
+import { Footprints } from "lucide-react";
 import { apiFetch } from "../api/client";
 
 interface RegisterPayload {
@@ -87,7 +88,8 @@ export default function RegistrationPage() {
             <div className="flex flex-col gap-6 md:flex-1 md:justify-center">
                 <div className="flex flex-col gap-3">
                     <div className="inline-flex w-fit items-center gap-2 rounded-full border border-border bg-surface px-3.5 py-1 text-xs font-medium uppercase tracking-wide text-muted">
-                        🏃 Free account
+                        <Footprints className="size-3.5" strokeWidth={1.75} />
+                        Free account
                     </div>
                     <h1 className="text-3xl font-bold tracking-tight text-foreground leading-snug">
                         Join the running community

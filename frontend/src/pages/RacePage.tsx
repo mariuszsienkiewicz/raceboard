@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useLocation } from "react-router-dom";
 import { apiFetch } from "../api/client";
 import type { RaceDetails } from "../types/race";
 import { Chip, Separator, Skeleton } from "@heroui/react";
@@ -13,6 +13,7 @@ import {
 import ReviewForm from "../components/review/ReviewForm";
 import RaceReviews from "../components/review/RaceReviews";
 import WatchlistButton from "../components/watchlist/WatchlistButton";
+import EmptyState from "../components/EmptyState";
 
 function formatDate(dateStr: string): string {
     return new Date(dateStr).toLocaleDateString("pl-PL", {
@@ -51,6 +52,8 @@ function RacePageSkeleton() {
 
 export default function RacePage() {
     const { id } = useParams<{ id: string }>();
+    const location = useLocation();
+    const backTo = (location.state as { from?: string } | null)?.from ?? "/";
 
     const [raceDetails, setRaceDetails] = useState<RaceDetails | null>(null);
     const [loading, setLoading] = useState(true);
@@ -98,7 +101,7 @@ export default function RacePage() {
     return (
         <div className="flex flex-col gap-8 py-4">
             <Link
-                to="/"
+                to={backTo}
                 className="inline-flex items-center gap-1.5 text-sm text-muted hover:text-foreground transition-colors w-fit"
             >
                 <ArrowLeftIcon className="size-4" />
@@ -108,11 +111,11 @@ export default function RacePage() {
             {loading ? (
                 <RacePageSkeleton />
             ) : !raceDetails ? (
-                <div className="flex flex-col items-center gap-3 py-20 text-center">
-                    <span className="text-5xl">😔</span>
-                    <p className="font-semibold text-foreground">Race not found</p>
-                    <p className="text-sm text-muted">This race doesn't exist or has been removed.</p>
-                </div>
+                <EmptyState
+                    icon="notFound"
+                    title="Race not found"
+                    description="This race doesn't exist or has been removed."
+                />
             ) : (
                 <>
                     {/* Hero */}

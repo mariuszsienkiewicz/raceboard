@@ -6,50 +6,83 @@ import SearchResult, { SearchResultSkeleton } from "./SearchResult";
 import type { Race } from "../../types/race";
 import type { SearchResponse } from "../../types/search";
 import SearchPagination from "./SearchPagination";
-import RaceMap from "./RaceMap";
-import ResultViewModeSwitcher from "./ResultViewModeSwitcher";
+import MapSearchView from "./MapSearchView";
+import SearchResultsToolbar from "./SearchResultsToolbar";
+import { restoreSearchScrollPosition, useSearchState } from "../../hooks/useSearchState";
+import type { SearchMode } from "./SearchModeSwitcher";
+import EmptyState from "../EmptyState";
 
 const SKELETON_COUNT = 20;
 const PER_PAGE = 20;
 
 export default function Search() {
-    const [searchTerm, setSearchTerm] = useState("");
-    const [selectedDistances, setSelectedDistances] = useState<Set<Key>>(new Set());
-    const [selectedVoivodeships, setSelectedVoivodeships] = useState<Set<Key>>(new Set());
-    const [selectedDateRange, setSelectedDateRange] = useState<DateRange | null>(null);
+    const {
+        q: searchTerm,
+        mode: searchMode,
+        distances: selectedDistances,
+        voivodeships: selectedVoivodeships,
+        dateRange: selectedDateRange,
+        page,
+        mapBounds,
+        updateState,
+    } = useSearchState();
+
     const [searchResponse, setSearchResponse] = useState<SearchResponse | null>(null);
-    const [page, setPage] = useState(1);
     const [results, setResults] = useState<Race[]>([]);
     const [loading, setLoading] = useState(true);
-    const [viewMode, setViewMode] = useState<"list" | "map">("list");
 
-    const handleSearchTermChange = useCallback((value: string) => {
-        setSearchTerm(value);
-        setPage(1);
-    }, []);
+    const handleSearchTermChange = useCallback(
+        (value: string) => updateState({ q: value, page: 1 }),
+        [updateState],
+    );
 
-    const handleDistanceChange = useCallback((selected: Set<Key>) => {
-        setSelectedDistances(selected);
-        setPage(1);
-    }, []);
+    const handleDistanceChange = useCallback(
+        (selected: Set<Key>) => updateState({ distances: selected, page: 1 }),
+        [updateState],
+    );
 
-    const handleVoivodeshipChange = useCallback((selected: Set<Key>) => {
-        setSelectedVoivodeships(selected);
-        setPage(1);
-    }, []);
+    const handleVoivodeshipChange = useCallback(
+        (selected: Set<Key>) => updateState({ voivodeships: selected, page: 1 }),
+        [updateState],
+    );
 
-    const handleDateChange = useCallback((selected: DateRange | null) => {
-        setSelectedDateRange(selected);
-        setPage(1);
-    }, []);
+    const handleDateChange = useCallback(
+        (selected: DateRange | null) => updateState({ dateRange: selected, page: 1 }),
+        [updateState],
+    );
 
-    const handlePageChange = useCallback((newPage: number) => {
-        setLoading(true);
-        setPage(newPage);
-        window.scrollTo({ top: 0, behavior: "smooth" });
-    }, []);
+    const handlePageChange = useCallback(
+        (newPage: number) => {
+            setLoading(true);
+            updateState({ page: newPage });
+            window.scrollTo({ top: 0, behavior: "smooth" });
+        },
+        [updateState],
+    );
+
+    const handleModeChange = useCallback(
+        (mode: SearchMode) => updateState({ mode, page: 1 }),
+        [updateState],
+    );
+
+    const handleMapBoundsChange = useCallback(
+        (bounds: typeof mapBounds) => updateState({ mapBounds: bounds }),
+        [updateState],
+    );
 
     useEffect(() => {
+        if (searchMode !== "list") {
+            return;
+        }
+
+        restoreSearchScrollPosition();
+    }, [searchMode]);
+
+    useEffect(() => {
+        if (searchMode !== "list") {
+            return;
+        }
+
         const controller = new AbortController();
 
         const timeout = setTimeout(async () => {
@@ -83,28 +116,45 @@ export default function Search() {
             clearTimeout(timeout);
             controller.abort();
         };
-    }, [searchTerm, selectedDistances, selectedVoivodeships, selectedDateRange, page]);
+    }, [searchTerm, selectedDistances, selectedVoivodeships, selectedDateRange, page, searchMode]);
 
-    return (
-        <div className="flex flex-col gap-6">
-            <SearchBar
-                value={searchTerm}
+    if (searchMode === "map") {
+        return (
+            <MapSearchView
+                searchTerm={searchTerm}
+                selectedDistances={selectedDistances}
+                selectedVoivodeships={selectedVoivodeships}
+                selectedDateRange={selectedDateRange}
+                initialBounds={mapBounds}
                 onSearchTermChange={handleSearchTermChange}
                 onDistanceChange={handleDistanceChange}
                 onVoivodeshipChange={handleVoivodeshipChange}
                 onDateChange={handleDateChange}
-                onViewModeChange={setViewMode}
+                onModeChange={handleModeChange}
+                onMapBoundsChange={handleMapBoundsChange}
+            />
+        );
+    }
+
+    return (
+        <div className="flex flex-col gap-5">
+            <SearchBar
+                value={searchTerm}
+                selectedDistances={selectedDistances}
+                selectedVoivodeships={selectedVoivodeships}
+                selectedDateRange={selectedDateRange}
+                onSearchTermChange={handleSearchTermChange}
+                onDistanceChange={handleDistanceChange}
+                onVoivodeshipChange={handleVoivodeshipChange}
+                onDateChange={handleDateChange}
             />
 
-            {!loading && searchResponse && searchResponse.totalHits > 0 && (
-                <div className="flex items-center justify-between">
-                    <p className="text-sm text-muted px-1">
-                        <span className="font-semibold text-foreground">{searchResponse.totalHits}</span>{" "}
-                        {searchResponse.totalHits === 1 ? "race found" : "races found"}
-                    </p>
-                    <ResultViewModeSwitcher onViewModeChange={setViewMode} />
-                </div>
-            )}
+            <SearchResultsToolbar
+                mode="list"
+                onModeChange={handleModeChange}
+                loading={loading}
+                totalHits={searchResponse?.totalHits}
+            />
 
             <Separator />
 
@@ -117,23 +167,19 @@ export default function Search() {
                     ))}
                 </ul>
             ) : results.length === 0 ? (
-                <div className="flex flex-col items-center gap-3 py-20 text-center">
-                    <span className="text-5xl">🔍</span>
-                    <p className="font-semibold text-foreground">No races found</p>
-                    <p className="text-sm text-muted">Try different keywords or remove some filters</p>
-                </div>
+                <EmptyState
+                    icon="search"
+                    title="No races found"
+                    description="Try different keywords or remove some filters"
+                />
             ) : (
-                (viewMode === "list" ? (
-                    <ul className="flex flex-col">
-                        {results.map((result) => (
-                            <li key={result.id} className="list-none">
-                                <SearchResult race={result} />
-                            </li>
-                        ))}
-                    </ul>
-                ) : (
-                    <RaceMap races={results} />
-                ))
+                <ul className="flex flex-col">
+                    {results.map((result) => (
+                        <li key={result.id} className="list-none">
+                            <SearchResult race={result} />
+                        </li>
+                    ))}
+                </ul>
             )}
 
             {!loading && searchResponse && searchResponse.totalPages > 1 && (

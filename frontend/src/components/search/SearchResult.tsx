@@ -2,8 +2,8 @@ import { Chip, Surface, Skeleton } from "@heroui/react";
 import type { Race } from "../../types/race";
 import { MapPinIcon, CalendarDaysIcon, ArrowRightIcon, HeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid";
-import { Link } from "react-router-dom";
 import { useState } from "react";
+import SearchReturnLink from "./SearchReturnLink";
 
 function formatDate(dateStr: string): string {
     return new Date(Number(dateStr) * 1000).toLocaleDateString("pl-PL", {
@@ -48,7 +48,7 @@ export default function SearchResult({ race }: { race: Race }) {
     }
 
     return (
-        <Link to={`/races/${race.id}`} className="block my-1.5">
+        <SearchReturnLink to={`/races/${race.id}`} className="block my-1.5">
             <Surface
                 className="group flex flex-col gap-3 rounded-2xl p-5 cursor-pointer transition-all duration-200 hover:shadow-md hover:-translate-y-px"
                 variant="default"
@@ -101,6 +101,6 @@ export default function SearchResult({ race }: { race: Race }) {
                     </div>
                 )}
             </Surface>
-        </Link>
+        </SearchReturnLink>
     );
 }
