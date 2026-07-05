@@ -14,6 +14,8 @@
         <field name="city" type="string" length="100" />
         <field name="voivodeship" type="string" length="100" />
         <field name="country" type="string" length="2" />
+        <field name="latitude" type="float" nullable="true" />
+        <field name="longitude" type="float" nullable="true" />
 
         <one-to-many field="editions"
             target-entity="App\RaceCatalog\Domain\Model\Edition"
