@@ -25,19 +25,45 @@ class ReviewController
     }
 
     #[Route('/api/races/{raceId}/reviews', name: 'api_review_race_list', methods: ['GET'])]
-    public function list(string $raceId): JsonResponse
+    public function list(#[CurrentUser] User $user, string $raceId, Request $request): JsonResponse
     {
-        $reviews = $this->reviewRepository->findByRace(RaceId::fromString($raceId));
+        $race = RaceId::fromString($raceId);
+        $page = max(1, $request->query->getInt('page', 1));
+        $perPage = min(50, max(1, $request->query->getInt('perPage', 10)));
+        $offset = ($page - 1) * $perPage;
+
+        $userReview = null;
+        if ($user) {
+            $userReview = $this->reviewRepository->findByUserAndRace($user->getId(), $race);
+        }
+
+        $reviews = $this->reviewRepository->findByRace($race, $perPage, $offset);
+        $total = $this->reviewRepository->countByRace($race);
+
         $userIds = array_map(fn (Review $review) => $review->getUserId(), $reviews);
         $users = $this->userRepository->findByIds($userIds);
 
-        return new JsonResponse(array_map(fn (Review $r) => [
-            'id' => $r->getId()->toString(),
-            'rating' => $r->getRating(),
-            'comment' => $r->getComment(),
-            'displayName' => $users[$r->getUserId()->toString()]->getDisplayName() ?: 'Anonymous',
-            'createdAt' => $r->getCreatedAt()->format('Y-m-d H:i:s'),
-        ], $reviews));
+        return new JsonResponse([
+            'reviews' => array_map(fn (Review $review) => [
+                'id' => $review->getId()->toString(),
+                'rating' => $review->getRating(),
+                'comment' => $review->getComment(),
+                'displayName' => ($users[$review->getUserId()->toString()] ?? null)?->getDisplayName() ?: 'Anonymous',
+                'createdAt' => $review->getCreatedAt()->format('Y-m-d H:i:s'),
+            ], $reviews),
+            'userReview' => $userReview ? [
+                'id' => $userReview->getId()->toString(),
+                'rating' => $userReview->getRating(),
+                'comment' => $userReview->getComment(),
+                'displayName' => $user->getDisplayName() ?? 'Anonymous',
+                'createdAt' => $userReview->getCreatedAt()->format('Y-m-d H:i:s'),
+            ] : null,
+            'averageRating' => $this->reviewRepository->getAverageRating($race),
+            'reviewCount' => $total,
+            'page' => $page,
+            'perPage' => $perPage,
+            'totalPages' => (int) ceil($total / $perPage),
+        ]);
     }
 
     #[Route('/api/races/{raceId}/reviews', name: 'api_review_race_add', methods: ['POST'])]

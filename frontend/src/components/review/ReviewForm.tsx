@@ -122,8 +122,8 @@ export default function ReviewForm({ onSubmit }: ReviewFormProps) {
                                         className={cn(
                                             "size-6",
                                             filled
-                                                ? "fill-amber-400 text-amber-400"
-                                                : "text-muted-foreground/40 hover:text-amber-300",
+                                                ? "fill-primary text-primary"
+                                                : "text-muted-foreground/40 hover:text-foreground/60",
                                         )}
                                     />
                                 </button>
