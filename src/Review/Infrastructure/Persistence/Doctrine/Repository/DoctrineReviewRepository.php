@@ -30,7 +30,7 @@ class DoctrineReviewRepository implements ReviewRepositoryInterface
             ->where('r.raceId = :raceId')
             ->setParameter('raceId', $raceId)
             ->setMaxResults($limit)
-            ->setFirstResult($offset)    
+            ->setFirstResult($offset)
             ->getQuery()
             ->getResult();
     }
@@ -59,15 +59,17 @@ class DoctrineReviewRepository implements ReviewRepositoryInterface
             ->getOneOrNullResult();
     }
 
-    public function countByRace(RaceId $raceId): int 
+    public function countByRace(RaceId $raceId): int
     {
-        return $this->entityManager->createQueryBuilder()
+        $count = $this->entityManager->createQueryBuilder()
             ->select('COUNT(r)')
             ->from(Review::class, 'r')
             ->where('r.raceId = :raceId')
             ->setParameter('raceId', $raceId)
             ->getQuery()
             ->getSingleScalarResult() ?? 0;
+
+        return (int) $count;
     }
 
     public function getAverageRating(RaceId $raceId): ?float
@@ -80,7 +82,7 @@ class DoctrineReviewRepository implements ReviewRepositoryInterface
             ->getQuery()
             ->getSingleScalarResult();
 
-        return $average === null ? null : (float) $average;
+        return null === $average ? null : (float) $average;
     }
 
     public function remove(Review $review): void

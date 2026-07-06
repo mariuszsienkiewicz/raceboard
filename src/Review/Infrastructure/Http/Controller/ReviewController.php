@@ -25,7 +25,7 @@ class ReviewController
     }
 
     #[Route('/api/races/{raceId}/reviews', name: 'api_review_race_list', methods: ['GET'])]
-    public function list(#[CurrentUser] User $user, string $raceId, Request $request): JsonResponse
+    public function list(#[CurrentUser] ?User $user, string $raceId, Request $request): JsonResponse
     {
         $race = RaceId::fromString($raceId);
         $page = max(1, $request->query->getInt('page', 1));
@@ -33,7 +33,7 @@ class ReviewController
         $offset = ($page - 1) * $perPage;
 
         $userReview = null;
-        if ($user) {
+        if (null !== $user) {
             $userReview = $this->reviewRepository->findByUserAndRace($user->getId(), $race);
         }
 
@@ -51,11 +51,11 @@ class ReviewController
                 'displayName' => ($users[$review->getUserId()->toString()] ?? null)?->getDisplayName() ?: 'Anonymous',
                 'createdAt' => $review->getCreatedAt()->format('Y-m-d H:i:s'),
             ], $reviews),
-            'userReview' => $userReview ? [
+            'userReview' => null !== $user && null !== $userReview ? [
                 'id' => $userReview->getId()->toString(),
                 'rating' => $userReview->getRating(),
                 'comment' => $userReview->getComment(),
-                'displayName' => $user->getDisplayName() ?? 'Anonymous',
+                'displayName' => $user->getDisplayName(),
                 'createdAt' => $userReview->getCreatedAt()->format('Y-m-d H:i:s'),
             ] : null,
             'averageRating' => $this->reviewRepository->getAverageRating($race),
