@@ -7,7 +7,9 @@ import Footer from './components/Footer'
 import RegistrationPage from './pages/RegistrationPage'
 import RacePage from './pages/RacePage'
 import WatchlistPage from './pages/WatchlistPage'
+import AccountPage from './pages/AccountPage'
 import { ThemeProvider } from './components/ThemeProvider'
+import { Toaster } from './components/ui/sonner'
 
 function App() {
   return (
@@ -23,9 +25,11 @@ function App() {
                 <Route path="/login" element={<LoginPage />} />
                 <Route path="/register" element={<RegistrationPage />} />
                 <Route path="/watchlist" element={<WatchlistPage />} />
+                <Route path="/account" element={<AccountPage />} />
               </Routes>
             </main>
             <Footer />
+            <Toaster richColors position="top-center" />
           </div>
         </BrowserRouter>
       </AuthProvider>

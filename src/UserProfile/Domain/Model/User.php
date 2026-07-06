@@ -48,6 +48,15 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this->displayName;
     }
 
+    public function changeDisplayName(string $displayName): void
+    {
+        if ('' === $displayName) {
+            throw new \InvalidArgumentException('Display name cannot be empty.');
+        }
+
+        $this->displayName = $displayName;
+    }
+
     public function getEmail(): string
     {
         return $this->email;
