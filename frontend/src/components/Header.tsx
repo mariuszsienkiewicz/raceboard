@@ -95,10 +95,6 @@ export default function Header() {
                                     <UserCircle />
                                     My account
                                 </DropdownMenuItem>
-                                <DropdownMenuItem render={<Link to="/watchlist" />} nativeButton={false}>
-                                    <Settings />
-                                    Watchlist
-                                </DropdownMenuItem>
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem variant="destructive" onClick={handleLogout}>
                                     <LogOut />
