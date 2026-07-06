@@ -3,7 +3,7 @@ import { Link, useLocation, useParams } from "react-router-dom";
 import { ArrowLeft, CalendarDays, Map, MapPin } from "lucide-react";
 import { apiFetch } from "@/api/client";
 import EmptyState from "@/components/EmptyState";
-import RaceReviews from "@/components/review/RaceReviews";
+import ReviewList from "@/components/review/ReviewList";
 import ReviewForm from "@/components/review/ReviewForm";
 import WatchlistButton from "@/components/watchlist/WatchlistButton";
 import { Badge } from "@/components/ui/badge";
@@ -12,6 +12,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { RaceDetails } from "@/types/race";
 import { MapContainer, TileLayer } from "react-leaflet";
+import RaceReviews from "@/components/review/RaceReviews";
 
 function formatDate(dateStr: string): string {
     return new Date(dateStr).toLocaleDateString("pl-PL", {
@@ -55,26 +56,6 @@ export default function RacePage() {
 
     const [raceDetails, setRaceDetails] = useState<RaceDetails | null>(null);
     const [loading, setLoading] = useState(true);
-
-    const handleAddReview = async (_rating: number, _comment: string): Promise<void> => {
-        apiFetch(`/api/races/${id}/reviews`, {
-            method: "POST",
-            body: JSON.stringify({
-                rating: _rating,
-                comment: _comment,
-            }),
-        })
-            .then((res) => {
-                if (!res.ok) {
-                    throw new Error("Failed to submit review");
-                }
-                console.log("Review submitted successfully");
-            })
-            .catch((err) => {
-                console.error("Error submitting review:", err);
-                alert("Failed to submit review. Please try again.");
-            });
-    };
 
     useEffect(() => {
         if (!id) {
@@ -247,19 +228,7 @@ export default function RacePage() {
 
                     <Separator />
 
-                    <div className="flex flex-col gap-5">
-                        <div className="flex items-center justify-between">
-                            <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
-                                Reviews
-                            </h2>
-                            <Badge variant="outline" className="text-xs text-muted-foreground">
-                                placeholder data
-                            </Badge>
-                        </div>
-
-                        <ReviewForm onSubmit={handleAddReview} />
-                        <RaceReviews raceId={raceDetails.id} />
-                    </div>
+                    <RaceReviews raceId={raceDetails.id} />
                 </>
             )}
         </div>

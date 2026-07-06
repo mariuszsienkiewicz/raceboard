@@ -41,7 +41,7 @@ class DoctrineReviewRepositoryTest extends KernelTestCase
         $this->repository->save($review);
         $this->em->clear();
 
-        $reviewsByRace = $this->repository->findByRace($review->getRaceId());
+        $reviewsByRace = $this->repository->findByRace($review->getRaceId(), 10, 0);
         $this->assertCount(1, $reviewsByRace);
         $this->assertEquals($review->getId()->toString(), $reviewsByRace[0]->getId()->toString());
     }
