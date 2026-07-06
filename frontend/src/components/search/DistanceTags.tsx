@@ -38,7 +38,7 @@ export default function DistanceTags({ selectedKeys, onChange }: DistanceTagsPro
                 className="flex flex-wrap gap-1.5"
             >
                 {DISTANCES.map(({ value, label }) => (
-                    <ToggleGroupItem key={value} value={value}>
+                    <ToggleGroupItem key={value} value={value} className="cursor-pointer">
                         {label}
                     </ToggleGroupItem>
                 ))}
