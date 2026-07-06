@@ -11,6 +11,7 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { RaceDetails } from "@/types/race";
+import { MapContainer, TileLayer } from "react-leaflet";
 
 function formatDate(dateStr: string): string {
     return new Date(dateStr).toLocaleDateString("pl-PL", {
@@ -230,14 +231,17 @@ export default function RacePage() {
                             <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                                 Location
                             </h2>
-                            <div className="flex min-h-[220px] flex-col items-center justify-center gap-3 rounded-2xl border border-dashed border-border bg-card p-8">
-                                <Map className="size-10 text-muted-foreground/30" />
-                                <p className="text-sm font-medium text-muted-foreground">Map coming soon</p>
-                                <p className="text-center text-xs text-muted-foreground/50">
-                                    {raceDetails.city}
-                                    {raceDetails.voivodeship && `, ${raceDetails.voivodeship}`}
-                                </p>
-                            </div>
+                            <MapContainer
+                                center={[raceDetails.latitude, raceDetails.longitude]}
+                                zoom={13}
+                                style={{ height: "220px", width: "100%" }}
+                                className="rounded-2xl"
+                            >
+                                <TileLayer
+                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+                                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                                />
+                            </MapContainer>
                         </div>
                     </div>
 

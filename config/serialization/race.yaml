@@ -15,6 +15,10 @@ App\RaceCatalog\Domain\Model\Race:
             groups: ['race:read']
         editions:
             groups: ['race:read']
+        latitude:
+            groups: ['race:read']
+        longitude:
+            groups: ['race:read']
 
 App\RaceCatalog\Domain\Model\Edition:
     attributes:
