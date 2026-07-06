@@ -15,6 +15,7 @@ import { cn } from "@/lib/utils";
 
 interface RegisterPayload {
     email: string;
+    displayName: string;
     password: string;
 }
 
@@ -39,6 +40,7 @@ const PERKS = [
 
 export default function RegistrationPage() {
     const [email, setEmail] = useState("");
+    const [displayName, setDisplayName] = useState("");
     const [password, setPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
     const [showPassword, setShowPassword] = useState(false);
@@ -47,7 +49,7 @@ export default function RegistrationPage() {
     const [success, setSuccess] = useState(false);
 
     const passwordsMatch = confirmPassword === "" || password === confirmPassword;
-    const isValid = email.length > 0 && password.length >= 8 && password === confirmPassword;
+    const isValid = email.length > 0 && displayName.length > 0 && password.length >= 8 && password === confirmPassword;
 
     const handleSubmit = async (event: React.FormEvent) => {
         event.preventDefault();
@@ -59,7 +61,7 @@ export default function RegistrationPage() {
         setError(null);
 
         try {
-            await registerUser({ email, password });
+            await registerUser({ email, displayName, password });
             setSuccess(true);
         } catch (err) {
             setError(err instanceof Error ? err.message : "Something went wrong. Please try again.");
@@ -157,6 +159,29 @@ export default function RegistrationPage() {
                                         value={email}
                                         onChange={(event) => setEmail(event.target.value)}
                                         placeholder="you@example.com"
+                                    />
+                                </InputGroup>
+                            </div>
+
+                            <div className="flex flex-col gap-1.5">
+                                <Label
+                                    htmlFor="display-name"
+                                    className="text-xs font-semibold tracking-wide text-muted-foreground uppercase"
+                                >
+                                    Name
+                                </Label>
+                                <InputGroup className="h-11">
+                                    <InputGroupAddon>
+                                        <User />
+                                    </InputGroupAddon>
+                                    <InputGroupInput
+                                        id="display-name"
+                                        type="text"
+                                        autoComplete="name"
+                                        required
+                                        value={displayName}
+                                        onChange={(event) => setDisplayName(event.target.value)}
+                                        placeholder="John Doe"
                                     />
                                 </InputGroup>
                             </div>
