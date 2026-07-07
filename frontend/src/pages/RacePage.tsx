@@ -210,17 +210,24 @@ export default function RacePage() {
                             <h2 className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">
                                 Location
                             </h2>
-                            <MapContainer
-                                center={[raceDetails.latitude, raceDetails.longitude]}
-                                zoom={13}
-                                style={{ height: "220px", width: "100%" }}
-                                className="rounded-2xl"
-                            >
-                                <TileLayer
-                                    attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-                                    url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                                />
-                            </MapContainer>
+                            {raceDetails.latitude != null && raceDetails.longitude != null ? (
+                                <MapContainer
+                                    center={[raceDetails.latitude, raceDetails.longitude]}
+                                    zoom={13}
+                                    style={{ height: "220px", width: "100%" }}
+                                    className="rounded-2xl"
+                                >
+                                    <TileLayer
+                                        attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
+                                        url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
+                                    />
+                                </MapContainer>
+                            ) : (
+                                <div className="flex h-[220px] w-full flex-col items-center justify-center gap-2 rounded-2xl border border-dashed border-border bg-muted/30 text-center text-sm text-muted-foreground">
+                                    <MapPin className="size-5 opacity-60" />
+                                    <span>Location not available yet</span>
+                                </div>
+                            )}
                         </div>
                     </div>
 

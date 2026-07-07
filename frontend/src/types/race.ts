@@ -17,8 +17,8 @@ export interface RaceDetails {
     country: string;
     voivodeship: string;
     editions: Editions[];
-    latitude: number;
-    longitude: number;
+    latitude: number | null;
+    longitude: number | null;
 }
 
 export interface Editions {
