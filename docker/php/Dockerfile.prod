@@ -7,7 +7,6 @@ RUN composer install \
     --no-interaction \
     --prefer-dist \
     --optimize-autoloader \
-    --classmap-authoritative \
     --no-progress
 
 FROM php:8.4-fpm-alpine AS runtime
@@ -26,9 +25,14 @@ RUN apk add --no-cache --virtual .build-deps autoconf g++ make \
     && apk del .build-deps
 WORKDIR /app
 COPY docker/php/php.prod.ini /usr/local/etc/php/conf.d/zz-app.ini
+COPY --from=vendor /usr/bin/composer /usr/bin/composer
 COPY . .
 COPY --from=vendor /app/vendor ./vendor
-RUN mkdir -p var/cache var/log \
+
+# Regenerate the autoloader now, then drop composer.
+RUN composer dump-autoload --no-dev --optimize --classmap-authoritative --no-scripts \
+    && rm /usr/bin/composer \
+    && mkdir -p var/cache var/log \
     && chown -R www-data:www-data var
 USER www-data
 EXPOSE 9000
