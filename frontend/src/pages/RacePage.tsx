@@ -1,10 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useLocation, useParams } from "react-router-dom";
-import { ArrowLeft, CalendarDays, Map, MapPin } from "lucide-react";
+import { ArrowLeft, CalendarDays, MapPin } from "lucide-react";
 import { apiFetch } from "@/api/client";
 import EmptyState from "@/components/EmptyState";
-import ReviewList from "@/components/review/ReviewList";
-import ReviewForm from "@/components/review/ReviewForm";
 import WatchlistButton from "@/components/watchlist/WatchlistButton";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
