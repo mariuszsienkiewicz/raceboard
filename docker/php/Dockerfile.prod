@@ -33,8 +33,8 @@ COPY --from=vendor /app/vendor ./vendor
 # Regenerate the autoloader now, then drop composer.
 RUN composer dump-autoload --no-dev --optimize --classmap-authoritative --no-scripts \
     && rm /usr/bin/composer \
-    && mkdir -p var/cache var/log \
-    && chown -R www-data:www-data var
+    && mkdir -p var/cache var/log config/jwt \
+    && chown -R www-data:www-data var config/jwt
 USER www-data
 EXPOSE 9000
 CMD ["php-fpm"]
