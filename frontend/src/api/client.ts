@@ -1,7 +1,6 @@
 import { getToken, removeToken } from "./auth";
 
-const API_URL = import.meta.env.VITE_API_URL;
-if (!API_URL) throw new Error('VITE_API_URL is not defined');
+const API_URL = import.meta.env.VITE_API_URL ?? '';
 
 export async function apiFetch(path: string, options: RequestInit = {}) {
     const token = getToken();
