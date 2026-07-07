@@ -1,0 +1,99 @@
+services:
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      meilisearch:
+        condition: service_started
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: 0
+      APP_SECRET: ${APP_SECRET}
+      DATABASE_URL: postgresql://raceboard:${POSTGRES_PASSWORD}@database:5432/raceboard?serverVersion=16&charset=utf8
+      REDIS_URL: redis://redis:6379
+      MEILISEARCH_URL: http://meilisearch:7700
+      MEILISEARCH_API_KEY: ${MEILISEARCH_API_KEY}
+      MESSENGER_TRANSPORT_DSN: redis://redis:6379/messages
+      MAILER_DSN: ${MAILER_DSN}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
+    volumes:
+      - jwt_keys:/app/config/jwt
+
+  nginx:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile.prod
+    restart: unless-stopped
+    depends_on:
+      - php
+    expose:
+      - "80"
+
+  worker:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile.prod
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      meilisearch:
+        condition: service_started
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: 0
+      APP_SECRET: ${APP_SECRET}
+      DATABASE_URL: postgresql://raceboard:${POSTGRES_PASSWORD}@database:5432/raceboard?serverVersion=16&charset=utf8
+      REDIS_URL: redis://redis:6379
+      MEILISEARCH_URL: http://meilisearch:7700
+      MEILISEARCH_API_KEY: ${MEILISEARCH_API_KEY}
+      MESSENGER_TRANSPORT_DSN: redis://redis:6379/messages
+      MAILER_DSN: ${MAILER_DSN}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
+    volumes:
+      - jwt_keys:/app/config/jwt
+    command: php bin/console messenger:consume async --time-limit=3600 --memory-limit=192M -v
+
+  database:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: raceboard
+      POSTGRES_USER: raceboard
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - db_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U raceboard -d raceboard"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    restart: unless-stopped
+    volumes:
+      - redis_data:/data
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    restart: unless-stopped
+    environment:
+      MEILI_MASTER_KEY: ${MEILISEARCH_API_KEY}
+      MEILI_ENV: production
+    volumes:
+      - meilisearch_data:/meili_data
+
+volumes:
+  db_data:
+  redis_data:
+  meilisearch_data:
+  jwt_keys:

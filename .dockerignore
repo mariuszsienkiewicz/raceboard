@@ -1,0 +1,23 @@
+.git
+.github
+.idea
+.vscode
+
+# PHP
+/vendor
+/var
+composer.phar
+
+# Frontend
+/frontend/node_modules
+/frontend/dist
+
+# Local env / secrets
+.env.local
+.env.*.local
+/config/jwt/*.pem
+
+# Dev-only
+docker-compose.override.yml
+tests
+.phpunit.result.cache
