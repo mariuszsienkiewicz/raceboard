@@ -44,6 +44,16 @@ when@prod:
                 path: php://stderr
                 level: debug
                 formatter: monolog.formatter.json
+            # "main" (fingers_crossed) only flushes when an error occurs, so the
+            # happypath lifecycle of async workers would otherwise be invisible.
+            # This handler streams the domain-relevant flow (imports, message
+            # consumption) to stderr / `docker logs` without http_client/doctrine noise.
+            worker:
+                type: stream
+                path: php://stderr
+                level: info
+                formatter: monolog.formatter.json
+                channels: ["app", "messenger"]
             console:
                 type: console
                 process_psr_3_messages: false
