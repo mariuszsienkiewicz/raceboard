@@ -4,6 +4,7 @@ services:
       context: .
       dockerfile: docker/php/Dockerfile.prod
     restart: unless-stopped
+    image: raceboard-php:latest
     depends_on:
       database:
         condition: service_healthy
@@ -36,9 +37,7 @@ services:
       - "80"
 
   worker:
-    build:
-      context: .
-      dockerfile: docker/php/Dockerfile.prod
+    image: raceboard-php:latest
     restart: unless-stopped
     depends_on:
       database:
