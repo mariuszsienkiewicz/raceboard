@@ -19,7 +19,6 @@ import { useAuth } from "@/context/useAuth";
 const NAV_LINKS = [
     { label: "Races", to: "/" },
     { label: "Watchlist", to: "/watchlist" },
-    { label: "Reviews", to: "/reviews" },
     { label: "About", to: "/about" },
 ] as const;
 

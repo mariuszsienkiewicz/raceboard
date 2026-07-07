@@ -6,18 +6,15 @@ import { cn } from "@/lib/utils";
 const LINKS = {
     Product: [
         { label: "Search races", to: "/" },
-        { label: "My watchlist", to: "#" },
-        { label: "Reviews", to: "#" },
+        { label: "My watchlist", to: "/watchlist" },
     ],
     Resources: [
-        { label: "API docs", to: "#" },
-        { label: "About", to: "#" },
-        { label: "Blog", to: "#" },
+        { label: "About", to: "/about" },
     ],
     Legal: [
-        { label: "Privacy policy", to: "#" },
-        { label: "Terms of use", to: "#" },
-        { label: "Cookie policy", to: "#" },
+        { label: "Privacy policy", to: "/privacy" },
+        { label: "Terms of use", to: "/terms" },
+        { label: "Cookie policy", to: "/cookie" },
     ],
 } as const;
 

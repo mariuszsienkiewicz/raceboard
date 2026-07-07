@@ -8,6 +8,10 @@ import RegistrationPage from './pages/RegistrationPage'
 import RacePage from './pages/RacePage'
 import WatchlistPage from './pages/WatchlistPage'
 import AccountPage from './pages/AccountPage'
+import AboutPage from './pages/AboutPage'
+import PrivacyPolicyPage from './pages/legal/PrivacyPolicyPage'
+import TermsOfUsePage from './pages/legal/TermsOfUsePage'
+import CookiePolicyPage from './pages/legal/CookiePolicyPage'
 import { ThemeProvider } from './components/ThemeProvider'
 import { Toaster } from './components/ui/sonner'
 
@@ -26,6 +30,10 @@ function App() {
                 <Route path="/register" element={<RegistrationPage />} />
                 <Route path="/watchlist" element={<WatchlistPage />} />
                 <Route path="/account" element={<AccountPage />} />
+                <Route path="/about" element={<AboutPage />} />
+                <Route path="/privacy" element={<PrivacyPolicyPage />} />
+                <Route path="/terms" element={<TermsOfUsePage />} />
+                <Route path="/cookie" element={<CookiePolicyPage />} />
               </Routes>
             </main>
             <Footer />
