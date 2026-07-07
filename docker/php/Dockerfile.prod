@@ -7,7 +7,8 @@ RUN composer install \
     --no-interaction \
     --prefer-dist \
     --optimize-autoloader \
-    --no-progress
+    --no-progress \
+    --ignore-platform-req=ext-redis
 
 FROM php:8.4-fpm-alpine AS runtime
 RUN apk add --no-cache \
