@@ -11,6 +11,7 @@ import {
     InputGroupInput,
 } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
+import PageSeo from "@/components/PageSeo";
 import { cn } from "@/lib/utils";
 
 interface RegisterPayload {
@@ -73,6 +74,7 @@ export default function RegistrationPage() {
     if (success) {
         return (
             <div className="flex min-h-[60vh] items-center justify-center px-4">
+                <PageSeo title="Account created" noIndex />
                 <div className="flex flex-col items-center gap-4 text-center">
                     <div className="flex size-16 items-center justify-center rounded-full bg-primary/10">
                         <CheckCircle2 className="size-9 text-primary" />
@@ -93,6 +95,11 @@ export default function RegistrationPage() {
 
     return (
         <div className="mx-auto flex max-w-4xl flex-col gap-10 py-8 md:flex-row md:gap-16 md:py-16">
+            <PageSeo
+                title="Create account"
+                description="Join Raceboard to save races, leave reviews and track upcoming editions."
+                noIndex
+            />
             <div className="flex flex-col gap-6 md:flex-1 md:justify-center">
                 <div className="flex flex-col gap-3">
                     <Badge

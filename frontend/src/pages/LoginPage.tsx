@@ -10,6 +10,7 @@ import {
     InputGroupInput,
 } from "@/components/ui/input-group";
 import { Label } from "@/components/ui/label";
+import PageSeo from "@/components/PageSeo";
 import { cn } from "@/lib/utils";
 import { useAuth } from "@/context/useAuth";
 
@@ -58,6 +59,11 @@ export default function LoginPage() {
 
     return (
         <div className="flex justify-center px-4 py-8 md:py-16">
+            <PageSeo
+                title="Log in"
+                description="Sign in to your Raceboard account to manage your watchlist and reviews."
+                noIndex
+            />
             <div className="w-full max-w-sm">
                 <div className="rounded-3xl border border-border bg-card p-8 text-card-foreground shadow-sm">
                     <div className="flex flex-col gap-6">

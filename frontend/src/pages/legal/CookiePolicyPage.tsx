@@ -94,6 +94,7 @@ export default function CookiePolicyPage() {
             icon={Cookie}
             badge="Cookies"
             title="Cookie Policy"
+            seoDescription="What cookies and local storage Raceboard uses and how you can manage them."
             intro="What Raceboard stores in your browser, why we store it and how you can manage it."
             lastUpdated={LAST_UPDATED}
             sections={SECTIONS}

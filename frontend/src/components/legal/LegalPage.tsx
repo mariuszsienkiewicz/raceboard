@@ -1,4 +1,5 @@
 import type { ComponentType, ReactNode } from "react";
+import PageSeo from "@/components/PageSeo";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
 
@@ -12,6 +13,7 @@ interface LegalPageProps {
     icon: ComponentType<{ className?: string; strokeWidth?: number }>;
     badge: string;
     title: string;
+    seoDescription: string;
     intro: string;
     lastUpdated: string;
     sections: LegalSection[];
@@ -21,12 +23,14 @@ export default function LegalPage({
     icon: Icon,
     badge,
     title,
+    seoDescription,
     intro,
     lastUpdated,
     sections,
 }: LegalPageProps) {
     return (
         <div className="flex flex-col gap-10 py-4">
+            <PageSeo title={title} description={seoDescription} />
             <header className="relative overflow-hidden rounded-4xl border border-border bg-card p-6 ring-1 ring-foreground/5 sm:p-8">
                 <div
                     aria-hidden

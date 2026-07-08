@@ -1,5 +1,6 @@
 import { CalendarCheck, Footprints, MapPinned, Sparkles } from "lucide-react";
 import { Link, useSearchParams } from "react-router-dom";
+import PageSeo from "@/components/PageSeo";
 import Search from "@/components/search/Search";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
@@ -69,6 +70,10 @@ export default function HomePage() {
 
     return (
         <div className={cn(!isMapMode && "flex flex-col gap-10 sm:gap-12")}>
+            <PageSeo
+                title="Raceboard"
+                description="Find running races across Poland. Search by city, region and distance in one calendar."
+            />
             {!isMapMode && (
                 <section className="relative px-2 pt-6 pb-1 text-center sm:pt-10">
                     <div
