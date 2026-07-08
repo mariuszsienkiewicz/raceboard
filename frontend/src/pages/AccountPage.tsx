@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Lock, Mail, User, UserCircle } from "lucide-react";
 import { toast } from "sonner";
+import PageSeo from "@/components/PageSeo";
 import { apiFetch } from "@/api/client";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -75,6 +76,7 @@ function PageContainer({ children }: { children: React.ReactNode }) {
 function NotAuthenticated() {
     return (
         <PageContainer>
+            <PageSeo title="Account" description="Manage your Raceboard profile and display name." noIndex />
             <Card>
                 <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
                     <Avatar className="size-16">
@@ -100,6 +102,7 @@ function NotAuthenticated() {
 function AccountSkeleton() {
     return (
         <PageContainer>
+            <PageSeo title="Account" description="Manage your Raceboard profile and display name." noIndex />
             <Card>
                 <CardHeader className="border-b">
                     <div className="flex items-center gap-4">
@@ -127,6 +130,7 @@ function AccountSkeleton() {
 function LoadError({ message }: { message: string }) {
     return (
         <PageContainer>
+            <PageSeo title="Account" description="Manage your Raceboard profile and display name." noIndex />
             <Card className="border-destructive/50">
                 <CardContent>
                     <FieldError>{message}</FieldError>
@@ -226,6 +230,7 @@ export default function AccountPage() {
 
     return (
         <PageContainer>
+            <PageSeo title="Account" description="Manage your Raceboard profile and display name." noIndex />
             <Card>
                 <CardHeader className="border-b">
                     <div className="flex items-center gap-4">

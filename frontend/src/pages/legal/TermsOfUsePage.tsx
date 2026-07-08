@@ -121,6 +121,7 @@ export default function TermsOfUsePage() {
             icon={ScrollText}
             badge="Terms"
             title="Terms of Use"
+            seoDescription="Rules for using the Raceboard running calendar and your account."
             intro="The rules for using Raceboard, including your account, reviews and acceptable use of the service."
             lastUpdated={LAST_UPDATED}
             sections={SECTIONS}

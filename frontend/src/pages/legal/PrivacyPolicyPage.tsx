@@ -137,6 +137,7 @@ export default function PrivacyPolicyPage() {
             icon={ShieldCheck}
             badge="Privacy"
             title="Privacy Policy"
+            seoDescription="How Raceboard collects, uses and protects your personal data."
             intro="How Raceboard collects, uses and protects your personal data when you use the site."
             lastUpdated={LAST_UPDATED}
             sections={SECTIONS}

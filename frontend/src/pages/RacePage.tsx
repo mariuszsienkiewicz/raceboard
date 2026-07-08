@@ -13,6 +13,7 @@ import {
 } from "lucide-react";
 import { apiFetch } from "@/api/client";
 import EmptyState from "@/components/EmptyState";
+import PageSeo from "@/components/PageSeo";
 import WatchlistButton from "@/components/watchlist/WatchlistButton";
 import { Badge } from "@/components/ui/badge";
 import { buttonVariants } from "@/components/ui/button";
@@ -114,6 +115,18 @@ function FactRow({ icon: Icon, label, value }: { icon: React.ComponentType<{ cla
     );
 }
 
+function buildRaceSeoDescription(race: RaceDetails, nextDate: string | null): string {
+    const place = [race.city, race.voivodeship].filter(Boolean).join(", ");
+    const location = place || race.country;
+
+    if (nextDate) {
+        const formattedDate = formatDate(nextDate);
+        return `${race.name} in ${location}. Next edition on ${formattedDate}. Dates, distances and reviews on Raceboard.`;
+    }
+
+    return `${race.name} in ${location}. View dates, distances and reviews on Raceboard.`;
+}
+
 function RacePageSkeleton() {
     return (
         <div className="flex flex-col gap-8">
@@ -199,6 +212,18 @@ export default function RacePage() {
 
     return (
         <div className="flex flex-col gap-8 py-4">
+            {loading && (
+                <PageSeo title="Race details" description="Running race details on Raceboard." />
+            )}
+            {!loading && !raceDetails && (
+                <PageSeo title="Race not found" description="This race does not exist or has been removed." noIndex />
+            )}
+            {!loading && raceDetails && (
+                <PageSeo
+                    title={raceDetails.name}
+                    description={buildRaceSeoDescription(raceDetails, nextEdition?.date ?? null)}
+                />
+            )}
             <Link
                 to={backTo}
                 className="inline-flex w-fit items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"

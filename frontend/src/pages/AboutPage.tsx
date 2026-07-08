@@ -13,6 +13,7 @@ import {
     Sparkles,
     Star,
 } from "lucide-react";
+import PageSeo from "@/components/PageSeo";
 import { Badge } from "@/components/ui/badge";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
@@ -101,6 +102,10 @@ function SectionHeading({ eyebrow, title }: { eyebrow: string; title: string }) 
 export default function AboutPage() {
     return (
         <div className="flex flex-col gap-16 py-4 sm:gap-20">
+            <PageSeo
+                title="About Raceboard"
+                description="Learn how Raceboard aggregates, normalizes and enriches running events from across Poland."
+            />
             <section className="relative px-2 pt-6 text-center sm:pt-10">
                 <div
                     aria-hidden

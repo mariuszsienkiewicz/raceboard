@@ -5,6 +5,7 @@ import WatchlistCard from "@/components/watchlist/WatchlistCard";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
+import PageSeo from "@/components/PageSeo";
 import { apiFetch } from "@/api/client";
 import { useAuth } from "@/context/useAuth";
 import type { WatchlistEntry } from "@/types/watchlist";
@@ -135,6 +136,11 @@ export default function WatchlistPage() {
 
     return (
         <div className="flex flex-col gap-8 py-4">
+            <PageSeo
+                title="Watchlist"
+                description="Your saved running races on Raceboard."
+                noIndex
+            />
             <div className="flex flex-col gap-1">
                 <h1 className="text-2xl font-bold tracking-tight text-foreground">Watchlist</h1>
                 <p className="text-sm text-muted-foreground">Races you want to run.</p>
