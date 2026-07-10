@@ -17,6 +17,7 @@ services:
       MEILISEARCH_URL: http://meilisearch:7700
       MEILISEARCH_API_KEY: raceboard_master_key
       MESSENGER_TRANSPORT_DSN: redis://redis:6379/messages
+      GEOCODER_URL: http://geocoder:8090
 
   nginx:
     image: nginx:1.27-alpine
@@ -61,6 +62,13 @@ services:
       - "7700:7700"
     volumes:
       - meilisearch_data:/meili_data
+  
+  geocoder:
+    build:
+      context: ./geocoder
+      dockerfile: Dockerfile
+    ports:
+      - "8090:8090" # only needed for testing
 
 volumes:
   db_data:

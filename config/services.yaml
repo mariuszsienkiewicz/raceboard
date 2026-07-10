@@ -31,3 +31,7 @@ services:
         arguments:
             $url: '%env(MEILISEARCH_URL)%'
             $apiKey: '%env(MEILISEARCH_API_KEY)%'
+
+    App\DataImport\Infrastructure\Geocoding\GeocoderServiceClient:
+        arguments:
+            $geocoderUrl: '%env(GEOCODER_URL)%'
