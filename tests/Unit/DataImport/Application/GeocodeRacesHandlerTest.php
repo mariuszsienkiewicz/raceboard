@@ -35,18 +35,19 @@ class GeocodeRacesHandlerTest extends TestCase
         );
     }
 
-    public function testGeocodesRacesWithoutCoordinatesUsingUniqueCities(): void
+    public function testGeocodesManyRacesWithoutCoordinatesUsingUniqueCities(): void
     {
         $raceOne = Race::create(RaceId::generate(), 'Race One', 'Warszawa', 'mazowieckie');
         $raceTwo = Race::create(RaceId::generate(), 'Race Two', 'Warszawa', 'mazowieckie');
         $raceThree = Race::create(RaceId::generate(), 'Race Three', 'Kraków', 'małopolskie');
 
         $this->repository->method('findWithoutCoordinates')->willReturn([$raceOne, $raceTwo, $raceThree]);
-        $this->geocoder->expects($this->exactly(2))
-            ->method('geocode')
-            ->willReturnMap([
-                ['Warszawa', ['lat' => 52.2297, 'lng' => 21.0122]],
-                ['Kraków', ['lat' => 50.0647, 'lng' => 19.9450]],
+        $this->geocoder->expects($this->exactly(1))
+            ->method('geocodeMany')
+            ->with(['Warszawa', 'Kraków'])
+            ->willReturn([
+                'Warszawa' => ['lat' => 52.2297, 'lng' => 21.0122],
+                'Kraków' => ['lat' => 50.0647, 'lng' => 19.9450],
             ]);
         $this->repository->expects($this->exactly(3))->method('save');
         $this->messageBus->expects($this->once())
@@ -76,9 +77,11 @@ class GeocodeRacesHandlerTest extends TestCase
             $raceId->toString() => $raceWithoutCoords,
         ]);
         $this->geocoder->expects($this->once())
-            ->method('geocode')
-            ->with('Poznań')
-            ->willReturn(['lat' => 52.4064, 'lng' => 16.9252]);
+            ->method('geocodeMany')
+            ->with(['Poznań'])
+            ->willReturn([
+                'Poznań' => ['lat' => 52.4064, 'lng' => 16.9252],
+            ]);
         $this->repository->expects($this->once())->method('save')->with($raceWithoutCoords);
         $this->messageBus->expects($this->once())->method('dispatch')->willReturn(new Envelope(new \stdClass()));
 
@@ -106,7 +109,7 @@ class GeocodeRacesHandlerTest extends TestCase
         $race = Race::create(RaceId::generate(), 'Unknown City Race', 'Nowhere', 'mazowieckie');
 
         $this->repository->method('findWithoutCoordinates')->willReturn([$race]);
-        $this->geocoder->expects($this->once())->method('geocode')->willReturn(null);
+        $this->geocoder->expects($this->once())->method('geocodeMany')->willReturn([]);
         $this->repository->expects($this->never())->method('save');
         $this->messageBus->expects($this->never())->method('dispatch');
 

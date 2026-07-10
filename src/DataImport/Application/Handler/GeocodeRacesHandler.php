@@ -14,6 +14,8 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 class GeocodeRacesHandler
 {
+    private const GEOCODE_BATCH_SIZE = 25;
+
     public function __construct(
         private RaceRepositoryInterface $raceRepository,
         private GeocoderInterface $geocoder,
@@ -75,13 +77,11 @@ class GeocodeRacesHandler
             $cities[$race->getCity()] = true;
         }
 
-        /** @var array<string, array{lat: float, lng: float}> $coordsByCity */
+        $uniqueCities = array_keys($cities);
+
         $coordsByCity = [];
-        foreach (array_keys($cities) as $city) {
-            $coords = $this->geocoder->geocode($city);
-            if (null !== $coords) {
-                $coordsByCity[$city] = $coords;
-            }
+        foreach (array_chunk($uniqueCities, self::GEOCODE_BATCH_SIZE) as $chunk) {
+            $coordsByCity += $this->geocoder->geocodeMany($chunk);
         }
 
         return $coordsByCity;
