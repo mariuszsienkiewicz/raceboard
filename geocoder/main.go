@@ -6,6 +6,7 @@ import (
 	"log"
 	"net/http"
 	"raceboard/geocoder/internal/cache"
+	"raceboard/geocoder/internal/domain"
 	"raceboard/geocoder/internal/geocoder"
 	"time"
 )
@@ -15,7 +16,7 @@ type GeocodeRequest struct {
 }
 
 type GeocodeResponse struct {
-	Results []geocoder.Coordinates `json:"coordinates"`
+	Results []domain.Coordinates `json:"coordinates"`
 }
 
 func geocodeHandler(w http.ResponseWriter, r *http.Request, service *geocoder.Service) {

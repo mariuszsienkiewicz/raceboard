@@ -3,6 +3,7 @@ package geocoder
 import (
 	"context"
 	"log"
+	"raceboard/geocoder/internal/domain"
 	"sync"
 	"time"
 
@@ -10,18 +11,22 @@ import (
 )
 
 type Cache interface {
-	Get(city string) (Coordinates, bool)
-	Set(city string, coords Coordinates)
+	Get(city string) (domain.Coordinates, bool)
+	Set(city string, coords domain.Coordinates)
+}
+
+type Geocoder interface {
+	Geocode(city string) (domain.Coordinates, error)
 }
 
 type Service struct {
-	client  *Client
+	client  Geocoder
 	cache   Cache
 	workers int
 	limiter *rate.Limiter
 }
 
-func NewService(client *Client, cache Cache, workers int) *Service {
+func NewService(client Geocoder, cache Cache, workers int) *Service {
 	return &Service{
 		client:  client,
 		cache:   cache,
@@ -30,9 +35,9 @@ func NewService(client *Client, cache Cache, workers int) *Service {
 	}
 }
 
-func (s *Service) GeocodeMany(ctx context.Context, cities []string) []Coordinates {
+func (s *Service) GeocodeMany(ctx context.Context, cities []string) []domain.Coordinates {
 	jobs := make(chan string)
-	results := make(chan Coordinates)
+	results := make(chan domain.Coordinates)
 
 	// waitgroup for workers
 	var wg sync.WaitGroup
@@ -60,7 +65,7 @@ func (s *Service) GeocodeMany(ctx context.Context, cities []string) []Coordinate
 	}()
 
 	// collect results from results channel
-	collected := make([]Coordinates, 0, len(cities))
+	collected := make([]domain.Coordinates, 0, len(cities))
 	for coords := range results {
 		collected = append(collected, coords)
 	}
@@ -68,7 +73,7 @@ func (s *Service) GeocodeMany(ctx context.Context, cities []string) []Coordinate
 	return collected
 }
 
-func (s *Service) worker(ctx context.Context, jobs <-chan string, results chan<- Coordinates, wg *sync.WaitGroup) {
+func (s *Service) worker(ctx context.Context, jobs <-chan string, results chan<- domain.Coordinates, wg *sync.WaitGroup) {
 	defer wg.Done()
 
 	for city := range jobs {
