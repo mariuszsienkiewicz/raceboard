@@ -50,6 +50,10 @@ func main() {
 	http.HandleFunc("/geocode", func(w http.ResponseWriter, r *http.Request) {
 		geocodeHandler(w, r, service)
 	})
+	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
+		w.WriteHeader(http.StatusOK)
+		_, _ = w.Write([]byte("ok"))
+	})
 
 	addr := ":8090"
 	log.Printf("geocoder listening on %s", addr)
