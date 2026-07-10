@@ -37,7 +37,7 @@ func TestService_ReturnsResultForEachCity(t *testing.T) {
 
 func TestService_DeduplicatesViaCache(t *testing.T) {
 	fakeGeo := &fakeGeocoder{response: domain.Coordinates{Lat: 52.23, Lng: 21.01}}
-	service := NewService(fakeGeo, cache.New(), 5)
+	service := NewService(fakeGeo, cache.New(), 1)
 
 	service.GeocodeMany(context.Background(), []string{"Warszawa", "Warszawa", "Warszawa"})
 
