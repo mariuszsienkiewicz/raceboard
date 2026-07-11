@@ -3,6 +3,9 @@ api_platform:
     version: 0.1.0
     defaults:
         stateless: true
+        pagination_enabled: true
+        pagination_items_per_page: 30
+        pagination_client_items_per_page: true
         cache_headers:
             vary: ['Content-Type', 'Authorization', 'Origin']
     mapping:

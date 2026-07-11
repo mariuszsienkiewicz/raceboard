@@ -30,4 +30,9 @@ interface RaceRepositoryInterface
 
     /** @return list<Race> */
     public function findAll(): array;
+
+    /** @return \Traversable<Race> */
+    public function findPaginatedWithDetails(int $limit, int $offset): \Traversable;
+
+    public function count(): int;
 }
