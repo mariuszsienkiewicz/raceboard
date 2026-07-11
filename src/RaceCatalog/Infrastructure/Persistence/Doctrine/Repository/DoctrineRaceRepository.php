@@ -8,6 +8,7 @@ use App\RaceCatalog\Domain\Model\Race;
 use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;
+use Doctrine\ORM\Tools\Pagination\Paginator;
 
 class DoctrineRaceRepository implements RaceRepositoryInterface
 {
@@ -90,5 +91,32 @@ class DoctrineRaceRepository implements RaceRepositoryInterface
     public function findAll(): array
     {
         return $this->entityManager->getRepository(Race::class)->findAll();
+    }
+
+    public function findPaginatedWithDetails(int $limit, int $offset): \Traversable
+    {
+        $query = $this->entityManager->createQueryBuilder()
+            ->select('r')
+            ->addSelect('e')
+            ->addSelect('d')
+            ->from(Race::class, 'r')
+            ->leftJoin('r.editions', 'e')
+            ->leftJoin('e.distances', 'd')
+            ->setMaxResults($limit)
+            ->setFirstResult($offset)
+            ->getQuery();
+
+        $paginator = new Paginator($query, true);
+
+        return $paginator;
+    }
+
+    public function count(): int
+    {
+        return (int) $this->entityManager->createQueryBuilder()
+            ->select('COUNT(r)')
+            ->from(Race::class, 'r')
+            ->getQuery()
+            ->getSingleScalarResult();
     }
 }
