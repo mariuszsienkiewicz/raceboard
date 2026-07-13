@@ -4,7 +4,8 @@ declare(strict_types=1);
 
 namespace App\UserProfile\Domain\Model;
 
-use App\RaceCatalog\Domain\Model\RaceId;
+use App\Shared\Domain\Model\RaceId;
+use App\Shared\Domain\Model\UserId;
 
 class WatchlistEntry
 {

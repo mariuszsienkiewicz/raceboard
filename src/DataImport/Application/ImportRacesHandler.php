@@ -9,9 +9,9 @@ use App\RaceCatalog\Domain\Event\RacesImported;
 use App\RaceCatalog\Domain\Model\Distance;
 use App\RaceCatalog\Domain\Model\Edition;
 use App\RaceCatalog\Domain\Model\Race;
-use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
 use App\Search\Domain\SearchIndexInterface;
+use App\Shared\Domain\Model\RaceId;
 use App\Shared\Domain\Slugifier;
 use Symfony\Component\Messenger\MessageBusInterface;
 

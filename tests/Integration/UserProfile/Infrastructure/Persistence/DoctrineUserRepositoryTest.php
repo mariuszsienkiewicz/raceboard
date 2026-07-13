@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\UserProfile\Infrastructure\Persistence;
 
+use App\Shared\Domain\Model\UserId;
 use App\UserProfile\Domain\Model\User;
-use App\UserProfile\Domain\Model\UserId;
 use App\UserProfile\Domain\Repository\UserRepositoryInterface;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 

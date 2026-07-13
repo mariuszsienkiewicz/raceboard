@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Unit\Search\Infrastructure\MeiliSearch;
 
 use App\RaceCatalog\Domain\Model\Race;
-use App\RaceCatalog\Domain\Model\RaceId;
 use App\Search\Domain\SearchIndexInterface;
 use App\Search\Domain\SearchQuery;
 use App\Search\Infrastructure\MeiliSearch\MeiliSearchAdapter;
+use App\Shared\Domain\Model\RaceId;
 use Meilisearch\Client;
 use Meilisearch\Endpoints\Indexes;
 use PHPUnit\Framework\Attributes\AllowMockObjectsWithoutExpectations;

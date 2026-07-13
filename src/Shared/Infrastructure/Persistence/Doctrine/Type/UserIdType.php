@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\UserProfile\Infrastructure\Persistence\Doctrine\Type;
+namespace App\Shared\Infrastructure\Persistence\Doctrine\Type;
 
-use App\Shared\Infrastructure\Persistence\Doctrine\Type\AbstractIdType;
-use App\UserProfile\Domain\Model\UserId;
+use App\Shared\Domain\Model\UserId;
 
 final class UserIdType extends AbstractIdType
 {

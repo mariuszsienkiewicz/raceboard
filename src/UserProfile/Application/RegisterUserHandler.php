@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\UserProfile\Application;
 
+use App\Shared\Domain\Model\UserId;
 use App\UserProfile\Domain\Exception\EmailAlreadyExistsException;
 use App\UserProfile\Domain\Model\User;
-use App\UserProfile\Domain\Model\UserId;
 use App\UserProfile\Domain\Repository\UserRepositoryInterface;
 use Symfony\Component\PasswordHasher\Hasher\UserPasswordHasherInterface;
 

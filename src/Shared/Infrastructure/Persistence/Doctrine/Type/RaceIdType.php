@@ -2,10 +2,9 @@
 
 declare(strict_types=1);
 
-namespace App\RaceCatalog\Infrastructure\Persistence\Doctrine\Type;
+namespace App\Shared\Infrastructure\Persistence\Doctrine\Type;
 
-use App\RaceCatalog\Domain\Model\RaceId;
-use App\Shared\Infrastructure\Persistence\Doctrine\Type\AbstractIdType;
+use App\Shared\Domain\Model\RaceId;
 
 final class RaceIdType extends AbstractIdType
 {

@@ -8,8 +8,8 @@ use App\DataImport\Application\GeocodeRacesResult;
 use App\DataImport\Domain\Geocoding\GeocoderInterface;
 use App\RaceCatalog\Domain\Event\RacesGeocoded;
 use App\RaceCatalog\Domain\Model\Race;
-use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
+use App\Shared\Domain\Model\RaceId;
 use Symfony\Component\Messenger\MessageBusInterface;
 
 class GeocodeRacesHandler

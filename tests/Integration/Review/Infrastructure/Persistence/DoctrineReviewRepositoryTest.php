@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Tests\Integration\Review\Infrastructure\Persistence;
 
-use App\RaceCatalog\Domain\Model\RaceId;
 use App\Review\Domain\Model\Review;
 use App\Review\Domain\Model\ReviewId;
 use App\Review\Domain\Repository\ReviewRepositoryInterface;
-use App\UserProfile\Domain\Model\UserId;
+use App\Shared\Domain\Model\RaceId;
+use App\Shared\Domain\Model\UserId;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class DoctrineReviewRepositoryTest extends KernelTestCase
