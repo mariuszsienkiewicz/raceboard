@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Tests\Unit\UserProfile\Application;
 
+use App\Shared\Domain\Model\UserId;
 use App\UserProfile\Application\RegisterUserHandler;
 use App\UserProfile\Domain\Exception\EmailAlreadyExistsException;
 use App\UserProfile\Domain\Model\User;
-use App\UserProfile\Domain\Model\UserId;
 use App\UserProfile\Domain\Repository\UserRepositoryInterface;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;

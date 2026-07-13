@@ -9,10 +9,10 @@ doctrine:
         profiling_collect_backtrace: '%kernel.debug%'
 
         types:
-            race_id: App\RaceCatalog\Infrastructure\Persistence\Doctrine\Type\RaceIdType
+            race_id: App\Shared\Infrastructure\Persistence\Doctrine\Type\RaceIdType
             edition_id: App\RaceCatalog\Infrastructure\Persistence\Doctrine\Type\EditionIdType
             distance_id: App\RaceCatalog\Infrastructure\Persistence\Doctrine\Type\DistanceIdType
-            user_id: App\UserProfile\Infrastructure\Persistence\Doctrine\Type\UserIdType
+            user_id: App\Shared\Infrastructure\Persistence\Doctrine\Type\UserIdType
             watchlist_entry_id: App\UserProfile\Infrastructure\Persistence\Doctrine\Type\WatchlistEntryIdType
             review_id: App\Review\Infrastructure\Persistence\Doctrine\Type\ReviewIdType
 

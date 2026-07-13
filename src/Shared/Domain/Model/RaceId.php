@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
-namespace App\UserProfile\Domain\Model;
+namespace App\Shared\Domain\Model;
 
 use App\Shared\Domain\AbstractId;
 
-class UserId extends AbstractId
+class RaceId extends AbstractId
 {
 }

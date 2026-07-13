@@ -7,8 +7,8 @@ namespace App\Tests\Integration\RaceCatalog\Infrastructure\Persistence;
 use App\RaceCatalog\Domain\Model\Distance;
 use App\RaceCatalog\Domain\Model\Edition;
 use App\RaceCatalog\Domain\Model\Race;
-use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
+use App\Shared\Domain\Model\RaceId;
 use Symfony\Bundle\FrameworkBundle\Test\KernelTestCase;
 
 class DoctrineRaceRepositoryTest extends KernelTestCase

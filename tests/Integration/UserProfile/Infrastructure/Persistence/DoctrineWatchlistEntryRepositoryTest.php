@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Tests\Integration\UserProfile\Infrastructure\Persistence;
 
 use App\RaceCatalog\Domain\Model\Race;
-use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
+use App\Shared\Domain\Model\RaceId;
+use App\Shared\Domain\Model\UserId;
 use App\UserProfile\Domain\Model\User;
-use App\UserProfile\Domain\Model\UserId;
 use App\UserProfile\Domain\Model\WatchlistEntry;
 use App\UserProfile\Domain\Model\WatchlistEntryId;
 use App\UserProfile\Domain\Repository\UserRepositoryInterface;

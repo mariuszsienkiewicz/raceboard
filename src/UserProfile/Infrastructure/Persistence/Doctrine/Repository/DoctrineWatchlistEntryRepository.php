@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\UserProfile\Infrastructure\Persistence\Doctrine\Repository;
 
-use App\RaceCatalog\Domain\Model\RaceId;
-use App\UserProfile\Domain\Model\UserId;
+use App\Shared\Domain\Model\RaceId;
+use App\Shared\Domain\Model\UserId;
 use App\UserProfile\Domain\Model\WatchlistEntry;
 use App\UserProfile\Domain\Repository\WatchlistEntryRepositoryInterface;
 use Doctrine\ORM\EntityManagerInterface;

@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\UserProfile\Domain\Model;
 
+use App\Shared\Domain\Model\UserId;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 

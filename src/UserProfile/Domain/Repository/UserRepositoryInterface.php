@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\UserProfile\Domain\Repository;
 
+use App\Shared\Domain\Model\UserId;
 use App\UserProfile\Domain\Model\User;
-use App\UserProfile\Domain\Model\UserId;
 
 interface UserRepositoryInterface
 {

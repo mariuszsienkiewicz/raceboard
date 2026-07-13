@@ -9,7 +9,7 @@ use App\RaceCatalog\Domain\Exception\DuplicateEditionException;
 use App\RaceCatalog\Domain\Model\Distance;
 use App\RaceCatalog\Domain\Model\Edition;
 use App\RaceCatalog\Domain\Model\Race;
-use App\RaceCatalog\Domain\Model\RaceId;
+use App\Shared\Domain\Model\RaceId;
 use PHPUnit\Framework\TestCase;
 
 final class RaceTest extends TestCase

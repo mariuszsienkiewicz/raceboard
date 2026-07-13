@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Review\Domain\Repository;
 
-use App\RaceCatalog\Domain\Model\RaceId;
 use App\Review\Domain\Model\Review;
-use App\UserProfile\Domain\Model\UserId;
+use App\Shared\Domain\Model\RaceId;
+use App\Shared\Domain\Model\UserId;
 
 interface ReviewRepositoryInterface
 {

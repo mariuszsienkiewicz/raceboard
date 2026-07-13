@@ -5,8 +5,8 @@ declare(strict_types=1);
 namespace App\RaceCatalog\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\RaceCatalog\Domain\Model\Race;
-use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
+use App\Shared\Domain\Model\RaceId;
 use Doctrine\ORM\EntityManagerInterface;
 use Doctrine\ORM\Tools\Pagination\Paginator;
 

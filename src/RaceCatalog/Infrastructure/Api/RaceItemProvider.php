@@ -7,8 +7,8 @@ namespace App\RaceCatalog\Infrastructure\Api;
 use ApiPlatform\Metadata\Operation;
 use ApiPlatform\State\ProviderInterface;
 use App\RaceCatalog\Domain\Model\Race;
-use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
+use App\Shared\Domain\Model\RaceId;
 
 /** @implements ProviderInterface<Race> */
 class RaceItemProvider implements ProviderInterface

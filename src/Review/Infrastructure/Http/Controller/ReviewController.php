@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Review\Infrastructure\Http\Controller;
 
-use App\RaceCatalog\Domain\Model\RaceId;
 use App\Review\Domain\Model\Review;
 use App\Review\Domain\Model\ReviewId;
 use App\Review\Domain\Repository\ReviewRepositoryInterface;
+use App\Shared\Domain\Model\RaceId;
 use App\UserProfile\Domain\Model\User;
 use App\UserProfile\Domain\Repository\UserRepositoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;

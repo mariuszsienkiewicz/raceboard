@@ -6,10 +6,10 @@ namespace Tests\Unit\Search\Application;
 
 use App\RaceCatalog\Domain\Event\RacesGeocoded;
 use App\RaceCatalog\Domain\Model\Race;
-use App\RaceCatalog\Domain\Model\RaceId;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
 use App\Search\Application\Handler\ReindexRacesOnGeocodeHandler;
 use App\Search\Domain\SearchIndexInterface;
+use App\Shared\Domain\Model\RaceId;
 use PHPUnit\Framework\MockObject\MockObject;
 use PHPUnit\Framework\TestCase;
 

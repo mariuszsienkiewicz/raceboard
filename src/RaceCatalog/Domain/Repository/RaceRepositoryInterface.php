@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\RaceCatalog\Domain\Repository;
 
 use App\RaceCatalog\Domain\Model\Race;
-use App\RaceCatalog\Domain\Model\RaceId;
+use App\Shared\Domain\Model\RaceId;
 
 interface RaceRepositoryInterface
 {

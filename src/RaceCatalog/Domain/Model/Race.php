@@ -6,6 +6,7 @@ namespace App\RaceCatalog\Domain\Model;
 
 use App\RaceCatalog\Domain\Event\RaceCreated;
 use App\RaceCatalog\Domain\Exception\DuplicateEditionException;
+use App\Shared\Domain\Model\RaceId;
 use App\Shared\Domain\Slugifier;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;

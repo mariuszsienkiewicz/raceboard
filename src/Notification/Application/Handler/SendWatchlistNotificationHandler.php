@@ -8,7 +8,7 @@ use App\Notification\Infrastructure\Email\WatchlistMailer;
 use App\RaceCatalog\Domain\Event\RacesImported;
 use App\RaceCatalog\Domain\Model\Race;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
-use App\UserProfile\Domain\Model\UserId;
+use App\Shared\Domain\Model\UserId;
 use App\UserProfile\Domain\Repository\UserRepositoryInterface;
 use App\UserProfile\Domain\Repository\WatchlistEntryRepositoryInterface;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
