@@ -18,9 +18,10 @@ jobs:
         with:
           php-version: '8.4'
           extensions: intl, pdo_pgsql, zip, redis
+          coverage: none
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+        uses: ramsey/composer-install@v3
 
       - name: Run PHPStan
         run: vendor/bin/phpstan analyse
@@ -51,9 +52,10 @@ jobs:
         with:
           php-version: '8.4'
           extensions: intl, pdo_pgsql, zip, redis
+          coverage: none
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+        uses: ramsey/composer-install@v3
 
       - name: Create .env.test.local
         run: echo "DATABASE_URL=postgresql://raceboard:raceboard@localhost:5432/raceboard_test?serverVersion=16&charset=utf8" > .env.test.local
@@ -66,7 +68,7 @@ jobs:
 
       - name: Run tests
         run: vendor/bin/phpunit
-  
+
   cs:
     name: PHP CS Fixer
     runs-on: ubuntu-latest
@@ -78,9 +80,10 @@ jobs:
         with:
           php-version: '8.4'
           extensions: intl, pdo_pgsql, zip, redis
+          coverage: none
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress
+        uses: ramsey/composer-install@v3
 
       - name: Check code style
         run: vendor/bin/php-cs-fixer fix --dry-run --diff
