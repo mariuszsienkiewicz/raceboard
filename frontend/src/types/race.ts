@@ -19,6 +19,7 @@ export interface RaceDetails {
     editions: Editions[];
     latitude: number | null;
     longitude: number | null;
+    averageRating: number | null;
 }
 
 export interface Editions {
