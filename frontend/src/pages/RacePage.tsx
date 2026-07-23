@@ -482,7 +482,7 @@ export default function RacePage() {
 
                     <Separator />
 
-                    <RaceReviews raceId={raceDetails.id} />
+                    <RaceReviews averageRating={raceDetails.averageRating} raceId={raceDetails.id} />
                 </>
             )}
         </div>

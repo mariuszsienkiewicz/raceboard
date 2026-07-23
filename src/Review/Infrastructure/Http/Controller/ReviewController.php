@@ -4,8 +4,9 @@ declare(strict_types=1);
 
 namespace App\Review\Infrastructure\Http\Controller;
 
+use App\Review\Application\Command\AddReviewCommand;
+use App\Review\Application\Handler\AddReviewHandler;
 use App\Review\Domain\Model\Review;
-use App\Review\Domain\Model\ReviewId;
 use App\Review\Domain\Repository\ReviewRepositoryInterface;
 use App\Shared\Domain\Model\RaceId;
 use App\UserProfile\Domain\Model\User;
@@ -58,7 +59,6 @@ class ReviewController
                 'displayName' => $user->getDisplayName(),
                 'createdAt' => $userReview->getCreatedAt()->format('Y-m-d H:i:s'),
             ] : null,
-            'averageRating' => $this->reviewRepository->getAverageRating($race),
             'reviewCount' => $total,
             'page' => $page,
             'perPage' => $perPage,
@@ -67,7 +67,7 @@ class ReviewController
     }
 
     #[Route('/api/races/{raceId}/reviews', name: 'api_review_race_add', methods: ['POST'])]
-    public function add(#[CurrentUser] User $user, string $raceId, Request $request): JsonResponse
+    public function add(#[CurrentUser] User $user, string $raceId, Request $request, AddReviewHandler $addReviewHandler): JsonResponse
     {
         $data = json_decode($request->getContent(), true);
 
@@ -78,26 +78,13 @@ class ReviewController
             return new JsonResponse(['error' => 'Rating is required and must be an integer.'], Response::HTTP_BAD_REQUEST);
         }
 
-        // Check if the user has already reviewed this race
-        $existingReview = $this->reviewRepository->findByUserAndRace($user->getId(), RaceId::fromString($raceId));
-        if (null !== $existingReview) {
-            return new JsonResponse(['error' => 'You have already reviewed this race.'], Response::HTTP_CONFLICT);
-        }
+        $addReviewHandler(new AddReviewCommand(
+            $raceId,
+            $user->getId()->toString(),
+            $rating,
+            $comment,
+        ));
 
-        try {
-            $review = Review::create(
-                ReviewId::generate(),
-                $user->getId(),
-                RaceId::fromString($raceId),
-                $rating,
-                $comment,
-            );
-        } catch (\InvalidArgumentException $e) {
-            return new JsonResponse(['error' => $e->getMessage()], Response::HTTP_BAD_REQUEST);
-        }
-
-        $this->reviewRepository->save($review);
-
-        return new JsonResponse(['id' => $review->getId()->toString()], Response::HTTP_CREATED);
+        return new JsonResponse([], Response::HTTP_CREATED);
     }
 }

@@ -33,7 +33,7 @@ class ImportRacesCommand extends Command
         #[AutowireIterator('app.import_adapter')]
         iterable $adapters,
         private ImportRacesHandler $handler,
-        private MessageBusInterface $messageBus,
+        private MessageBusInterface $commandBus,
     ) {
         parent::__construct();
 
@@ -77,7 +77,7 @@ class ImportRacesCommand extends Command
                 $result->skippedCount,
             ));
         } else {
-            $this->messageBus->dispatch(new ImportRacesFromSource($source));
+            $this->commandBus->dispatch(new ImportRacesFromSource($source));
             $io->success(\sprintf('Import from %s dispatched to queue', $source));
         }
 

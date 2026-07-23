@@ -17,7 +17,7 @@ use Symfony\Component\Messenger\MessageBusInterface;
 
 class ImportRacesHandler
 {
-    public function __construct(private RaceRepositoryInterface $raceRepository, private DuplicateDetector $duplicateDetector, private SearchIndexInterface $searchIndex, private MessageBusInterface $messageBus)
+    public function __construct(private RaceRepositoryInterface $raceRepository, private DuplicateDetector $duplicateDetector, private SearchIndexInterface $searchIndex, private MessageBusInterface $eventBus)
     {
     }
 
@@ -77,7 +77,7 @@ class ImportRacesHandler
         }
 
         if ([] !== $newRaceIds) {
-            $this->messageBus->dispatch(new RacesImported($newRaceIds));
+            $this->eventBus->dispatch(new RacesImported($newRaceIds));
         }
 
         return $importResult;

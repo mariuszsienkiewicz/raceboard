@@ -19,6 +19,8 @@ App\RaceCatalog\Domain\Model\Race:
             groups: ['race:read']
         longitude:
             groups: ['race:read']
+        averageRating:
+            groups: ['race:read']
 
 App\RaceCatalog\Domain\Model\Edition:
     attributes:

@@ -13,6 +13,8 @@ interface RaceRepositoryInterface
 
     public function findById(RaceId $id): ?Race;
 
+    public function exists(RaceId $id): bool;
+
     /**
      * @param array<RaceId> $ids
      *

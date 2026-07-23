@@ -27,6 +27,19 @@ class DoctrineRaceRepository implements RaceRepositoryInterface
         return $this->entityManager->find(Race::class, $id);
     }
 
+    public function exists(RaceId $id): bool
+    {
+        $count = (int) $this->entityManager->createQueryBuilder()
+            ->select('COUNT(r)')
+            ->from(Race::class, 'r')
+            ->where('r.id = :id')
+            ->setParameter('id', $id)
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        return $count > 0;
+    }
+
     public function findByIds(array $ids): array
     {
         if (empty($ids)) {

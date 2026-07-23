@@ -11,19 +11,19 @@ import { Skeleton } from "../ui/skeleton";
 
 interface RaceReviewsProps {
     raceId: string;
+    averageRating: number | null;
 }
 
 interface RaceReviewsApiResposne {
     reviews: Review[];
     userReview: Review | null;
-    averageRating: number;
     reviewCount: number;
     page: number;
     perPage: number;
     totalPages: number;
 }
 
-function ReviewStats({ averageRating, reviewCount }: { averageRating: number; reviewCount: number }) {
+function ReviewStats({ averageRating, reviewCount }: { averageRating: number | null; reviewCount: number }) {
     if (reviewCount === 0) {
         return <span className="text-sm text-muted-foreground">No reviews yet</span>;
     }
@@ -31,8 +31,12 @@ function ReviewStats({ averageRating, reviewCount }: { averageRating: number; re
     return (
         <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
             <Star className="size-4 fill-primary text-primary" />
-            <span className="font-medium text-foreground">{averageRating.toFixed(1)}</span>
-            <span aria-hidden="true">·</span>
+            {averageRating ? (
+                <>
+                    <span className="font-medium text-foreground">{averageRating.toFixed(1)}</span>
+                    <span aria-hidden="true">·</span>
+                </>
+            ) : (<></>)}
             <span>
                 {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
             </span>
@@ -60,13 +64,12 @@ function ReviewListSkeleton({ count = 2 }: { count?: number }) {
     );
 }
 
-export default function RaceReviews({ raceId }: RaceReviewsProps) {
+export default function RaceReviews({ raceId, averageRating }: RaceReviewsProps) {
     const [loading, setLoading] = useState(true);
     const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
 
     const [reviews, setReviews] = useState<Review[]>([]);
     const [userReview, setUserReview] = useState<Review | null>(null);
-    const [averageRating, setAverageRating] = useState<number>(0);
     const [reviewCount, setReviewCount] = useState<number>(0);
     const [page, setPage] = useState<number>(1);
     const [perPage, setPerPage] = useState<number>(10);
@@ -85,7 +88,6 @@ export default function RaceReviews({ raceId }: RaceReviewsProps) {
                 if (!cancelled) {
                     setReviews(data.reviews);
                     setUserReview(data.userReview);
-                    setAverageRating(data.averageRating);
                     setReviewCount(data.reviewCount);
                     setPage(data.page);
                     setPerPage(data.perPage);
