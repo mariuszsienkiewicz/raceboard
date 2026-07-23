@@ -28,6 +28,7 @@ class Race
         private string $country = 'PL',
         private ?float $latitude = null,
         private ?float $longitude = null,
+        private ?float $averageRating = null,
     ) {
         $this->editions = new ArrayCollection();
         $this->recordEvent(new RaceCreated($this->id));
@@ -132,6 +133,16 @@ class Race
     {
         $this->latitude = $latitude;
         $this->longitude = $longitude;
+    }
+
+    public function getAverageRating(): ?float
+    {
+        return $this->averageRating;
+    }
+
+    public function updateAverageRating(float $averageRating): void
+    {
+        $this->averageRating = $averageRating;
     }
 
     /** @return list<Edition> */

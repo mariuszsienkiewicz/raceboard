@@ -12,10 +12,13 @@ framework:
             failed: 'doctrine://default?queue_name=failed'
             # sync: 'sync://'
 
-        default_bus: messenger.bus.default
+        default_bus: command.bus
 
         buses:
-            messenger.bus.default: []
+            command.bus: []
+            event.bus:
+                default_middleware:
+                    allow_no_handlers: true
 
         routing:
             Symfony\Component\Mailer\Messenger\SendEmailMessage: async
@@ -26,3 +29,4 @@ framework:
             # 'App\Message\YourMessage': async
             App\DataImport\Application\Message\ImportRacesFromSource: async
             App\RaceCatalog\Domain\Event\RacesImported: async
+            App\Review\Domain\Event\ReviewAdded: async
