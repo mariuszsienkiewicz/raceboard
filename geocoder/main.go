@@ -3,11 +3,15 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 	"raceboard/geocoder/internal/cache"
 	"raceboard/geocoder/internal/domain"
 	"raceboard/geocoder/internal/geocoder"
+	"syscall"
 	"time"
 )
 
@@ -55,9 +59,29 @@ func main() {
 		_, _ = w.Write([]byte("ok"))
 	})
 
+	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
+	defer stop()
+
 	addr := ":8090"
-	log.Printf("geocoder listening on %s", addr)
-	if err := http.ListenAndServe(addr, nil); err != nil {
-		log.Fatalf("server failed: %v", err)
+	server := &http.Server{
+		Addr:    addr,
+		Handler: nil,
+	}
+
+	go func() {
+		log.Printf("geocoder listening on %s", addr)
+		if err := server.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			log.Fatalf("server failed: %v", err)
+		}
+	}()
+
+	<-ctx.Done()
+	log.Println("shutting down...")
+
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 25*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(shutdownCtx); err != nil {
+		log.Printf("graceful shutdown failed: %v", err)
 	}
 }
