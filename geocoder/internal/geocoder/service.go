@@ -19,17 +19,25 @@ type Geocoder interface {
 	Geocode(city string) (domain.Coordinates, error)
 }
 
+type MetricsRecorder interface {
+	RecordCacheHit()
+	RecordCacheMiss()
+	RecordNominatimError()
+}
+
 type Service struct {
 	client  Geocoder
 	cache   Cache
+	metrics MetricsRecorder
 	workers int
 	limiter *rate.Limiter
 }
 
-func NewService(client Geocoder, cache Cache, workers int) *Service {
+func NewService(client Geocoder, cache Cache, metrics MetricsRecorder, workers int) *Service {
 	return &Service{
 		client:  client,
 		cache:   cache,
+		metrics: metrics,
 		workers: workers,
 		limiter: rate.NewLimiter(rate.Every(time.Second), 1),
 	}
@@ -78,6 +86,7 @@ func (s *Service) worker(ctx context.Context, jobs <-chan string, results chan<-
 
 	for city := range jobs {
 		if coords, found := s.cache.Get(city); found {
+			s.metrics.RecordCacheHit()
 			log.Printf("cache hit for %q", city)
 			select {
 			case results <- coords:
@@ -87,6 +96,7 @@ func (s *Service) worker(ctx context.Context, jobs <-chan string, results chan<-
 			continue
 		}
 
+		s.metrics.RecordCacheMiss()
 		if err := s.limiter.Wait(ctx); err != nil {
 			log.Printf("rate limiter wait failed: %v", err)
 			continue
@@ -95,6 +105,7 @@ func (s *Service) worker(ctx context.Context, jobs <-chan string, results chan<-
 		coords, err := s.client.Geocode(city)
 		if err != nil {
 			log.Printf("geocoding %q failed: %v", city, err)
+			s.metrics.RecordNominatimError()
 			continue
 		}
 
