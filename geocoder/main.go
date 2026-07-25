@@ -13,7 +13,58 @@ import (
 	"raceboard/geocoder/internal/geocoder"
 	"syscall"
 	"time"
+
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promauto"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
+
+var (
+	geocodeRequests = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "geocode_requests_total",
+		Help: "Total number of /geocode requests.",
+	})
+
+	nominatimErrors = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "nominatim_errors_total",
+		Help: "Total number of Nominatim errors.",
+	})
+
+	cacheHits = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "cache_hits_total",
+		Help: "Total number of cache hits.",
+	})
+
+	cacheMisses = promauto.NewCounter(prometheus.CounterOpts{
+		Name: "cache_misses_total",
+		Help: "Total number of cache misses.",
+	})
+
+	geocodeInFlight = promauto.NewGauge(prometheus.GaugeOpts{
+		Name: "geocode_in_flight",
+		Help: "Number of /geocode requests currently being processed.",
+	})
+
+	geocodeDuration = promauto.NewHistogram(prometheus.HistogramOpts{
+		Name:    "geocode_duration_seconds",
+		Help:    "Duration of geocoding in seconds.",
+		Buckets: []float64{0.5, 1, 2, 5, 10, 20, 30, 60},
+	})
+)
+
+type prometheusMetrics struct{}
+
+func (prometheusMetrics) RecordCacheHit() {
+	cacheHits.Inc()
+}
+
+func (prometheusMetrics) RecordCacheMiss() {
+	cacheMisses.Inc()
+}
+
+func (prometheusMetrics) RecordNominatimError() {
+	nominatimErrors.Inc()
+}
 
 type GeocodeRequest struct {
 	Cities []string `json:"cities"`
@@ -49,15 +100,28 @@ func geocodeHandler(w http.ResponseWriter, r *http.Request, service *geocoder.Se
 func main() {
 	client := geocoder.NewClient()
 	geoCache := cache.New()
-	service := geocoder.NewService(client, geoCache, 5)
+	service := geocoder.NewService(client, geoCache, &prometheusMetrics{}, 5)
 
+	// geocode endpoint
 	http.HandleFunc("/geocode", func(w http.ResponseWriter, r *http.Request) {
+		start := time.Now()
+		geocodeRequests.Inc()
+		geocodeInFlight.Inc()
+		defer geocodeInFlight.Dec()
+		defer func() {
+			geocodeDuration.Observe(time.Since(start).Seconds())
+		}()
 		geocodeHandler(w, r, service)
 	})
+
+	// health endpoint
 	http.HandleFunc("/health", func(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusOK)
 		_, _ = w.Write([]byte("ok"))
 	})
+
+	// metrics endpoint
+	http.Handle("/metrics", promhttp.Handler())
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
