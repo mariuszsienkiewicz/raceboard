@@ -2,6 +2,8 @@
 
 Aggregator of running races in Poland. Scrapes data from multiple sources, deduplicates and enriches race information, and provides a searchable database with full-text search powered by MeiliSearch.
 
+**Live demo:** [raceboard.heaps.pl](https://raceboard.heaps.pl/)
+
 A **monorepo** built as a portfolio project: a Symfony 7.4 backend with hexagonal architecture and DDD, a **Go microservice** for concurrent geocoding, an async event-driven processing layer (Symfony Messenger), and a Prometheus + Grafana observability stack.
 
 ## Features
