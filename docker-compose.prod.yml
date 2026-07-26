@@ -6,8 +6,8 @@ services:
     restart: unless-stopped
     image: raceboard-php:latest
     depends_on:
-      database:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_started
       meilisearch:
@@ -26,6 +26,19 @@ services:
       JWT_PASSPHRASE: ${JWT_PASSPHRASE}
     volumes:
       - jwt_keys:/app/config/jwt
+
+  migrate:
+    image: raceboard-php:latest
+    restart: "no"
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: 0
+      APP_SECRET: ${APP_SECRET}
+      DATABASE_URL: postgresql://raceboard:${POSTGRES_PASSWORD}@database:5432/raceboard?serverVersion=16&charset=utf8
+    command: ["php", "bin/console", "doctrine:migrations:migrate", "--no-interaction"]
 
   nginx:
     build:
@@ -47,8 +60,8 @@ services:
     image: raceboard-php:latest
     restart: unless-stopped
     depends_on:
-      database:
-        condition: service_healthy
+      migrate:
+        condition: service_completed_successfully
       redis:
         condition: service_started
       meilisearch:
