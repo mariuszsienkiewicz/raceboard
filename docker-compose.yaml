@@ -68,7 +68,7 @@ services:
       context: ./geocoder
       dockerfile: Dockerfile
     ports:
-      - "8090:8090" # only needed for testinga
+      - "8090:8090" # only needed for testing
 
   prometheus:
     image: prom/prometheus:latest
