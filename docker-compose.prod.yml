@@ -93,6 +93,32 @@ services:
       - jwt_keys:/app/config/jwt
     command: ["sh", "/app/docker/php/worker-entrypoint.sh"]
 
+  scheduler:
+    image: raceboard-php:latest
+    restart: unless-stopped
+    depends_on:
+      migrate:
+        condition: service_completed_successfully
+      redis:
+        condition: service_started
+      meilisearch:
+        condition: service_started
+    environment:
+      APP_ENV: prod
+      APP_DEBUG: 0
+      APP_SECRET: ${APP_SECRET}
+      DATABASE_URL: postgresql://raceboard:${POSTGRES_PASSWORD}@database:5432/raceboard?serverVersion=16&charset=utf8
+      REDIS_URL: redis://redis:6379
+      GEOCODER_URL: http://geocoder:8090
+      MEILISEARCH_URL: http://meilisearch:7700
+      MEILISEARCH_API_KEY: ${MEILISEARCH_API_KEY}
+      MESSENGER_TRANSPORT_DSN: redis://redis:6379/messages
+      MAILER_DSN: ${MAILER_DSN}
+      JWT_PASSPHRASE: ${JWT_PASSPHRASE}
+    volumes:
+      - jwt_keys:/app/config/jwt
+    command: ["sh", "/app/docker/php/scheduler-entrypoint.sh"]
+
   geocoder:
     build:
       context: ./geocoder
