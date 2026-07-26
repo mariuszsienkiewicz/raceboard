@@ -25,7 +25,7 @@ class SearchController
             city: $request->query->get('city'),
             voivodeship: $request->query->get('voivodeship'),
             distanceKm: $request->query->has('distance') ? (float) $request->query->get('distance') : null,
-            dateFrom: $request->query->get('dateFrom'),
+            dateFrom: $this->resolveDateFrom($request),
             dateTo: $request->query->get('dateTo'),
             page: $request->query->getInt('page', 1),
             perPage: $request->query->getInt('perPage', 20),
@@ -50,7 +50,7 @@ class SearchController
             city: $request->query->get('city'),
             voivodeship: $request->query->get('voivodeship'),
             distanceKm: $request->query->has('distance') ? (float) $request->query->get('distance') : null,
-            dateFrom: $request->query->get('dateFrom'),
+            dateFrom: $this->resolveDateFrom($request),
             dateTo: $request->query->get('dateTo'),
             topLat: $this->parseOptionalFloat($request, 'topLat'),
             topLng: $this->parseOptionalFloat($request, 'topLng'),
@@ -59,6 +59,17 @@ class SearchController
         );
 
         return new JsonResponse($this->searchIndex->searchMapPoints($query));
+    }
+
+    private function resolveDateFrom(Request $request): string
+    {
+        $dateFrom = $request->query->get('dateFrom');
+
+        if (\is_string($dateFrom) && '' !== $dateFrom) {
+            return $dateFrom;
+        }
+
+        return (new \DateTimeImmutable('today'))->format('Y-m-d');
     }
 
     private function parseOptionalFloat(Request $request, string $key): ?float
