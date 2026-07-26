@@ -70,6 +70,23 @@ services:
     ports:
       - "8090:8090" # only needed for testing
 
+  prometheus:
+    image: prom/prometheus:latest
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+
+  grafana:
+    image: grafana/grafana:latest
+    ports:
+      - "3000:3000"
+    environment:
+      GF_SECURITY_ADMIN_PASSWORD: admin
+      GF_AUTH_ANONYMOUS_ENABLED: "true"
+    volumes:
+      - ./docker/grafana/provisioning:/etc/grafana/provisioning
+
 volumes:
   db_data:
   meilisearch_data:
