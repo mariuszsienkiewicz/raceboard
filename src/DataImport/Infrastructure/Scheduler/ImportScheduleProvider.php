@@ -15,9 +15,8 @@ use Symfony\Contracts\Cache\CacheInterface;
 class ImportScheduleProvider implements ScheduleProviderInterface
 {
     public function __construct(
-        private readonly CacheInterface $cache
+        private readonly CacheInterface $cache,
     ) {
-
     }
 
     public function getSchedule(): Schedule
