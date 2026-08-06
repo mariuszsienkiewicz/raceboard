@@ -37,8 +37,10 @@ security:
 
     # Note: Only the *first* matching rule is applied
     access_control:
+        - { path: ^/api, roles: PUBLIC_ACCESS, methods: [OPTIONS] }
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
+        - { path: ^/api/search, roles: PUBLIC_ACCESS }
         - { path: ^/api/races/.+/reviews, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/races/.+/reviews, roles: ROLE_USER, methods: [POST] }
         - { path: ^/api/races, roles: PUBLIC_ACCESS }
