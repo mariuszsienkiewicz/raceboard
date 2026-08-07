@@ -60,6 +60,9 @@ class MeiliSearchAdapter implements SearchIndexInterface
             $options['filter'] = $filters;
         }
 
+        // sort by ascending date by default
+        $options['sort'] = ['dates:asc'];
+
         $searchResult = $this->client->index(self::INDEX_NAME)->search($query->query, $options);
 
         return new SearchResult(
