@@ -24,6 +24,7 @@ final class ReindexRacesOnGeocodeHandler
             return;
         }
 
-        $this->searchIndex->indexAll($this->raceRepository->findAll());
+        $races = $this->raceRepository->findByIds($event->raceIds);
+        $this->searchIndex->indexRaces(array_values($races));
     }
 }
