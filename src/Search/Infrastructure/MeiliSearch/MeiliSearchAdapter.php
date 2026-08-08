@@ -100,12 +100,14 @@ class MeiliSearchAdapter implements SearchIndexInterface
             $filters[] = \sprintf('city = "%s"', $query->city);
         }
 
-        if (null !== $query->voivodeship) {
-            $filters[] = \sprintf('voivodeship = "%s"', $query->voivodeship);
+        if ([] !== $query->voivodeships) {
+            $voivodeshipShards = array_map(fn (string $voivodeship) => \sprintf('voivodeship = "%s"', $voivodeship), $query->voivodeships);
+            $filters[] = \sprintf('(%s)', implode(' OR ', $voivodeshipShards));
         }
 
-        if (null !== $query->distanceKm) {
-            $filters[] = \sprintf('distances = %s', $query->distanceKm);
+        if ([] !== $query->distancesKm) {
+            $distanceShards = array_map(fn (string $distance) => \sprintf('distances = %s', $distance), $query->distancesKm);
+            $filters[] = \sprintf('(%s)', implode(' OR ', $distanceShards));
         }
 
         if (null !== $query->dateFrom) {

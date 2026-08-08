@@ -6,11 +6,15 @@ namespace App\Search\Domain;
 
 final readonly class SearchQuery
 {
+    /**
+     * @param array<string> $voivodeships
+     * @param array<string> $distancesKm
+     */
     public function __construct(
         public string $query = '',
         public ?string $city = null,
-        public ?string $voivodeship = null,
-        public ?float $distanceKm = null,
+        public array $voivodeships = [],
+        public array $distancesKm = [],
         public ?string $dateFrom = null,
         public ?string $dateTo = null,
         public ?float $topLat = null,

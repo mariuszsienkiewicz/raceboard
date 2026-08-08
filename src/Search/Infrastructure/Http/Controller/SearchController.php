@@ -23,8 +23,8 @@ class SearchController
         $query = new SearchQuery(
             query: $request->query->getString('q', ''),
             city: $request->query->get('city'),
-            voivodeship: $request->query->get('voivodeship'),
-            distanceKm: $request->query->has('distance') ? (float) $request->query->get('distance') : null,
+            voivodeships: $request->query->all('voivodeship'),
+            distancesKm: $request->query->all('distance'),
             dateFrom: $this->resolveDateFrom($request),
             dateTo: $request->query->get('dateTo'),
             page: $request->query->getInt('page', 1),
@@ -48,8 +48,8 @@ class SearchController
         $query = new SearchQuery(
             query: $request->query->getString('q', ''),
             city: $request->query->get('city'),
-            voivodeship: $request->query->get('voivodeship'),
-            distanceKm: $request->query->has('distance') ? (float) $request->query->get('distance') : null,
+            voivodeships: $request->query->all('voivodeship'),
+            distancesKm: $request->query->all('distance'),
             dateFrom: $this->resolveDateFrom($request),
             dateTo: $request->query->get('dateTo'),
             topLat: $this->parseOptionalFloat($request, 'topLat'),
