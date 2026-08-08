@@ -16,17 +16,19 @@ class SearchQueryTest extends TestCase
         $this->assertSame(1, $query->page);
         $this->assertSame(20, $query->perPage);
         $this->assertNull($query->city);
-        $this->assertNull($query->voivodeship);
+        $this->assertSame([], $query->voivodeships);
+        $this->assertSame([], $query->distancesKm);
     }
 
     public function testCustomValues(): void
     {
         $dateFrom = new \DateTimeImmutable('+4 days')->format('Y-m-d');
         $dateTo = new \DateTimeImmutable('+5 days')->format('Y-m-d');
-        $query = new SearchQuery('test', 'Test City', 'Test Voivodeship', 10, $dateFrom, $dateTo, page: 2, perPage: 40);
+        $query = new SearchQuery('test', 'Test City', ['Test Voivodeship'], ['10'], $dateFrom, $dateTo, page: 2, perPage: 40);
         $this->assertSame('test', $query->query);
         $this->assertSame('Test City', $query->city);
-        $this->assertSame('Test Voivodeship', $query->voivodeship);
+        $this->assertSame(['Test Voivodeship'], $query->voivodeships);
+        $this->assertSame(['10'], $query->distancesKm);
         $this->assertSame($dateFrom, $query->dateFrom);
         $this->assertSame($dateTo, $query->dateTo);
         $this->assertSame(2, $query->page);

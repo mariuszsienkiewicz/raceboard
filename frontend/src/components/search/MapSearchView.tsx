@@ -33,8 +33,8 @@ function buildMapSearchParams(
     bounds: MapBounds | null,
 ): URLSearchParams {
     const params = new URLSearchParams({ q: searchTerm });
-    selectedDistances.forEach((d) => params.append("distance", d.toString()));
-    selectedVoivodeships.forEach((v) => params.append("voivodeship", v.toString()));
+    selectedDistances.forEach((d) => params.append("distance[]", d.toString()));
+    selectedVoivodeships.forEach((v) => params.append("voivodeship[]", v.toString()));
     if (selectedDateRange) {
         params.append("dateFrom", selectedDateRange.start.toString());
         params.append("dateTo", selectedDateRange.end.toString());

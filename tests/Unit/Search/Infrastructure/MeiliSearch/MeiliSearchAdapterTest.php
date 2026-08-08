@@ -88,7 +88,7 @@ class MeiliSearchAdapterTest extends TestCase
 
     public function testSearchPassesFiltersToClient(): void
     {
-        $query = new SearchQuery('maraton', 'Warszawa', 'mazowieckie', 42.195);
+        $query = new SearchQuery('maraton', 'Warszawa', ['mazowieckie', 'lubelskie'], ['42.195', '100']);
 
         $searchResults = $this->createStub(\Meilisearch\Search\SearchResult::class);
         $searchResults->method('getHits')->willReturn([]);
@@ -101,8 +101,8 @@ class MeiliSearchAdapterTest extends TestCase
                 $this->callback(function (array $options) {
                     return isset($options['filter'])
                         && str_contains($options['filter'], 'city = "Warszawa"')
-                        && str_contains($options['filter'], 'voivodeship = "mazowieckie"')
-                        && str_contains($options['filter'], 'distances = 42.195');
+                        && str_contains($options['filter'], '(voivodeship = "mazowieckie" OR voivodeship = "lubelskie")')
+                        && str_contains($options['filter'], '(distances = 42.195 OR distances = 100)');
                 }),
             )
             ->willReturn($searchResults);
@@ -158,7 +158,7 @@ class MeiliSearchAdapterTest extends TestCase
 
     public function testSearchCalculatesPageAndHitsPerPage(): void
     {
-        $query = new SearchQuery('maraton', 'Warszawa', 'mazowieckie', 42.195, page: 2, perPage: 40);
+        $query = new SearchQuery('maraton', 'Warszawa', ['mazowieckie'], ['42.195'], page: 2, perPage: 40);
 
         $searchResults = $this->createStub(\Meilisearch\Search\SearchResult::class);
         $searchResults->method('getHits')->willReturn([]);
