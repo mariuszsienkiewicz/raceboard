@@ -46,6 +46,30 @@ class DoctrineWatchlistEntryRepository implements WatchlistEntryRepositoryInterf
             ->getOneOrNullResult();
     }
 
+    public function findWatchedRaceIds(UserId $userId, array $raceIds): array
+    {
+        if ([] === $raceIds) {
+            return [];
+        }
+
+        $result = $this->entityManager->createQueryBuilder()
+            ->select('w.raceId')
+            ->from(WatchlistEntry::class, 'w')
+            ->where('w.userId = :userId')
+            ->andWhere('w.raceId IN (:raceIds)')
+            ->setParameter('userId', $userId)
+            ->setParameter('raceIds', $raceIds)
+            ->getQuery()
+            ->getResult();
+
+        $watchedRaceIds = [];
+        foreach ($result as $row) {
+            $watchedRaceIds[] = $row['raceId'];
+        }
+
+        return $watchedRaceIds;
+    }
+
     public function findUserIdsByCity(string $city): array
     {
         $result = $this->entityManager->createQueryBuilder()

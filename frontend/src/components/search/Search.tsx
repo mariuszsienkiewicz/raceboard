@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/api/client";
 import EmptyState from "@/components/EmptyState";
 import { Separator } from "@/components/ui/separator";
@@ -6,6 +6,7 @@ import type { DateRange, FilterKey } from "@/types/search-filters";
 import type { Race } from "@/types/race";
 import type { SearchResponse } from "@/types/search";
 import { restoreSearchScrollPosition, useSearchState } from "@/hooks/useSearchState";
+import { useWatchlistStatuses } from "@/hooks/useWatchlistStatuses";
 import MapSearchView from "./MapSearchView";
 import SearchBar from "./SearchBar";
 import SearchPagination from "./SearchPagination";
@@ -31,6 +32,9 @@ export default function Search() {
     const [searchResponse, setSearchResponse] = useState<SearchResponse | null>(null);
     const [results, setResults] = useState<Race[]>([]);
     const [loading, setLoading] = useState(true);
+
+    const raceIds = useMemo(() => results.map((race) => race.id), [results]);
+    const { isAuthenticated, isWatched, toggle } = useWatchlistStatuses(raceIds);
 
     const handleSearchTermChange = useCallback(
         (value: string) => updateState({ q: value, page: 1 }),
@@ -177,7 +181,12 @@ export default function Search() {
                 <ul className="flex flex-col">
                     {results.map((result) => (
                         <li key={result.id} className="list-none">
-                            <SearchResult race={result} />
+                            <SearchResult
+                                race={result}
+                                watched={isWatched(result.id)}
+                                isAuthenticated={isAuthenticated}
+                                onToggleWatchlist={toggle}
+                            />
                         </li>
                     ))}
                 </ul>

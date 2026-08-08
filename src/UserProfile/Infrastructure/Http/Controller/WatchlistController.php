@@ -13,6 +13,7 @@ use App\UserProfile\Domain\Model\WatchlistEntry;
 use App\UserProfile\Domain\Model\WatchlistEntryId;
 use App\UserProfile\Domain\Repository\WatchlistEntryRepositoryInterface;
 use Symfony\Component\HttpFoundation\JsonResponse;
+use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
@@ -56,6 +57,31 @@ class WatchlistController
                 'createdAt' => $entry->getCreatedAt()->format('Y-m-d H:i:s'),
             ];
         }, $entries));
+    }
+
+    #[Route('/api/me/watchlist/check', name: 'api_watchlist_check_batch', methods: ['POST'])]
+    public function checkBatch(#[CurrentUser] User $user, Request $request): JsonResponse
+    {
+        $data = json_decode($request->getContent(), true);
+        $rawRaceIds = \is_array($data) ? ($data['raceIds'] ?? []) : [];
+
+        if (!\is_array($rawRaceIds) || [] === $rawRaceIds) {
+            return new JsonResponse(['watchedRaceIds' => []]);
+        }
+
+        $raceIds = array_map(
+            static fn (mixed $raceId): RaceId => RaceId::fromString((string) $raceId),
+            array_values($rawRaceIds),
+        );
+
+        $watchedRaceIds = $this->watchlistRepository->findWatchedRaceIds($user->getId(), $raceIds);
+
+        return new JsonResponse([
+            'watchedRaceIds' => array_map(
+                static fn (RaceId $raceId): string => $raceId->toString(),
+                $watchedRaceIds,
+            ),
+        ]);
     }
 
     #[Route('/api/me/watchlist/{raceId}/check', name: 'api_watchlist_check', methods: ['GET'])]
