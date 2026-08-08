@@ -6,6 +6,7 @@ namespace App\DataImport\Application;
 
 use App\DataImport\Domain\RawRaceData;
 use App\RaceCatalog\Domain\Event\RacesImported;
+use App\RaceCatalog\Domain\Exception\DuplicateEditionException;
 use App\RaceCatalog\Domain\Model\Distance;
 use App\RaceCatalog\Domain\Model\Edition;
 use App\RaceCatalog\Domain\Model\Race;
@@ -39,16 +40,22 @@ class ImportRacesHandler
             $slug = Slugifier::slugify($rawRaceData->name);
             $existing = $this->raceRepository->findBySlug($slug);
             if ($existing) {
-                $this->enrichRace($existing, $rawRaceData, $date);
-                $importResult->incrementUpdated();
+                if ($this->enrichRace($existing, $rawRaceData, $date)) {
+                    $importResult->incrementUpdated();
+                } else {
+                    $importResult->incrementSkipped();
+                }
                 continue;
             }
 
             $candidates = $this->raceRepository->findSimilar($rawRaceData->date, $rawRaceData->city);
             $duplicate = $this->duplicateDetector->findDuplicate($rawRaceData->name, $candidates);
             if (null !== $duplicate) {
-                $this->enrichRace($duplicate, $rawRaceData, $date);
-                $importResult->incrementUpdated();
+                if ($this->enrichRace($duplicate, $rawRaceData, $date)) {
+                    $importResult->incrementUpdated();
+                } else {
+                    $importResult->incrementSkipped();
+                }
                 continue;
             }
 
@@ -83,7 +90,7 @@ class ImportRacesHandler
         return $importResult;
     }
 
-    private function enrichRace(Race $race, RawRaceData $data, \DateTimeImmutable $date): void
+    private function enrichRace(Race $race, RawRaceData $data, \DateTimeImmutable $date): bool
     {
         $changed = false;
 
@@ -93,7 +100,23 @@ class ImportRacesHandler
         }
 
         $edition = $race->findEditionByDate($date);
-        if (null !== $edition) {
+        if (null === $edition) {
+            $edition = new Edition($date, $data->registrationUrl ?: null);
+            foreach ($data->distances as $distanceData) {
+                $edition->addDistance(new Distance(
+                    $distanceData['name'],
+                    $distanceData['lengthInKm'],
+                    $distanceData['priceInPln'],
+                ));
+            }
+
+            try {
+                $race->addEdition($edition);
+                $changed = true;
+            } catch (DuplicateEditionException) {
+                // Same calendar year already has an edition outside the ±1 day match window.
+            }
+        } else {
             foreach ($data->distances as $distanceData) {
                 if (!$edition->hasDistance($distanceData['lengthInKm'])) {
                     $edition->addDistance(new Distance(
@@ -110,5 +133,7 @@ class ImportRacesHandler
             $this->raceRepository->save($race);
             $this->searchIndex->indexRace($race);
         }
+
+        return $changed;
     }
 }

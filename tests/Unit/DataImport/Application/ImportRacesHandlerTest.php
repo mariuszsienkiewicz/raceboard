@@ -7,6 +7,7 @@ namespace Tests\Unit\DataImport\Application;
 use App\DataImport\Application\DuplicateDetector;
 use App\DataImport\Application\ImportRacesHandler;
 use App\DataImport\Domain\RawRaceData;
+use App\RaceCatalog\Domain\Model\Edition;
 use App\RaceCatalog\Domain\Model\Race;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
 use App\Search\Domain\SearchIndexInterface;
@@ -66,8 +67,8 @@ class ImportRacesHandlerTest extends TestCase
         );
 
         $this->repository->method('findBySlug')->willReturn($raceToBeFound);
-        $this->repository->expects($this->never())->method('save');
-        $this->searchIndex->expects($this->never())->method('indexRace');
+        $this->repository->expects($this->once())->method('save');
+        $this->searchIndex->expects($this->once())->method('indexRace');
 
         $futureDate = (new \DateTimeImmutable('+3 months'))->format('Y-m-d');
 
@@ -82,6 +83,37 @@ class ImportRacesHandlerTest extends TestCase
 
         $this->assertSame(0, $result->importedCount);
         $this->assertSame(1, $result->updatedCount);
+        $this->assertSame(0, $result->skippedCount);
+        $this->assertCount(1, $raceToBeFound->getEditions());
+    }
+
+    public function testSkipsWhenExistingRaceHasNothingToEnrich(): void
+    {
+        $futureDate = new \DateTimeImmutable('+3 months');
+        $existingRace = Race::create(
+            RaceId::generate(),
+            'Maraton Warszawski',
+            'Warszawa',
+            'mazowieckie',
+        );
+        $existingRace->addEdition(new Edition($futureDate));
+
+        $this->repository->method('findBySlug')->willReturn($existingRace);
+        $this->repository->expects($this->never())->method('save');
+        $this->searchIndex->expects($this->never())->method('indexRace');
+
+        $result = $this->handler->handle([
+            $this->createRawRaceData(
+                'Maraton Warszawski',
+                $futureDate->format('Y-m-d'),
+                'Warszawa',
+                'mazowieckie',
+            ),
+        ]);
+
+        $this->assertSame(0, $result->importedCount);
+        $this->assertSame(0, $result->updatedCount);
+        $this->assertSame(1, $result->skippedCount);
     }
 
     public function testImportsMixOfNewAndExistingRaces(): void
@@ -92,10 +124,9 @@ class ImportRacesHandlerTest extends TestCase
             ['maraton-gdanski', Race::create(RaceId::generate(), 'Maraton Gdański', 'Gdańsk', 'pomorskie')],
         ]);
 
-        $this->repository->expects($this->once())->method('save')->with($this->callback(function (Race $race) {
-            return 'Maraton Krakowski' === $race->getName();
-        }));
-        $this->searchIndex->expects($this->once())->method('indexRace');
+        // Existing races without editions get enriched with a new edition; Krakowski is imported.
+        $this->repository->expects($this->exactly(3))->method('save');
+        $this->searchIndex->expects($this->exactly(3))->method('indexRace');
 
         $futureDate1 = (new \DateTimeImmutable('+3 months'))->format('Y-m-d');
         $futureDate2 = (new \DateTimeImmutable('+4 months'))->format('Y-m-d');
@@ -124,6 +155,7 @@ class ImportRacesHandlerTest extends TestCase
 
         $this->assertSame(1, $result->importedCount);
         $this->assertSame(2, $result->updatedCount);
+        $this->assertSame(0, $result->skippedCount);
     }
 
     public function testCreatesEditionWithCorrectDate(): void
@@ -175,8 +207,9 @@ class ImportRacesHandlerTest extends TestCase
             ['maraton-testowy', null],
             ['maraton-poznanski', Race::create(RaceId::generate(), 'Maraton Poznański', 'Poznań', 'wielkopolskie')],
         ]);
-        $this->repository->expects($this->exactly(2))->method('save');
-        $this->searchIndex->expects($this->exactly(2))->method('indexRace');
+        // 2 imports + 3 existing races enriched with a new edition each
+        $this->repository->expects($this->exactly(5))->method('save');
+        $this->searchIndex->expects($this->exactly(5))->method('indexRace');
 
         $result = $this->handler->handle([
             $this->createRawRaceData(
@@ -213,6 +246,7 @@ class ImportRacesHandlerTest extends TestCase
 
         $this->assertSame(2, $result->importedCount);
         $this->assertSame(3, $result->updatedCount);
+        $this->assertSame(0, $result->skippedCount);
     }
 
     public function testUpdatesAllWhenAllRacesAlreadyExist(): void
@@ -288,7 +322,7 @@ class ImportRacesHandlerTest extends TestCase
     {
         $futureDate = new \DateTimeImmutable('+3 months');
         $existingRace = Race::create(RaceId::generate(), 'Test Race', 'City', 'mazowieckie');
-        $existingRace->addEdition(new \App\RaceCatalog\Domain\Model\Edition($futureDate));
+        $existingRace->addEdition(new Edition($futureDate));
 
         $this->repository->method('findBySlug')->willReturn($existingRace);
         $this->repository->expects($this->once())->method('save');
@@ -309,11 +343,75 @@ class ImportRacesHandlerTest extends TestCase
         $this->assertSame(1, $result->updatedCount);
     }
 
+    public function testEnrichesExistingRaceWithNewEditionWhenDateDoesNotMatch(): void
+    {
+        $existingDate = new \DateTimeImmutable('+3 months');
+        $nextYearDate = $existingDate->modify('+1 year');
+
+        $existingRace = Race::create(RaceId::generate(), 'Test Race', 'City', 'mazowieckie');
+        $existingRace->addEdition(new Edition($existingDate));
+
+        $this->repository->method('findBySlug')->willReturn($existingRace);
+        $this->repository->expects($this->once())->method('save');
+        $this->searchIndex->expects($this->once())->method('indexRace');
+
+        $result = $this->handler->handle([
+            new RawRaceData(
+                'Test Race',
+                $nextYearDate->format('Y-m-d'),
+                'City',
+                'mazowieckie',
+                [['name' => '10 km', 'lengthInKm' => 10.0, 'priceInPln' => null]],
+                'https://example.com',
+                'https://example.com/register',
+            ),
+        ]);
+
+        $this->assertSame(1, $result->updatedCount);
+        $this->assertSame(0, $result->skippedCount);
+        $this->assertCount(2, $existingRace->getEditions());
+
+        $newEdition = $existingRace->findEditionByDate($nextYearDate);
+        $this->assertNotNull($newEdition);
+        $this->assertTrue($newEdition->hasDistance(10.0));
+        $this->assertSame('https://example.com/register', $newEdition->getRegistrationUrl());
+    }
+
+    public function testSkipsNewEditionWhenSameYearAlreadyExistsOutsideMatchWindow(): void
+    {
+        $year = (int) (new \DateTimeImmutable('+1 year'))->format('Y');
+        $existingDate = new \DateTimeImmutable(sprintf('%d-04-12', $year));
+        $sameYearDifferentDate = new \DateTimeImmutable(sprintf('%d-10-03', $year));
+
+        $existingRace = Race::create(RaceId::generate(), 'Test Race', 'City', 'mazowieckie');
+        $existingRace->addEdition(new Edition($existingDate));
+
+        $this->repository->method('findBySlug')->willReturn($existingRace);
+        $this->repository->expects($this->never())->method('save');
+        $this->searchIndex->expects($this->never())->method('indexRace');
+
+        $result = $this->handler->handle([
+            new RawRaceData(
+                'Test Race',
+                $sameYearDifferentDate->format('Y-m-d'),
+                'City',
+                'mazowieckie',
+                [['name' => '10 km', 'lengthInKm' => 10.0, 'priceInPln' => null]],
+                'https://example.com',
+                null,
+            ),
+        ]);
+
+        $this->assertSame(0, $result->updatedCount);
+        $this->assertSame(1, $result->skippedCount);
+        $this->assertCount(1, $existingRace->getEditions());
+    }
+
     public function testDoesNotDuplicateExistingDistances(): void
     {
         $futureDate = new \DateTimeImmutable('+3 months');
         $existingRace = Race::create(RaceId::generate(), 'Test Race', 'City', 'mazowieckie');
-        $edition = new \App\RaceCatalog\Domain\Model\Edition($futureDate);
+        $edition = new Edition($futureDate);
         $edition->addDistance(new \App\RaceCatalog\Domain\Model\Distance('Maraton', 42.195, null));
         $existingRace->addEdition($edition);
 
@@ -333,7 +431,8 @@ class ImportRacesHandlerTest extends TestCase
             ),
         ]);
 
-        $this->assertSame(1, $result->updatedCount);
+        $this->assertSame(0, $result->updatedCount);
+        $this->assertSame(1, $result->skippedCount);
     }
 
     /**
