@@ -91,6 +91,46 @@ class DoctrineWatchlistEntryRepositoryTest extends KernelTestCase
         $this->assertNull($foundEntry);
     }
 
+    public function testFindWatchedRaceIdsReturnsOnlyMatchingEntries(): void
+    {
+        $userId = UserId::generate();
+        $watchedRaceId = RaceId::generate();
+        $otherWatchedRaceId = RaceId::generate();
+        $unwatchedRaceId = RaceId::generate();
+
+        $this->repository->save(WatchlistEntry::create(WatchlistEntryId::generate(), $userId, $watchedRaceId));
+        $this->repository->save(WatchlistEntry::create(WatchlistEntryId::generate(), $userId, $otherWatchedRaceId));
+        $this->repository->save(WatchlistEntry::create(
+            WatchlistEntryId::generate(),
+            UserId::generate(),
+            $unwatchedRaceId,
+        ));
+        $this->em->clear();
+
+        $watchedRaceIds = $this->repository->findWatchedRaceIds($userId, [
+            $watchedRaceId,
+            $unwatchedRaceId,
+            RaceId::generate(),
+        ]);
+
+        $watchedRaceIdStrings = array_map(
+            static fn (RaceId $raceId): string => $raceId->toString(),
+            $watchedRaceIds,
+        );
+
+        $this->assertContains($watchedRaceId->toString(), $watchedRaceIdStrings);
+        $this->assertNotContains($otherWatchedRaceId->toString(), $watchedRaceIdStrings);
+        $this->assertNotContains($unwatchedRaceId->toString(), $watchedRaceIdStrings);
+        $this->assertCount(1, $watchedRaceIds);
+    }
+
+    public function testFindWatchedRaceIdsReturnsEmptyArrayForEmptyInput(): void
+    {
+        $watchedRaceIds = $this->repository->findWatchedRaceIds(UserId::generate(), []);
+
+        $this->assertSame([], $watchedRaceIds);
+    }
+
     public function testFindByUserReturnsEmptyArrayWhenNoEntries(): void
     {
         $entries = $this->repository->findByUser(UserId::generate());

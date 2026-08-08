@@ -1,5 +1,6 @@
-import { useState } from "react";
 import { ArrowRight, CalendarDays, Heart, MapPin } from "lucide-react";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
 import SearchReturnLink from "./SearchReturnLink";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -36,16 +37,39 @@ export function SearchResultSkeleton() {
     );
 }
 
-export default function SearchResult({ race }: { race: Race }) {
+interface SearchResultProps {
+    race: Race;
+    watched: boolean;
+    isAuthenticated: boolean;
+    onToggleWatchlist: (raceId: string) => void;
+}
+
+export default function SearchResult({
+    race,
+    watched,
+    isAuthenticated,
+    onToggleWatchlist,
+}: SearchResultProps) {
+    const navigate = useNavigate();
     const sortedDates = race.dates.slice().sort();
     const nextDate = sortedDates[0] ?? null;
     const extraDatesCount = sortedDates.length - 1;
-    const [watched, setWatched] = useState(false);
 
     function handleWatchlistToggle(event: React.MouseEvent) {
         event.preventDefault();
         event.stopPropagation();
-        setWatched((prev) => !prev);
+
+        if (!isAuthenticated) {
+            toast.message("Log in to save races to your watchlist", {
+                action: {
+                    label: "Log in",
+                    onClick: () => navigate("/login"),
+                },
+            });
+            return;
+        }
+
+        onToggleWatchlist(race.id);
     }
 
     return (
