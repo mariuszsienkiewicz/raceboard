@@ -26,15 +26,27 @@ class ReindexRacesOnGeocodeHandlerTest extends TestCase
         $this->handler = new ReindexRacesOnGeocodeHandler($this->repository, $this->searchIndex);
     }
 
-    public function testReindexesAllRacesWhenGeocodingSucceeded(): void
+    public function testReindexesOnlyGeocodedRaces(): void
     {
-        $race = Race::create(RaceId::generate(), 'Test Race', 'Warszawa', 'mazowieckie');
-        $races = [$race];
+        $geocoded = Race::create(RaceId::generate(), 'Test Race', 'Warszawa', 'mazowieckie');
+        $geocoded->setCoordinates(52.2, 21.0);
 
-        $this->repository->expects($this->once())->method('findAll')->willReturn($races);
-        $this->searchIndex->expects($this->once())->method('indexAll')->with($races);
+        $id = $geocoded->getId();
 
-        ($this->handler)(new RacesGeocoded([$race->getId()]));
+        $this->repository->expects($this->once())
+            ->method('findByIds')
+            ->with([$id])
+            ->willReturn([$geocoded]);
+
+        $this->repository->expects($this->never())->method('findAll');
+
+        $this->searchIndex->expects($this->once())
+            ->method('indexRaces')
+            ->with([$geocoded]);
+
+        $this->searchIndex->expects($this->never())->method('indexAll');
+
+        ($this->handler)(new RacesGeocoded([$id]));
     }
 
     public function testSkipsReindexWhenNoRaceIds(): void

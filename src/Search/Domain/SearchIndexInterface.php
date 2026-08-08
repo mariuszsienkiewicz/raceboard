@@ -13,6 +13,9 @@ interface SearchIndexInterface
     public function indexRace(Race $race): void;
 
     /** @param list<Race> $races */
+    public function indexRaces(array $races): void;
+
+    /** @param list<Race> $races */
     public function indexAll(array $races): void;
 
     public function search(SearchQuery $query): SearchResult;

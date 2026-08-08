@@ -19,7 +19,7 @@ class GeocodeRacesHandler
     public function __construct(
         private RaceRepositoryInterface $raceRepository,
         private GeocoderInterface $geocoder,
-        private MessageBusInterface $messageBus,
+        private MessageBusInterface $eventBus,
     ) {
     }
 
@@ -59,7 +59,7 @@ class GeocodeRacesHandler
         }
 
         if ([] !== $geocodedIds) {
-            $this->messageBus->dispatch(new RacesGeocoded($geocodedIds));
+            $this->eventBus->dispatch(new RacesGeocoded($geocodedIds));
         }
 
         return new GeocodeRacesResult(\count($geocodedIds), $failed);

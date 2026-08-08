@@ -37,13 +37,16 @@ class MeiliSearchAdapter implements SearchIndexInterface
         $this->client->index(self::INDEX_NAME)->addDocuments([$document]);
     }
 
-    /**
-     * @param list<Race> $races
-     */
     public function indexAll(array $races): void
     {
         $documents = array_map(fn (Race $race) => $this->toDocument($race), $races);
         $this->client->index(self::INDEX_NAME)->deleteAllDocuments();
+        $this->client->index(self::INDEX_NAME)->addDocuments($documents);
+    }
+
+    public function indexRaces(array $races): void
+    {
+        $documents = array_map(fn (Race $race) => $this->toDocument($race), $races);
         $this->client->index(self::INDEX_NAME)->addDocuments($documents);
     }
 
