@@ -12,12 +12,12 @@ use App\UserProfile\Domain\Model\User;
 use App\UserProfile\Domain\Model\WatchlistEntry;
 use App\UserProfile\Domain\Model\WatchlistEntryId;
 use App\UserProfile\Domain\Repository\WatchlistEntryRepositoryInterface;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 class WatchlistController
 {

@@ -8,7 +8,6 @@ use App\UserProfile\Application\RegisterUserHandler;
 use App\UserProfile\Domain\Exception\EmailAlreadyExistsException;
 use App\UserProfile\Infrastructure\Http\Request\RegisterUserRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
