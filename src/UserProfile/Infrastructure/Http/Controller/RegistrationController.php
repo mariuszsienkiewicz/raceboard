@@ -6,9 +6,10 @@ namespace App\UserProfile\Infrastructure\Http\Controller;
 
 use App\UserProfile\Application\RegisterUserHandler;
 use App\UserProfile\Domain\Exception\EmailAlreadyExistsException;
+use App\UserProfile\Infrastructure\Http\Request\RegisterUserRequest;
 use Symfony\Component\HttpFoundation\JsonResponse;
-use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpKernel\Attribute\MapRequestPayload;
 use Symfony\Component\Routing\Attribute\Route;
 
 class RegistrationController
@@ -19,20 +20,10 @@ class RegistrationController
     }
 
     #[Route('/api/register', name: 'api_register', methods: ['POST'])]
-    public function register(Request $request): JsonResponse
+    public function register(#[MapRequestPayload] RegisterUserRequest $registerRequest): JsonResponse
     {
-        $data = json_decode($request->getContent(), true);
-
-        $email = $data['email'] ?? '';
-        $plainPassword = $data['password'] ?? '';
-        $displayName = $data['displayName'] ?? '';
-
-        if ('' === $email || '' === $plainPassword || '' === $displayName) {
-            return new JsonResponse(['error' => 'Email, password, and name are required.'], Response::HTTP_BAD_REQUEST);
-        }
-
         try {
-            $user = $this->handler->handle($email, $plainPassword, $displayName);
+            $user = $this->handler->handle($registerRequest->email, $registerRequest->password, $registerRequest->displayName);
 
             return new JsonResponse(['id' => $user->getIdString(), 'email' => $user->getEmail()], Response::HTTP_CREATED);
         } catch (EmailAlreadyExistsException) {

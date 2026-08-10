@@ -12,6 +12,7 @@ use App\UserProfile\Domain\Model\User;
 use App\UserProfile\Domain\Model\WatchlistEntry;
 use App\UserProfile\Domain\Model\WatchlistEntryId;
 use App\UserProfile\Domain\Repository\WatchlistEntryRepositoryInterface;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -113,7 +114,11 @@ class WatchlistController
             RaceId::fromString($raceId),
         );
 
-        $this->watchlistRepository->save($entry);
+        try {
+            $this->watchlistRepository->save($entry);
+        } catch (UniqueConstraintViolationException $e) {
+            return new JsonResponse(['error' => 'Race already in watchlist'], Response::HTTP_CONFLICT);
+        }
 
         return new JsonResponse(['id' => $entry->getId()->toString()], Response::HTTP_CREATED);
     }
