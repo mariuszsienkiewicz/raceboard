@@ -12,5 +12,8 @@
         <field name="raceId" column="race_id" type="race_id" />
 
         <field name="createdAt" column="created_at" type="datetime_immutable" />
+        <unique-constraints>
+            <unique-constraint name="uniq_watchlist_user_race" columns="user_id,race_id" />
+        </unique-constraints>
     </entity>
 </doctrine-mapping>

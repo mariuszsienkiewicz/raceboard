@@ -17,6 +17,7 @@ use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 
 class WatchlistController
 {
@@ -113,7 +114,11 @@ class WatchlistController
             RaceId::fromString($raceId),
         );
 
-        $this->watchlistRepository->save($entry);
+        try {
+            $this->watchlistRepository->save($entry);
+        } catch (UniqueConstraintViolationException $e) {
+            return new JsonResponse(['error' => 'Race already in watchlist'], Response::HTTP_CONFLICT);
+        }
 
         return new JsonResponse(['id' => $entry->getId()->toString()], Response::HTTP_CREATED);
     }
