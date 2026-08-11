@@ -1,80 +1,58 @@
-import { createContext, useContext, useEffect, useState } from "react"
-
-type Theme = "dark" | "light" | "system"
+import { useEffect, useState } from "react";
+import { ThemeProviderContext, type Theme } from "@/components/ThemeProviderContext";
 
 type ThemeProviderProps = {
-  children: React.ReactNode
-  defaultTheme?: Theme
-  storageKey?: string
-}
-
-type ThemeProviderState = {
-  theme: Theme
-  setTheme: (theme: Theme) => void
-}
-
-const initialState: ThemeProviderState = {
-  theme: "system",
-  setTheme: () => null,
-}
-
-const ThemeProviderContext = createContext<ThemeProviderState>(initialState)
+    children: React.ReactNode;
+    defaultTheme?: Theme;
+    storageKey?: string;
+};
 
 export function ThemeProvider({
-  children,
-  defaultTheme = "system",
-  storageKey = "vite-ui-theme",
-  ...props
+    children,
+    defaultTheme = "system",
+    storageKey = "vite-ui-theme",
+    ...props
 }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(
-    () => (localStorage.getItem(storageKey) as Theme) || defaultTheme
-  )
+    const [theme, setTheme] = useState<Theme>(
+        () => (localStorage.getItem(storageKey) as Theme) || defaultTheme,
+    );
 
-  useEffect(() => {
-    const root = window.document.documentElement
-    const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)")
+    useEffect(() => {
+        const root = window.document.documentElement;
+        const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
 
-    const applyTheme = () => {
-      root.classList.remove("light", "dark")
+        const applyTheme = () => {
+            root.classList.remove("light", "dark");
 
-      if (theme === "system") {
-        root.classList.add(mediaQuery.matches ? "dark" : "light")
-        return
-      }
+            if (theme === "system") {
+                root.classList.add(mediaQuery.matches ? "dark" : "light");
+                return;
+            }
 
-      root.classList.add(theme)
-    }
+            root.classList.add(theme);
+        };
 
-    applyTheme()
+        applyTheme();
 
-    if (theme !== "system") {
-      return
-    }
+        if (theme !== "system") {
+            return;
+        }
 
-    mediaQuery.addEventListener("change", applyTheme)
-    return () => mediaQuery.removeEventListener("change", applyTheme)
-  }, [theme])
+        mediaQuery.addEventListener("change", applyTheme);
+        return () => mediaQuery.removeEventListener("change", applyTheme);
+    }, [theme]);
 
-  const value = {
-    theme,
-    setTheme: (theme: Theme) => {
-      localStorage.setItem(storageKey, theme)
-      setTheme(theme)
-    },
-  }
+    const value = {
+        theme,
+        setTheme: (nextTheme: Theme) => {
+            localStorage.setItem(storageKey, nextTheme);
+            setTheme(nextTheme);
+        },
+    };
 
-  return (
-    <ThemeProviderContext.Provider {...props} value={value}>
-      {children}
-    </ThemeProviderContext.Provider>
-  )
-}
-
-export const useTheme = () => {
-  const context = useContext(ThemeProviderContext)
-
-  if (context === undefined)
-    throw new Error("useTheme must be used within a ThemeProvider")
-
-  return context
+    return (
+        <ThemeProviderContext.Provider {...props} value={value}>
+            {children}
+        </ThemeProviderContext.Provider>
+    );
 }

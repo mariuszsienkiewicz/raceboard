@@ -1,13 +1,6 @@
-import { createContext, useState } from 'react';
-import { getToken, removeToken, saveToken } from '../api/auth';
-
-interface AuthContextType {
-    isAuthenticated: boolean;
-    login: (token: string) => void;
-    logout: () => void;
-}
-
-export const AuthContext = createContext<AuthContextType>(null!);
+import { useState } from "react";
+import { getToken, removeToken, saveToken } from "../api/auth";
+import { AuthContext } from "./auth-context";
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
     const [isAuthenticated, setIsAuthenticated] = useState(!!getToken());
