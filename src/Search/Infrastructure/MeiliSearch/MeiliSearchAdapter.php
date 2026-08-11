@@ -100,17 +100,25 @@ class MeiliSearchAdapter implements SearchIndexInterface
         $filters = [];
 
         if (null !== $query->city) {
-            $filters[] = \sprintf('city = "%s"', $query->city);
+            $filters[] = \sprintf('city = %s', $this->quote($query->city));
         }
 
         if ([] !== $query->voivodeships) {
-            $voivodeshipShards = array_map(fn (string $voivodeship) => \sprintf('voivodeship = "%s"', $voivodeship), $query->voivodeships);
+            $voivodeshipShards = array_map(fn (string $voivodeship) => \sprintf('voivodeship = %s', $this->quote($voivodeship)), $query->voivodeships);
             $filters[] = \sprintf('(%s)', implode(' OR ', $voivodeshipShards));
         }
 
-        if ([] !== $query->distancesKm) {
-            $distanceShards = array_map(fn (string $distance) => \sprintf('distances = %s', $distance), $query->distancesKm);
-            $filters[] = \sprintf('(%s)', implode(' OR ', $distanceShards));
+        $distances = array_values(array_filter(
+            $query->distancesKm,
+            static fn (mixed $v): bool => is_numeric($v),
+        ));
+
+        if ([] !== $distances) {
+            $distanceShards = array_map(
+                static fn (string|int|float $d): string => sprintf('distances = %s', $d),
+                $distances,
+            );
+            $filters[] = sprintf('(%s)', implode(' OR ', $distanceShards));
         }
 
         if (null !== $query->dateFrom) {
@@ -178,5 +186,10 @@ class MeiliSearchAdapter implements SearchIndexInterface
         }
 
         return array_values(array_unique($distances));
+    }
+
+    private function quote(string $value): string
+    {
+        return '"'.str_replace(['\\', '"'], ['\\\\', '\\"'], $value).'"';
     }
 }
