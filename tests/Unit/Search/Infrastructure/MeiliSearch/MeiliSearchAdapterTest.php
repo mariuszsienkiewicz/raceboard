@@ -110,6 +110,53 @@ class MeiliSearchAdapterTest extends TestCase
         $this->adapter->search($query);
     }
 
+    public function testSearchPassesFiltersToClientWithQuotedValues(): void
+    {
+        $query = new SearchQuery('maraton', 'Warszawa "test"', ['mazowieckie', 'lubelskie'], ['42.195', '100']);
+
+        $searchResults = $this->createStub(\Meilisearch\Search\SearchResult::class);
+        $searchResults->method('getHits')->willReturn([]);
+        $searchResults->method('getEstimatedTotalHits')->willReturn(0);
+
+        $this->index->expects($this->once())
+            ->method('search')
+            ->with(
+                'maraton',
+                $this->callback(function (array $options) {
+                    return isset($options['filter'])
+                        && str_contains($options['filter'], 'city = "Warszawa \"test\""')
+                        && str_contains($options['filter'], '(voivodeship = "mazowieckie" OR voivodeship = "lubelskie")')
+                        && str_contains($options['filter'], '(distances = 42.195 OR distances = 100)');
+                }),
+            )
+            ->willReturn($searchResults);
+
+        $this->adapter->search($query);
+    }
+
+    public function testSearchOnlyPassesNumericDistancesToClient(): void
+    {
+        $query = new SearchQuery('maraton', 'Warszawa', ['mazowieckie', 'lubelskie'], ['42.195', '100', 'test']);
+        $searchResults = $this->createStub(\Meilisearch\Search\SearchResult::class);
+        $searchResults->method('getHits')->willReturn([]);
+        $searchResults->method('getEstimatedTotalHits')->willReturn(0);
+
+        $this->index->expects($this->once())
+            ->method('search')
+            ->with(
+                'maraton',
+                $this->callback(function (array $options) {
+                    return isset($options['filter'])
+                        && str_contains($options['filter'], 'city = "Warszawa"')
+                        && str_contains($options['filter'], '(voivodeship = "mazowieckie" OR voivodeship = "lubelskie")')
+                        && str_contains($options['filter'], '(distances = 42.195 OR distances = 100)');
+                }),
+            )
+            ->willReturn($searchResults);
+
+        $this->adapter->search($query);
+    }
+
     public function testSearchReturnsCorrectSearchResult(): void
     {
         $query = new SearchQuery('maraton');
