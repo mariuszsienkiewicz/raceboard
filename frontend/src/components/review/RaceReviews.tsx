@@ -72,11 +72,10 @@ export default function RaceReviews({ raceId, averageRating }: RaceReviewsProps)
     const [userReview, setUserReview] = useState<Review | null>(null);
     const [reviewCount, setReviewCount] = useState<number>(0);
     const [page, setPage] = useState<number>(1);
-    const [perPage, setPerPage] = useState<number>(10);
     const [totalPages, setTotalPages] = useState<number>(1);
+    const perPage = 10;
 
     useEffect(() => {
-        setLoading(true);
         let cancelled = false;
 
         const params = new URLSearchParams();
@@ -89,8 +88,6 @@ export default function RaceReviews({ raceId, averageRating }: RaceReviewsProps)
                     setReviews(data.reviews);
                     setUserReview(data.userReview);
                     setReviewCount(data.reviewCount);
-                    setPage(data.page);
-                    setPerPage(data.perPage);
                     setTotalPages(data.totalPages);
                 }
             })
@@ -109,7 +106,12 @@ export default function RaceReviews({ raceId, averageRating }: RaceReviewsProps)
         return () => {
             cancelled = true;
         };
-    }, [raceId, page]);
+    }, [raceId, page, perPage]);
+
+    const goToPage = (nextPage: number) => {
+        setLoading(true);
+        setPage(nextPage);
+    };
 
     const handleAddReview = async (_rating: number, _comment: string): Promise<void> => {
         apiFetch(`/api/races/${raceId}/reviews`, {
@@ -173,13 +175,13 @@ export default function RaceReviews({ raceId, averageRating }: RaceReviewsProps)
                     <PaginationContent>
                         <PaginationItem>
                             <PaginationPrevious
-                                onClick={() => page > 1 && setPage(page - 1)}
+                                onClick={() => page > 1 && goToPage(page - 1)}
                                 className={cn(page === 1 && "pointer-events-none opacity-50")}
                             />
                         </PaginationItem>
                         <PaginationItem>
                             <PaginationNext
-                                onClick={() => page < totalPages && setPage(page + 1)}
+                                onClick={() => page < totalPages && goToPage(page + 1)}
                                 className={cn(
                                     (page === totalPages || totalPages === 0) && "pointer-events-none opacity-50",
                                 )}

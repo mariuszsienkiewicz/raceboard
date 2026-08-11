@@ -7,7 +7,7 @@ import {
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
-import { useTheme } from "./ThemeProvider";
+import { useTheme } from "@/hooks/useTheme";
 
 type ThemeOption = "light" | "dark" | "system";
 

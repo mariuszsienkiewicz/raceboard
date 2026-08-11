@@ -2,19 +2,20 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { apiFetch } from "@/api/client";
 import { useAuth } from "@/context/useAuth";
 
+const EMPTY_WATCHED_IDS = new Set<string>();
+
 export function useWatchlistStatuses(raceIds: string[]) {
     const { isAuthenticated } = useAuth();
     const [watchedIds, setWatchedIds] = useState<Set<string>>(() => new Set());
     const raceIdsKey = useMemo(() => [...raceIds].sort().join(","), [raceIds]);
+    const shouldFetch = isAuthenticated && raceIdsKey !== "";
 
     useEffect(() => {
-        const ids = raceIdsKey === "" ? [] : raceIdsKey.split(",");
-
-        if (!isAuthenticated || ids.length === 0) {
-            setWatchedIds(new Set());
+        if (!shouldFetch) {
             return;
         }
 
+        const ids = raceIdsKey.split(",");
         const controller = new AbortController();
 
         apiFetch("/api/me/watchlist/check", {
@@ -40,9 +41,14 @@ export function useWatchlistStatuses(raceIds: string[]) {
             });
 
         return () => controller.abort();
-    }, [isAuthenticated, raceIdsKey]);
+    }, [shouldFetch, raceIdsKey]);
 
-    const isWatched = useCallback((raceId: string) => watchedIds.has(raceId), [watchedIds]);
+    const visibleWatchedIds = shouldFetch ? watchedIds : EMPTY_WATCHED_IDS;
+
+    const isWatched = useCallback(
+        (raceId: string) => visibleWatchedIds.has(raceId),
+        [visibleWatchedIds],
+    );
 
     const toggle = useCallback(
         async (raceId: string) => {
