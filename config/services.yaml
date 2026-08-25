@@ -36,3 +36,5 @@ services:
     App\DataImport\Infrastructure\Geocoding\GeocoderServiceClient:
         arguments:
             $geocoderUrl: '%env(GEOCODER_URL)%'
+
+    App\Search\Domain\SearchIndexInterface: '@App\Search\Infrastructure\Cache\CachedSearchIndex'
