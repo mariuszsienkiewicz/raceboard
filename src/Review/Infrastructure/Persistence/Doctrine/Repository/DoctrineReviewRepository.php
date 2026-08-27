@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Review\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Review\Domain\Model\Review;
+use App\Review\Domain\Model\ReviewId;
 use App\Review\Domain\Repository\ReviewRepositoryInterface;
 use App\Shared\Domain\Model\RaceId;
 use App\Shared\Domain\Model\UserId;
@@ -14,6 +15,11 @@ class DoctrineReviewRepository implements ReviewRepositoryInterface
 {
     public function __construct(private EntityManagerInterface $entityManager)
     {
+    }
+
+    public function findById(ReviewId $reviewId): ?Review
+    {
+        return $this->entityManager->find(Review::class, $reviewId);
     }
 
     public function save(Review $review): void

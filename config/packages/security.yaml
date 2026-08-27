@@ -41,6 +41,7 @@ security:
         - { path: ^/api/register, roles: PUBLIC_ACCESS }
         - { path: ^/api/login, roles: PUBLIC_ACCESS }
         - { path: ^/api/search, roles: PUBLIC_ACCESS }
+        - { path: ^/api/reviews, roles: ROLE_USER, methods: [DELETE] }
         - { path: ^/api/races/.+/reviews, roles: PUBLIC_ACCESS, methods: [GET] }
         - { path: ^/api/races/.+/reviews, roles: ROLE_USER, methods: [POST] }
         - { path: ^/api/races, roles: PUBLIC_ACCESS }
