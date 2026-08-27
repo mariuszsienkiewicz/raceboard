@@ -1,13 +1,25 @@
+import { useState } from "react";
 import type { Review } from "@/types/review";
-import { Star } from "lucide-react";
+import { Star, Trash2 } from "lucide-react";
+import { toast } from "sonner";
 import { cn } from "@/lib/utils";
 import { Avatar, AvatarFallback } from "../ui/avatar";
 import { Badge } from "../ui/badge";
+import { Button } from "../ui/button";
 import { Skeleton } from "../ui/skeleton";
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogFooter,
+    DialogHeader,
+    DialogTitle,
+} from "../ui/dialog";
 
 interface ReviewItemProps {
     review: Review;
     isUserReview: boolean;
+    onDelete?: (reviewId: string) => Promise<void>;
 }
 
 function StarRating({ rating }: { rating: number }) {
@@ -51,7 +63,27 @@ export function ReviewItemSkeleton() {
     );
 }
 
-export default function ReviewItem({ review, isUserReview }: ReviewItemProps) {
+export default function ReviewItem({ review, isUserReview, onDelete }: ReviewItemProps) {
+    const [confirmOpen, setConfirmOpen] = useState(false);
+    const [deleting, setDeleting] = useState(false);
+
+    const handleConfirmDelete = async () => {
+        if (!onDelete) {
+            return;
+        }
+
+        setDeleting(true);
+        try {
+            await onDelete(review.id);
+            setConfirmOpen(false);
+            toast.success("Review deleted");
+        } catch {
+            toast.error("Failed to delete review. Please try again.");
+        } finally {
+            setDeleting(false);
+        }
+    };
+
     return (
         <article
             className={cn(
@@ -61,7 +93,7 @@ export default function ReviewItem({ review, isUserReview }: ReviewItemProps) {
                     : "border-border",
             )}
         >
-            <div className="flex items-center justify-between gap-4">
+            <div className="flex items-start justify-between gap-4">
                 <div className="flex items-center gap-3">
                     <Avatar size="sm">
                         <AvatarFallback>{review.displayName.charAt(0)}</AvatarFallback>
@@ -78,9 +110,52 @@ export default function ReviewItem({ review, isUserReview }: ReviewItemProps) {
                         <p className="text-xs text-muted-foreground">{review.createdAt}</p>
                     </div>
                 </div>
-                <StarRating rating={review.rating} />
+                <div className="flex items-center gap-2">
+                    <StarRating rating={review.rating} />
+                    {isUserReview && onDelete && (
+                        <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon-sm"
+                            aria-label="Delete your review"
+                            onClick={() => setConfirmOpen(true)}
+                            className="text-muted-foreground hover:text-destructive"
+                        >
+                            <Trash2 />
+                        </Button>
+                    )}
+                </div>
             </div>
             <p className="text-sm leading-relaxed text-muted-foreground">{review.comment}</p>
+
+            <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>Delete review?</DialogTitle>
+                        <DialogDescription>
+                            This will permanently remove your review for this race. You can leave a new one later.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            type="button"
+                            variant="outline"
+                            disabled={deleting}
+                            onClick={() => setConfirmOpen(false)}
+                        >
+                            Cancel
+                        </Button>
+                        <Button
+                            type="button"
+                            variant="destructive"
+                            disabled={deleting}
+                            onClick={handleConfirmDelete}
+                        >
+                            {deleting ? "Deleting…" : "Delete"}
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
         </article>
     );
 }
