@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\DataImport\Application;
+namespace App\Tests\Unit\DataImport\Application;
 
 use App\DataImport\Application\Handler\GeocodeRacesHandler;
 use App\DataImport\Domain\Geocoding\GeocoderInterface;

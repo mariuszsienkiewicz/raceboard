@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Search\Application;
+namespace App\Tests\Unit\Search\Application;
 
 use App\RaceCatalog\Domain\Event\RacesGeocoded;
 use App\RaceCatalog\Domain\Model\Race;

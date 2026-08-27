@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\RaceCatalog\Application\Handler;
+namespace App\Tests\Unit\RaceCatalog\Application\Handler;
 
 use App\RaceCatalog\Application\Handler\RecalculateRaceAverageRatingHandler;
 use App\RaceCatalog\Domain\Model\Race;

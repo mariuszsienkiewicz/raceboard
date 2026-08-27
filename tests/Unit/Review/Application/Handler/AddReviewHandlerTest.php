@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Review\Application\Handler;
+namespace App\Tests\Unit\Review\Application\Handler;
 
 use App\Review\Application\Command\AddReviewCommand;
 use App\Review\Application\Handler\AddReviewHandler;

@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Tests\Unit\Review\Infrastructure\Security;
+namespace App\Tests\Unit\Review\Infrastructure\Security;
 
 use App\Review\Domain\Model\Review;
 use App\Review\Domain\Model\ReviewId;
