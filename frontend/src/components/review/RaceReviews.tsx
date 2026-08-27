@@ -1,6 +1,6 @@
 import type { Review } from "@/types/review";
 import ReviewForm from "./ReviewForm";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { apiFetch } from "@/api/client";
 import ReviewList from "./ReviewList";
 import { Pagination, PaginationContent, PaginationItem, PaginationNext, PaginationPrevious } from "../ui/pagination";
@@ -8,13 +8,14 @@ import ReviewItem, { ReviewItemSkeleton } from "./ReviewItem";
 import { Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "../ui/skeleton";
+import { toast } from "sonner";
 
 interface RaceReviewsProps {
     raceId: string;
     averageRating: number | null;
 }
 
-interface RaceReviewsApiResposne {
+interface RaceReviewsApiResponse {
     reviews: Review[];
     userReview: Review | null;
     reviewCount: number;
@@ -36,7 +37,7 @@ function ReviewStats({ averageRating, reviewCount }: { averageRating: number | n
                     <span className="font-medium text-foreground">{averageRating.toFixed(1)}</span>
                     <span aria-hidden="true">·</span>
                 </>
-            ) : (<></>)}
+            ) : null}
             <span>
                 {reviewCount} {reviewCount === 1 ? "review" : "reviews"}
             </span>
@@ -73,7 +74,12 @@ export default function RaceReviews({ raceId, averageRating }: RaceReviewsProps)
     const [reviewCount, setReviewCount] = useState<number>(0);
     const [page, setPage] = useState<number>(1);
     const [totalPages, setTotalPages] = useState<number>(1);
+    const [reloadToken, setReloadToken] = useState(0);
     const perPage = 10;
+
+    const refreshReviews = useCallback(() => {
+        setReloadToken((token) => token + 1);
+    }, []);
 
     useEffect(() => {
         let cancelled = false;
@@ -83,7 +89,7 @@ export default function RaceReviews({ raceId, averageRating }: RaceReviewsProps)
         params.set("perPage", perPage.toString());
         apiFetch(`/api/races/${raceId}/reviews?${params.toString()}`)
             .then((res) => res.json())
-            .then((data: RaceReviewsApiResposne) => {
+            .then((data: RaceReviewsApiResponse) => {
                 if (!cancelled) {
                     setReviews(data.reviews);
                     setUserReview(data.userReview);
@@ -106,31 +112,44 @@ export default function RaceReviews({ raceId, averageRating }: RaceReviewsProps)
         return () => {
             cancelled = true;
         };
-    }, [raceId, page, perPage]);
+    }, [raceId, page, perPage, reloadToken]);
 
     const goToPage = (nextPage: number) => {
         setLoading(true);
         setPage(nextPage);
     };
 
-    const handleAddReview = async (_rating: number, _comment: string): Promise<void> => {
-        apiFetch(`/api/races/${raceId}/reviews`, {
+    const handleAddReview = async (rating: number, comment: string): Promise<void> => {
+        const res = await apiFetch(`/api/races/${raceId}/reviews`, {
             method: "POST",
-            body: JSON.stringify({
-                rating: _rating,
-                comment: _comment,
-            }),
-        })
-            .then((res) => {
-                if (!res.ok) {
-                    throw new Error("Failed to submit review");
-                }
-                console.log("Review submitted successfully");
-            })
-            .catch((err) => {
-                console.error("Error submitting review:", err);
-                alert("Failed to submit review. Please try again.");
-            });
+            body: JSON.stringify({ rating, comment }),
+        });
+
+        if (!res.ok) {
+            toast.error("Failed to submit review. Please try again.");
+            throw new Error("Failed to submit review");
+        }
+
+        toast.success("Review submitted");
+        setLoading(true);
+        setPage(1);
+        refreshReviews();
+    };
+
+    const handleDeleteReview = async (reviewId: string): Promise<void> => {
+        const res = await apiFetch(`/api/reviews/${reviewId}`, {
+            method: "DELETE",
+        });
+
+        if (!res.ok) {
+            throw new Error("Failed to delete review");
+        }
+
+        setUserReview(null);
+        setReviewCount((count) => Math.max(0, count - 1));
+        setReviews((current) => current.filter((review) => review.id !== reviewId));
+        setLoading(true);
+        refreshReviews();
     };
 
     const communityReviews = userReview
@@ -155,7 +174,13 @@ export default function RaceReviews({ raceId, averageRating }: RaceReviewsProps)
 
             {hasLoadedOnce && !userReview && <ReviewForm onSubmit={handleAddReview} />}
 
-            {hasLoadedOnce && userReview && <ReviewItem review={userReview} isUserReview />}
+            {hasLoadedOnce && userReview && (
+                <ReviewItem
+                    review={userReview}
+                    isUserReview
+                    onDelete={handleDeleteReview}
+                />
+            )}
 
             {loading ? (
                 <ReviewListSkeleton count={hasLoadedOnce ? 1 : 2} />

@@ -5,10 +5,11 @@ declare(strict_types=1);
 namespace App\UserProfile\Domain\Model;
 
 use App\Shared\Domain\Model\UserId;
+use App\Shared\Domain\Security\AuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
 use Symfony\Component\Security\Core\User\UserInterface;
 
-class User implements UserInterface, PasswordAuthenticatedUserInterface
+class User implements UserInterface, PasswordAuthenticatedUserInterface, AuthenticatedUserInterface
 {
     public function __construct(
         private readonly UserId $id,

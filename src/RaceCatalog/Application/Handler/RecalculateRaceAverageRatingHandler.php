@@ -7,10 +7,11 @@ namespace App\RaceCatalog\Application\Handler;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
 use App\RaceCatalog\Domain\Service\RaceRatingProviderInterface;
 use App\Review\Domain\Event\ReviewAdded;
+use App\Review\Domain\Event\ReviewRemoved;
+use App\Shared\Domain\Model\RaceId;
 use Symfony\Component\Messenger\Attribute\AsMessageHandler;
 
-#[AsMessageHandler]
-final class RecalculateRaceAverageOnReviewAddedHandler
+final class RecalculateRaceAverageRatingHandler
 {
     public function __construct(
         private RaceRatingProviderInterface $raceRatingProvider,
@@ -18,15 +19,22 @@ final class RecalculateRaceAverageOnReviewAddedHandler
     ) {
     }
 
-    public function __invoke(ReviewAdded $event): void
+    #[AsMessageHandler]
+    public function onReviewAdded(ReviewAdded $event): void
     {
-        $averageRating = $this->raceRatingProvider->getAverageRating($event->raceId);
-        if (null === $averageRating) {
-            // should not happen - anomaly, should be logged and investigated
-            return;
-        }
+        $this->recalculate($event->raceId);
+    }
 
-        $race = $this->raceRepository->findById($event->raceId);
+    #[AsMessageHandler]
+    public function onReviewRemoved(ReviewRemoved $event): void
+    {
+        $this->recalculate($event->raceId);
+    }
+
+    private function recalculate(RaceId $raceId): void
+    {
+        $averageRating = $this->raceRatingProvider->getAverageRating($raceId);
+        $race = $this->raceRepository->findById($raceId);
         if (null === $race) {
             return;
         }

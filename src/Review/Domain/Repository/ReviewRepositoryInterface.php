@@ -5,11 +5,14 @@ declare(strict_types=1);
 namespace App\Review\Domain\Repository;
 
 use App\Review\Domain\Model\Review;
+use App\Review\Domain\Model\ReviewId;
 use App\Shared\Domain\Model\RaceId;
 use App\Shared\Domain\Model\UserId;
 
 interface ReviewRepositoryInterface
 {
+    public function findById(ReviewId $reviewId): ?Review;
+
     public function save(Review $review): void;
 
     public function findByUserAndRace(UserId $userId, RaceId $raceId): ?Review;

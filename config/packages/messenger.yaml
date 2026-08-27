@@ -30,4 +30,5 @@ framework:
             App\DataImport\Application\Message\ImportRacesFromSource: async
             App\RaceCatalog\Domain\Event\RacesImported: async
             App\Review\Domain\Event\ReviewAdded: async
+            App\Review\Domain\Event\ReviewRemoved: async
             App\RaceCatalog\Domain\Event\RacesGeocoded: async

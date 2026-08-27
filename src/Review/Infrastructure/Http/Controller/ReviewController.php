@@ -5,16 +5,22 @@ declare(strict_types=1);
 namespace App\Review\Infrastructure\Http\Controller;
 
 use App\Review\Application\Command\AddReviewCommand;
+use App\Review\Application\Command\RemoveReviewCommand;
 use App\Review\Application\Handler\AddReviewHandler;
+use App\Review\Application\Handler\RemoveReviewHandler;
 use App\Review\Domain\Model\Review;
+use App\Review\Domain\Model\ReviewId;
 use App\Review\Domain\Repository\ReviewRepositoryInterface;
+use App\Review\Infrastructure\Security\ReviewVoter;
 use App\Shared\Domain\Model\RaceId;
 use App\UserProfile\Domain\Model\User;
 use App\UserProfile\Domain\Repository\UserRepositoryInterface;
+use Symfony\Bundle\SecurityBundle\Security;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Symfony\Component\Security\Http\Attribute\CurrentUser;
 
 class ReviewController
@@ -22,6 +28,7 @@ class ReviewController
     public function __construct(
         private ReviewRepositoryInterface $reviewRepository,
         private UserRepositoryInterface $userRepository,
+        private Security $security,
     ) {
     }
 
@@ -86,5 +93,22 @@ class ReviewController
         ));
 
         return new JsonResponse([], Response::HTTP_CREATED);
+    }
+
+    #[Route('/api/reviews/{reviewId}', name: 'api_review_remove', methods: ['DELETE'])]
+    public function remove(string $reviewId, RemoveReviewHandler $removeReviewHandler): JsonResponse
+    {
+        $review = $this->reviewRepository->findById(ReviewId::fromString($reviewId));
+        if (null === $review) {
+            return new JsonResponse(['error' => 'review_not_exists'], Response::HTTP_NOT_FOUND);
+        }
+
+        if (!$this->security->isGranted(ReviewVoter::DELETE, $review)) {
+            throw new AccessDeniedException();
+        }
+
+        $removeReviewHandler(new RemoveReviewCommand($review->getId()->toString()));
+
+        return new JsonResponse(null, Response::HTTP_NO_CONTENT);
     }
 }

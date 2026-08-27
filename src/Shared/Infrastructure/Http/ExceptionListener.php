@@ -6,6 +6,7 @@ namespace App\Shared\Infrastructure\Http;
 
 use App\Review\Domain\Exception\RaceNotFoundException;
 use App\Review\Domain\Exception\ReviewAlreadyExistsException;
+use App\Review\Domain\Exception\ReviewNotExistsException;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -16,6 +17,7 @@ final class ExceptionListener
     private const EXCEPTION_MAP = [
         RaceNotFoundException::class => [404, 'race_not_found'],
         ReviewAlreadyExistsException::class => [409, 'review_already_exists'],
+        ReviewNotExistsException::class => [404, 'review_not_exists'],
     ];
 
     public function __invoke(ExceptionEvent $event): void

@@ -140,7 +140,7 @@ class Race
         return $this->averageRating;
     }
 
-    public function updateAverageRating(float $averageRating): void
+    public function updateAverageRating(?float $averageRating): void
     {
         $this->averageRating = $averageRating;
     }
