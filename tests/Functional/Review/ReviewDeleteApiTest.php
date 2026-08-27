@@ -93,6 +93,7 @@ final class ReviewDeleteApiTest extends WebTestCase
 
     /**
      * @template T of object
+     *
      * @param class-string<T> $id
      *
      * @return T
