@@ -32,3 +32,9 @@ framework:
             App\Review\Domain\Event\ReviewAdded: async
             App\Review\Domain\Event\ReviewRemoved: async
             App\RaceCatalog\Domain\Event\RacesGeocoded: async
+
+when@test:
+    framework:
+        messenger:
+            transports:
+                async: 'in-memory://'
