@@ -60,6 +60,9 @@ jobs:
       - name: Create .env.test.local
         run: echo "DATABASE_URL=postgresql://raceboard:raceboard@localhost:5432/raceboard_test?serverVersion=16&charset=utf8" > .env.test.local
 
+      - name: Generate JWT keypair
+        run: php bin/console lexik:jwt:generate-keypair --overwrite --no-interaction
+
       - name: Create test database
         run: php bin/console doctrine:database:create --env=test --if-not-exists
 
