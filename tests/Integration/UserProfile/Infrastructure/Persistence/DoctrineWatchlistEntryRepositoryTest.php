@@ -8,6 +8,7 @@ use App\RaceCatalog\Domain\Model\Race;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
 use App\Shared\Domain\Model\RaceId;
 use App\Shared\Domain\Model\UserId;
+use App\UserProfile\Domain\Exception\WatchlistEntryAlreadyExistsException;
 use App\UserProfile\Domain\Model\User;
 use App\UserProfile\Domain\Model\WatchlistEntry;
 use App\UserProfile\Domain\Model\WatchlistEntryId;
@@ -89,6 +90,19 @@ class DoctrineWatchlistEntryRepositoryTest extends KernelTestCase
 
         $foundEntry = $this->repository->findByUserAndRace($entry->getUserId(), RaceId::generate());
         $this->assertNull($foundEntry);
+    }
+
+    public function testSaveThrowsWatchlistEntryAlreadyExistsExceptionOnDuplicateUserRace(): void
+    {
+        $userId = UserId::generate();
+        $raceId = RaceId::generate();
+
+        $this->repository->save(WatchlistEntry::create(WatchlistEntryId::generate(), $userId, $raceId));
+        $this->em->clear();
+
+        $this->expectException(WatchlistEntryAlreadyExistsException::class);
+
+        $this->repository->save(WatchlistEntry::create(WatchlistEntryId::generate(), $userId, $raceId));
     }
 
     public function testFindWatchedRaceIdsReturnsOnlyMatchingEntries(): void

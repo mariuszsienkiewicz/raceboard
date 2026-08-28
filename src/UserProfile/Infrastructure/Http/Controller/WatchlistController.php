@@ -8,11 +8,11 @@ use App\RaceCatalog\Domain\Model\Distance;
 use App\RaceCatalog\Domain\Model\Edition;
 use App\RaceCatalog\Domain\Repository\RaceRepositoryInterface;
 use App\Shared\Domain\Model\RaceId;
+use App\UserProfile\Application\AddWatchlistEntryCommand;
+use App\UserProfile\Application\AddWatchlistEntryHandler;
 use App\UserProfile\Domain\Model\User;
 use App\UserProfile\Domain\Model\WatchlistEntry;
-use App\UserProfile\Domain\Model\WatchlistEntryId;
 use App\UserProfile\Domain\Repository\WatchlistEntryRepositoryInterface;
-use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -97,30 +97,14 @@ class WatchlistController
     }
 
     #[Route('/api/me/watchlist/{raceId}', name: 'api_watchlist_add', methods: ['POST'])]
-    public function add(#[CurrentUser] User $user, string $raceId): JsonResponse
+    public function add(#[CurrentUser] User $user, string $raceId, AddWatchlistEntryHandler $handler): JsonResponse
     {
-        $existing = $this->watchlistRepository->findByUserAndRace(
-            $user->getId(),
-            RaceId::fromString($raceId),
-        );
+        $entryId = $handler(new AddWatchlistEntryCommand(
+            $user->getId()->toString(),
+            $raceId,
+        ));
 
-        if (null !== $existing) {
-            return new JsonResponse(['error' => 'Race already in watchlist'], Response::HTTP_CONFLICT);
-        }
-
-        $entry = WatchlistEntry::create(
-            WatchlistEntryId::generate(),
-            $user->getId(),
-            RaceId::fromString($raceId),
-        );
-
-        try {
-            $this->watchlistRepository->save($entry);
-        } catch (UniqueConstraintViolationException $e) {
-            return new JsonResponse(['error' => 'Race already in watchlist'], Response::HTTP_CONFLICT);
-        }
-
-        return new JsonResponse(['id' => $entry->getId()->toString()], Response::HTTP_CREATED);
+        return new JsonResponse(['id' => $entryId->toString()], Response::HTTP_CREATED);
     }
 
     #[Route('/api/me/watchlist/{raceId}', name: 'api_watchlist_remove', methods: ['DELETE'])]

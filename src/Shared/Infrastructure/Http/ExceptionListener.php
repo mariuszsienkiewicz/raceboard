@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 namespace App\Shared\Infrastructure\Http;
 
-use App\Review\Domain\Exception\RaceNotFoundException;
+use App\Review\Domain\Exception\RaceNotFoundException as ReviewRaceNotFoundException;
 use App\Review\Domain\Exception\ReviewAlreadyExistsException;
 use App\Review\Domain\Exception\ReviewNotExistsException;
+use App\UserProfile\Domain\Exception\RaceNotFoundException as UserProfileRaceNotFoundException;
+use App\UserProfile\Domain\Exception\WatchlistEntryAlreadyExistsException;
 use Symfony\Component\EventDispatcher\Attribute\AsEventListener;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Component\HttpKernel\Event\ExceptionEvent;
@@ -15,9 +17,11 @@ use Symfony\Component\HttpKernel\Event\ExceptionEvent;
 final class ExceptionListener
 {
     private const EXCEPTION_MAP = [
-        RaceNotFoundException::class => [404, 'race_not_found'],
+        ReviewRaceNotFoundException::class => [404, 'race_not_found'],
         ReviewAlreadyExistsException::class => [409, 'review_already_exists'],
         ReviewNotExistsException::class => [404, 'review_not_exists'],
+        WatchlistEntryAlreadyExistsException::class => [409, 'watchlist_entry_already_exists'],
+        UserProfileRaceNotFoundException::class => [404, 'race_not_found'],
     ];
 
     public function __invoke(ExceptionEvent $event): void
