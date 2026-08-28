@@ -6,8 +6,10 @@ namespace App\UserProfile\Infrastructure\Persistence\Doctrine\Repository;
 
 use App\Shared\Domain\Model\RaceId;
 use App\Shared\Domain\Model\UserId;
+use App\UserProfile\Domain\Exception\WatchlistEntryAlreadyExistsException;
 use App\UserProfile\Domain\Model\WatchlistEntry;
 use App\UserProfile\Domain\Repository\WatchlistEntryRepositoryInterface;
+use Doctrine\DBAL\Exception\UniqueConstraintViolationException;
 use Doctrine\ORM\EntityManagerInterface;
 
 class DoctrineWatchlistEntryRepository implements WatchlistEntryRepositoryInterface
@@ -18,8 +20,12 @@ class DoctrineWatchlistEntryRepository implements WatchlistEntryRepositoryInterf
 
     public function save(WatchlistEntry $watchlistEntry): void
     {
-        $this->entityManager->persist($watchlistEntry);
-        $this->entityManager->flush();
+        try {
+            $this->entityManager->persist($watchlistEntry);
+            $this->entityManager->flush();
+        } catch (UniqueConstraintViolationException) {
+            throw WatchlistEntryAlreadyExistsException::forRace($watchlistEntry->getRaceId()->toString());
+        }
     }
 
     public function findByUser(UserId $userId): array
