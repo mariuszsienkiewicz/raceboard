@@ -1,15 +1,14 @@
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ArrowRight, Loader2, MapPin } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { apiFetch } from "@/api/client";
 import EmptyState from "@/components/EmptyState";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/lib/utils";
 import type { DateRange, FilterKey } from "@/types/search-filters";
 import type { MapSearchPoint } from "@/types/search";
+import MapRaceCard from "./MapRaceCard";
 import RaceMap, { type MapBounds } from "./RaceMap";
 import SearchBar from "./SearchBar";
 import SearchModeSwitcher from "./SearchModeSwitcher";
-import SearchReturnLink from "./SearchReturnLink";
 
 interface MapSearchViewProps {
     searchTerm: string;
@@ -46,28 +45,6 @@ function buildMapSearchParams(
         params.append("bottomLng", bounds.bottomLng.toString());
     }
     return params;
-}
-
-function MapSearchResult({ point }: { point: MapSearchPoint }) {
-    return (
-        <SearchReturnLink to={`/races/${point.id}`} className="block">
-            <article
-                className={cn(
-                    "group flex flex-col gap-2 rounded-2xl border border-border bg-card p-4 text-card-foreground",
-                    "transition-all duration-200 hover:-translate-y-px hover:shadow-md",
-                )}
-            >
-                <h3 className="flex items-center gap-1.5 text-sm leading-snug font-semibold text-foreground transition-colors group-hover:text-primary">
-                    {point.name}
-                    <ArrowRight className="size-3.5 shrink-0 -translate-x-1 opacity-0 transition-all duration-200 group-hover:translate-x-0 group-hover:opacity-100" />
-                </h3>
-                <div className="flex items-center gap-1.5 text-sm text-muted-foreground">
-                    <MapPin className="size-3.5 shrink-0" />
-                    <span>{point.city}</span>
-                </div>
-            </article>
-        </SearchReturnLink>
-    );
 }
 
 export default function MapSearchView({
@@ -202,7 +179,7 @@ export default function MapSearchView({
                             <ul className="flex flex-col gap-2">
                                 {points.map((point) => (
                                     <li key={point.id} className="list-none">
-                                        <MapSearchResult point={point} />
+                                        <MapRaceCard point={point} />
                                     </li>
                                 ))}
                             </ul>

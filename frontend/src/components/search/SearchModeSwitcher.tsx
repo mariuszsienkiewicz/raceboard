@@ -29,13 +29,16 @@ export default function SearchModeSwitcher({
             variant="outline"
             size="sm"
             spacing={0}
-            className={cn(isFloating && "rounded-full shadow-lg ring-1 ring-border")}
+            className={cn(
+                isFloating &&
+                    "rounded-full bg-background text-foreground shadow-lg ring-1 ring-border",
+            )}
         >
             <ToggleGroupItem
                 value="list"
                 aria-label="List view"
                 className={cn(
-                    "gap-1.5 data-[state=on]:bg-primary/10 data-[state=on]:text-primary",
+                    "gap-1.5 text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary",
                     isFloating && "rounded-l-full px-4",
                 )}
             >
@@ -46,7 +49,7 @@ export default function SearchModeSwitcher({
                 value="map"
                 aria-label="Map view"
                 className={cn(
-                    "gap-1.5 data-[state=on]:bg-primary/10 data-[state=on]:text-primary",
+                    "gap-1.5 text-foreground data-[state=on]:bg-primary/10 data-[state=on]:text-primary",
                     isFloating && "rounded-r-full px-4",
                 )}
             >

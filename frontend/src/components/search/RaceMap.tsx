@@ -1,12 +1,14 @@
 import { useEffect, useRef, useState } from "react";
 import { MapContainer, Popup, CircleMarker, useMap, useMapEvents } from "react-leaflet";
-import MapTiles from "@/components/map/MapTiles";
 import MarkerClusterGroup from "react-leaflet-cluster";
+import L from "leaflet";
+import MapTiles from "@/components/map/MapTiles";
 import type { MapSearchPoint } from "@/types/search";
-import SearchReturnLink from "./SearchReturnLink";
+import MapRaceCard from "./MapRaceCard";
 import "leaflet/dist/leaflet.css";
+import "leaflet.markercluster/dist/MarkerCluster.css";
+import "@/components/map/map-overlays.css";
 
-/** Matches `--primary` from shadcn theme (oklch(0.205 0 0)). */
 const MARKER_FILL = "oklch(0.205 0 0)";
 const MARKER_STROKE = "oklch(1 0 0)";
 
@@ -22,6 +24,18 @@ interface RaceMapProps {
     fullHeight?: boolean;
     restoreBounds?: MapBounds | null;
     onBoundsChange?: (bounds: MapBounds) => void;
+}
+
+function createClusterIcon(cluster: { getChildCount: () => number }) {
+    const count = cluster.getChildCount();
+    const sizeClass =
+        count < 10 ? "" : count < 50 ? " race-map-cluster-md" : " race-map-cluster-lg";
+
+    return L.divIcon({
+        html: `<div><span>${count}</span></div>`,
+        className: `race-map-cluster${sizeClass}`,
+        iconSize: L.point(count < 10 ? 40 : count < 50 ? 44 : 50, count < 10 ? 40 : count < 50 ? 44 : 50),
+    });
 }
 
 function BoundsWatcher({
@@ -108,7 +122,11 @@ export default function RaceMap({
                     suppressInitial={boundsToRestore !== null}
                 />
             )}
-            <MarkerClusterGroup chunkedLoading maxClusterRadius={50}>
+            <MarkerClusterGroup
+                chunkedLoading
+                maxClusterRadius={50}
+                iconCreateFunction={createClusterIcon}
+            >
                 {pointsWithGeo.map((point) => (
                     <CircleMarker
                         key={point.id}
@@ -121,12 +139,13 @@ export default function RaceMap({
                             weight: 2,
                         }}
                     >
-                        <Popup>
-                            <SearchReturnLink to={`/races/${point.id}`}>
-                                <strong>{point.name}</strong>
-                            </SearchReturnLink>
-                            <br />
-                            {point.city}
+                        <Popup
+                            className="race-map-popup"
+                            closeButton={false}
+                            minWidth={240}
+                            maxWidth={280}
+                        >
+                            <MapRaceCard point={point} />
                         </Popup>
                     </CircleMarker>
                 ))}

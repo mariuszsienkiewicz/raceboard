@@ -1,0 +1,60 @@
+/* Clusters sit on a light basemap — keep high-contrast dark pills in both themes. */
+.race-map-cluster {
+    background: transparent;
+}
+
+.race-map-cluster div {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 40px;
+    height: 40px;
+    border-radius: 9999px;
+    background: oklch(0.205 0 0);
+    border: 2px solid oklch(1 0 0);
+    color: oklch(1 0 0);
+    font: 600 13px/1 var(--font-sans), system-ui, sans-serif;
+    box-shadow: 0 2px 8px rgb(0 0 0 / 0.28);
+}
+
+.race-map-cluster-md div {
+    width: 44px;
+    height: 44px;
+    font-size: 14px;
+}
+
+.race-map-cluster-lg div {
+    width: 50px;
+    height: 50px;
+    font-size: 15px;
+}
+
+/*
+ * Leaflet chrome is stripped so the popup can be a real app card
+ * (same visual language as MapRaceCard / search results).
+ */
+.race-map-popup .leaflet-popup-content-wrapper {
+    background: transparent;
+    color: inherit;
+    border: none;
+    border-radius: 0;
+    box-shadow: none;
+    padding: 0;
+}
+
+.race-map-popup .leaflet-popup-content {
+    margin: 0 !important;
+    width: auto !important;
+    font-family: var(--font-sans), system-ui, sans-serif;
+    line-height: inherit;
+}
+
+.race-map-popup .leaflet-popup-tip-container {
+    margin-top: -1px;
+}
+
+.race-map-popup .leaflet-popup-tip {
+    background: var(--card);
+    border: none;
+    box-shadow: none;
+}
