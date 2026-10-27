@@ -319,11 +319,11 @@ class DoctrineRaceRepositoryTest extends KernelTestCase
         $edition->addDistance(new Distance('5 km', 5.0, 50.0));
         $edition->addDistance(new Distance('10 km', 10.0, 80.0));
 
-        $edition2 = new Edition(new \DateTimeImmutable('+6 months'));
+        $edition2 = new Edition(new \DateTimeImmutable('+15 months'));
         $edition2->addDistance(new Distance('10 km', 10.0, 50.0));
         $edition2->addDistance(new Distance('15 km', 15.0, 100.0));
 
-        $edition3 = new Edition(new \DateTimeImmutable('+18 months'));
+        $edition3 = new Edition(new \DateTimeImmutable('+27 months'));
         $edition3->addDistance(new Distance('21 km', 5.0, 50.0));
         $edition3->addDistance(new Distance('42 km', 10.0, 80.0));
 
