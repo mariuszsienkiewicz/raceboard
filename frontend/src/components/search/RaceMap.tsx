@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from "react";
-import { MapContainer, TileLayer, Popup, CircleMarker, useMap, useMapEvents } from "react-leaflet";
+import { MapContainer, Popup, CircleMarker, useMap, useMapEvents } from "react-leaflet";
+import MapTiles from "@/components/map/MapTiles";
 import MarkerClusterGroup from "react-leaflet-cluster";
 import type { MapSearchPoint } from "@/types/search";
 import SearchReturnLink from "./SearchReturnLink";
@@ -95,13 +96,11 @@ export default function RaceMap({
         <MapContainer
             center={[52.0, 19.0]}
             zoom={6}
+            maxZoom={16}
             className={fullHeight ? "h-full w-full" : "w-full rounded-2xl border border-border"}
             style={fullHeight ? undefined : { height: "600px" }}
         >
-            <TileLayer
-                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-            />
+            <MapTiles />
             {boundsToRestore && <InitialBoundsFitter bounds={boundsToRestore} />}
             {onBoundsChange && (
                 <BoundsWatcher

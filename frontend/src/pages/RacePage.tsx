@@ -21,7 +21,8 @@ import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/lib/utils";
 import type { Editions, RaceDetails } from "@/types/race";
-import { MapContainer, TileLayer } from "react-leaflet";
+import { MapContainer } from "react-leaflet";
+import MapTiles from "@/components/map/MapTiles";
 import RaceReviews from "@/components/review/RaceReviews";
 
 function formatDate(dateStr: string): string {
@@ -417,13 +418,11 @@ export default function RacePage() {
                                         <MapContainer
                                             center={[raceDetails.latitude as number, raceDetails.longitude as number]}
                                             zoom={13}
+                                            maxZoom={16}
                                             style={{ height: "220px", width: "100%" }}
                                             className="rounded-2xl"
                                         >
-                                            <TileLayer
-                                                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> &copy; <a href="https://carto.com/">CARTO</a>'
-                                                url="https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png"
-                                            />
+                                            <MapTiles />
                                         </MapContainer>
                                         <a
                                             href={`https://www.google.com/maps/search/?api=1&query=${raceDetails.latitude},${raceDetails.longitude}`}
